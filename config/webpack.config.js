@@ -2,35 +2,36 @@
 
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
-const glob = require('glob');
-
-const entries = glob.sync("./src/**/*.ts", { "dotRelative": true, posix: true }).reduce((files, filePath) => {
-   console.log(filePath);
-   const parts = filePath.split("/");
-   const entryName = parts.at(-1).split(".")[0];
-
-   files[entryName] = filePath;
-   return files;
-}, {});
-
-console.log(entries);
+const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
    mode: "production",
-   entry: entries,
+   optimization: {
+      minimizer: [new TerserPlugin({
+         extractComments: false,
+      })],
+   },
+   entry: {
+      devtools: "./src/devtools.ts",
+      index: "./src/ui/index.tsx",
+   },
    output: {
       path: path.join(__dirname, "../dist"),
       filename: "[name].js",
    },
    resolve: {
-      extensions: [".ts", ".js"],
+      extensions: [".ts", ".js", ".tsx", ".jsx"],
    },
    module: {
       rules: [
          {
-            test: /\.tsx?$/,
-            loader: "ts-loader",
+            test: /(?<!\.d)\.tsx?$/,
             exclude: /node_modules/,
+            loader: "ts-loader",
+         },
+         {
+            test: /\.css$/,
+            use: ['style-loader', 'css-loader'], // Injects CSS into the DOM
          },
       ],
    },

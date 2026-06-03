@@ -11,9 +11,7 @@
    "devtools_page": "devtools.html",
    "permissions": [
       "downloads",
-      "storage"
-   ],
-   "background": {
-      "service_worker": "background.js"
-   }
+      "storage",
+      "tabs"
+   ]
 }

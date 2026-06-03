@@ -1,12 +1,16 @@
 {
   "compilerOptions": {
+    "jsx": "react-jsx",
     "module": "commonjs",
     "noImplicitAny": true,
     "removeComments": true,
     "preserveConstEnums": true,
     "sourceMap": true,
+    "skipLibCheck": true,
     "types": [
-      "chrome"
+      "chrome",
+      "react",
+      "react-dom",
     ]
   },
   "include": [
