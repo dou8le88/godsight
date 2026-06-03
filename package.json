@@ -1,0 +1,21 @@
+{
+  "name": "godsight",
+  "version": "0.1.0",
+  "description": "A Granblue Fantasy theorycrafting extension.",
+  "private": true,
+  "scripts": {
+    "build": "webpack --config config/webpack.config.js"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.1.42",
+    "@types/node": "^25.9.1",
+    "copy-webpack-plugin": "^14.0.0",
+    "ts-loader": "^9.6.0",
+    "typescript": "^6.0.3",
+    "webpack": "^5.107.2",
+    "webpack-cli": "^7.0.3"
+  },
+  "dependencies": {
+    "glob": "^13.0.6"
+  }
+}

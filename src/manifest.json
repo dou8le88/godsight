@@ -1,0 +1,19 @@
+{
+   "name": "Godsight",
+   "description": "A Granblue Fantasy theorycrafting extension.",
+   "version": "1.0",
+   "manifest_version": 3,
+   "icons": {
+      "16": "icons/godsight-16x16.png",
+      "48": "icons/godsight-48x48.png",
+      "128": "icons/godsight-128x128.png"
+   },
+   "devtools_page": "devtools.html",
+   "permissions": [
+      "downloads",
+      "storage"
+   ],
+   "background": {
+      "service_worker": "background.js"
+   }
+}
