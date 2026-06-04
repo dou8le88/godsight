@@ -5,7 +5,6 @@ const CopyPlugin = require('copy-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
-   mode: "production",
    optimization: {
       minimizer: [new TerserPlugin({
          extractComments: false,
@@ -18,6 +17,7 @@ module.exports = {
    output: {
       path: path.join(__dirname, "../dist"),
       filename: "[name].js",
+      clean: true,
    },
    resolve: {
       extensions: [".ts", ".js", ".tsx", ".jsx"],
