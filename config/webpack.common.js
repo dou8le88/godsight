@@ -12,7 +12,7 @@ module.exports = {
    },
    entry: {
       devtools: "./src/devtools.ts",
-      index: "./src/ui/index.tsx",
+      index: "./src/react/index.tsx",
    },
    output: {
       path: path.join(__dirname, "../dist"),

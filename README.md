@@ -14,7 +14,7 @@ Devtools APIs are very powerful and thus very dangerous for users installing suc
 
 Review the code of such extensions carefully, or ask a trusted individual familiar with such things to do so on your behalf.
 
-The only code that interfaces with the devtools APIs is in [src/devtools.ts](/src/devtools.ts), which should reduce the footprint of reviewing this repository for security concerns to a minimum.
+The only code that interfaces with the devtools APIs is in [/src/devtools.ts](/src/devtools.ts) and [/src/react/app.tsx](/src/react/app.tsx), which should reduce the footprint of reviewing this repository for security concerns to a minimum.
 
 ## Development Status
 
@@ -22,8 +22,8 @@ This project is currently under active development.
 
 - [x] Initial boilerplate and placeholder stuff to make a devtools panel show up.
 - [x] Schema types for common battle actions.
-- [ ] Listen to browser navigation and disable response parsing if on other webpages, and enable it when on the GBF website.
-- [ ] Display a banner in the Godsight panel when on other websites, and show the normal UI when navigating to the game.
+- [x] Listen to browser navigation and disable response parsing if on other webpages, and enable it when on the GBF website.
+- [x] Display a banner in the Godsight panel when on other websites, and show the normal UI when navigating to the game.
 - [ ] Parse response bodies to determine command schemas.
 - [ ] Handle commands and relevant battle data.
     - [ ] ABILITY
