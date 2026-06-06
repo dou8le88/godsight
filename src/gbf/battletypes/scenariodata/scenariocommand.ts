@@ -14,19 +14,15 @@ export enum ScenarioCommand {
    * or a `MESSAGE` command if it buffed or debuffed, or both.
    *
    * In certain circumstances, such as when triggering Beelzebub's subaura, this
-   * can show up with a Japanese name and we must rely on the following WINDOW_EFFECT event
+   * can show up with a Japanese name and we must rely on the following `MESSAGE` event
    * to fix that, while keeping the positional data from this command.
    */
   ABILITY = "ability",
   /**
    * Functions as an override for "incorrectly-provided" Japanese names for certain effects.
-   * E.g., when Beelzebub is equipped in subsummons and MC CAs, an `ABILITY` command is
-   * created with the Japanese name of the Trance buff, but then a `MESSAGE` command
-   * follows that has the proper EN name. The `WINDOW_EFFECT` command doesn't have
+   * E.g., when certain effects like Agastia Manatura activate. The `WINDOW_EFFECT` command doesn't have
    * any data about the source of the effect, but it does have the corrected name,
    * so the controlling logic should handle such a scenario.
-   *
-   * In the case of skill button presses,
    */
   WINDOW_EFFECT = "windoweffect",
   /**
@@ -36,6 +32,8 @@ export enum ScenarioCommand {
   BUFF_AND_DEBUFF_CHANGED = "condition",
   /**
    * The command that actually causes messages like  "<icon> ATK Up" text to appear when characters gain buffs/debuffs.
+   * Occasionally contains data like proper EN names for effects that otherwise display their Japanese names, such as
+   * when MC gains the Trance buff with Beelzebub subsummon. The controlling logic should handle such a scenario.
    */
   MESSAGE = "message",
   /**
@@ -111,6 +109,8 @@ export enum ScenarioCommand {
    * Used a Full Elixir.
    */
   FULL_ELIXIR = "rematch",
+  RETREAT = "retire",
+  POTIONS_CHANGED = "temporary",
   /**
    * TODO: Charm, Can't Act, etc.
    */

@@ -4,6 +4,8 @@ import { GranblueBattleData } from "../gbf/battletypes/battledata";
 import { StartData } from "../gbf/battletypes/startdata";
 import { RetreatData } from "../gbf/battletypes/retiredata";
 import BattleTracker from "./battletracker/battletracker";
+import { BattleScenarioParser } from "../battlescenarioparser";
+import { GodsightBattleData } from "../godsight/battletypes/battledata";
 
 export default function GodsightPanel() {
   const validHosts = [
@@ -39,9 +41,32 @@ export default function GodsightPanel() {
     };
   }, []);
 
+  const [godsightBattleData, setGodsightBattleData] = useState<GodsightBattleData | undefined>(undefined);
+  const battleScenarioParser = new BattleScenarioParser();
+
   // Only listen for network requests when we're inspecting GBF.
   useEffect(() => {
     if (!onGbfPage) return;
+
+    function startDataHandler(data: StartData, endpoint: string) {
+      console.trace(`Got start data for ${endpoint}`);
+
+      const godsightBattleData = battleScenarioParser.parseStartData(data);
+
+      setGodsightBattleData(godsightBattleData);
+    }
+
+    function battleDataHandler(data: GranblueBattleData, endpoint: string) {
+      console.log(`Got battle data for ${endpoint}`);
+    }
+
+    function retreatDataHandler(data: RetreatData) {
+
+    }
+
+    function retryBattleHandler() {
+      // Since there's no response body to this, we just edit the currently-tracked battle.
+    }
 
     async function onRequestFinishedListener(request: chrome.devtools.network.Request) {
       // Ignore non-GBF requests.
@@ -95,9 +120,17 @@ export default function GodsightPanel() {
                 // Restarting a trial battle
                 retryBattleHandler();
                 return;
-
+              // Misc configuration endpoints that don't contain battle info.
+              case "setting":
+              case "auto_setting":
+                return;
               default:
-                console.warn(`Unhandled battle API endpoint ${endpoint}`);
+                if (endpoint && !isNaN(Number.parseInt(endpoint))) {
+                  // Battle-specific settings, endpoint is like /rest/raid/setting/123456
+                } else {
+                  console.warn(`Unhandled battle API endpoint ${endpoint}`);
+                }
+                return;
             }
           });
         }
@@ -111,32 +144,18 @@ export default function GodsightPanel() {
     };
   }, [onGbfPage]);
 
-  const [battleActions, setBattleActions] = useState(false);
-
-  function battleDataHandler(data: GranblueBattleData, endpoint: string) {
-    console.log(`Got battle data for ${endpoint}`);
-  }
-
-  function startDataHandler(data: StartData, endpoint: string) {
-    console.log(`Got start data for ${endpoint}`);
-  }
-
-  function retreatDataHandler(data: RetreatData) {
-
-  }
-
-  function retryBattleHandler() {
-    // Since there's no response body to this, we just edit the currently-tracked battle.
-  }
-
   const manifest = chrome.runtime.getManifest();
   return (
     <>
-      <div className="version-header"><a href="https://github.com/dou8le88/godsight">Godsight version {manifest["version"]}</a></div>
+      <div className="version-header">
+        <a href="https://github.com/dou8le88/godsight" target="_blank" rel="noopener noreferrer">
+          Godsight version {manifest["version"]}
+        </a>
+      </div>
       {!onGbfPage ? (
         <WrongWebsiteBanner />
       ) : (
-        <BattleTracker />
+        <BattleTracker battleData={godsightBattleData} />
       )}
     </>
   );

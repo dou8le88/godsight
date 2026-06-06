@@ -35,3 +35,105 @@ html {
     align-items: center;
     row-gap: 20px;
 }
+
+.party-info {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+
+    .party-wrapper {
+        display: flex;
+        width: 350px;
+        height: 100px;
+        margin-top: 20px;
+        justify-content: space-around;
+
+        /*
+         * Cloning a lot of Granblue's CSS here to imitate the UI.
+         * Particularly the element icons.
+         */
+        .avatar-wrapper {
+            width: 49px;
+            height: 100px;
+            position: relative;
+            cursor: pointer;
+
+            &:nth-child(4) {
+                margin-right: 10px;
+
+                &::after {
+                    width: 1px;
+                    height: 90px;
+                    background-color: black;
+                    content: "";
+                    display: block;
+                    position: absolute;
+                    right: -10px;
+                    bottom: 5px;
+                }
+            }
+
+            &:nth-child(n+5) {
+                .mask {
+                    display: block;
+                    position: absolute;
+                    top: 0px;
+                    left: 0px;
+                    z-index: 20;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(0, 0, 0, 0.4);
+                }
+            }
+
+            .portrait {
+                width: 49px;
+            }
+
+            .mask {
+                display: none;
+            }
+
+            .element-icon {
+                display: block;
+                position: absolute;
+                top: 1px;
+                right: 1px;
+                z-index: 15;
+                background-size: 64px 574px;
+                width: 13px;
+                height: 13px;
+                background-image: url(https://prd-game-a-granbluefantasy.akamaized.net/assets_en/img/sprite/v3/ui/icon/type-s1079abba8e.png);
+                background-repeat: no-repeat;
+
+                &.icon-attribute-0 {
+                    background-position: 0 -430px;
+                }
+
+                &.icon-attribute-1 {
+                    background-position: 0 -497px;
+                }
+
+                &.icon-attribute-2 {
+                    background-position: 0 -545px;
+                }
+
+                &.icon-attribute-3 {
+                    background-position: 0 -446px;
+                }
+
+                &.icon-attribute-4 {
+                    background-position: 0 -513px;
+                }
+
+                &.icon-attribute-5 {
+                    background-position: 0 -561px;
+                }
+
+                &.icon-attribute-6 {
+                    background-position: 0 -529px;
+                }
+            }
+        }
+    }
+}

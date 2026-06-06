@@ -8,8 +8,8 @@ export type Condition = {
 }
 
 export type ConditionSummary = {
-  "buff": Condition[],
-  "debuff": Condition[],
+  "buff"?: Condition[],
+  "debuff"?: Condition[],
   /**
    * TODO: Weird value, perhaps the original party slot of the affected character at battle start if it's a player?
    * Unsure about when the boss has this value.

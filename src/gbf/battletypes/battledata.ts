@@ -24,6 +24,7 @@ export type GroupGaugeStatus = {
 
 export type BattleStatus = {
   "turn": number,
+  "timer": number,
   "ability_turn": number,
   "is_guard_status": GuardStatus[],
   "chain_burst_gauge": string,
@@ -32,7 +33,7 @@ export type BattleStatus = {
   "group_gauge": GroupGaugeStatus,
 }
 
-export type BattleData = {
+export type GranblueBattleData = {
   "scenario": GenericScenarioData[],
   "status": BattleStatus,
 }

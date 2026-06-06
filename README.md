@@ -50,7 +50,7 @@ This project is currently under active development.
     - [ ] FULL_ELIXIR
     - [ ] Disabling effects on characters and bosses (Can't Act, Charm, Weakened, etc.)
     - [ ] Other
-- [ ] Basic UI with party member portraits
+- [x] Basic UI with party member portraits
 - [ ] Basic battle summary describing the outcomes of actions.
 - [ ] Select a portrait to view that character's specific battle contributions.
 - [ ] More detailed result display: hitcounts (total/by damage type), debuffs applied count, etc.

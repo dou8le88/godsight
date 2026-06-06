@@ -1,19 +1,21 @@
+import { GranblueBattleData } from "./battledata"
 import { ConditionSummary } from "./scenariodata/conditionchangedscenariodata"
-import { GameElement, GameElementValue, PrettyElementName } from "./scenariodata/mechanics/element"
+import { GenericScenarioData } from "./scenariodata/genericscenariodata"
+import { GameElementValue, PrettyElementName } from "./scenariodata/mechanics/element"
 import { Proficiency } from "./scenariodata/mechanics/proficiency"
 
 /**
  * The data received upon loading into a battle.
  * This includes both starting a battle and refreshing it.
  */
-export type StartData = {
+export type StartData = GranblueBattleData & {
   "raid_id": number,
   "quest_id": string,
   "is_coopraid": boolean,
   "is_host": boolean,
   "turn": number,
   /**
-   * TODO: what is this?
+   * Seems to be number of skill presses since battle start?
    */
   "ability_turn": number,
   /**
@@ -22,21 +24,30 @@ export type StartData = {
   "multi": number,
   "battle": WaveData,
   /**
-   * At battle start, seems to just be ["0", "1", "2", "3"].
-   * TODO: Current party positions compared to the initial layout?
+   * Current player layout compared to `"player"` party formation, as indices.
+   *
+   * E.g., `["0", "1", "2", "3"]` at battle start.
+   * If `"3"` dies, then `["0", "1", "2", "4"]`.
    */
   "formation": string[],
   /**
-   * At battle start, seems to just be ["4", "5"]. Presumably more for Unlimited raids.
-   * TODO: Current backline positions compared to the initial layout?
+   * Backline formation, see `"formation"`.
    */
   "back_formation": string[],
+  /**
+   * Base ordering of units in this party.
+   */
   "player": PartyFormationData,
   "boss": BossFormationData,
   /**
    * TODO: redundant in practice since all non-story battles have MC?
    */
   "nickname": string,
+  /**
+   * Only populated if the boss has an opening action, and only on the initial start.json.
+   * Battle refreshes will show an empty scenario.
+   */
+  "scenario": GenericScenarioData[],
 }
 
 export type WaveData = {
@@ -73,17 +84,17 @@ export type PartyMemberData = {
   "hpmax": number,
   "hp": number,
   /**
-   * CA/ougi meter.
-   */
-  "recast": number,
-  /**
    * TODO: Numerical boolean (0/1) for if the character is danchou?
    */
   "leader": number,
   /**
+   * CA/ougi meter.
+   */
+  "recast": number,
+  /**
    * Max CA/ougi meter.
    */
-  "recastmax": "100",
+  "recastmax": string,
   "attr": GameElementValue,
   "weapon": Proficiency[],
   /**
@@ -108,7 +119,7 @@ export type PartyMemberData = {
   /**
    * Numerical boolean (0/1) reeee
    */
-  "is_vanished": 0
+  "is_vanished": number,
 }
 
 export type BossFormationData = {
@@ -150,13 +161,12 @@ export type BossData = {
   /**
    * Charge Diamonds
    */
-  "recast": "3",
+  "recast": string,
   /**
    * Max Charge Diamonds.
    */
-  "recastmax": "3",
+  "recastmax": string,
   "attr": GameElementValue,
-  "effect": "ehit_9102883",
   /**
    * Numeric boolean (0/1).
    */
