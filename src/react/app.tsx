@@ -6,6 +6,7 @@ import { RetreatData } from "../gbf/battletypes/retiredata";
 import BattleTracker from "./battletracker/battletracker";
 import { BattleScenarioParser } from "../battlescenarioparser";
 import { GodsightBattleData } from "../godsight/battletypes/battledata";
+import { View } from "./view";
 
 export default function GodsightPanel() {
   const validHosts = [
@@ -29,8 +30,8 @@ export default function GodsightPanel() {
       }
     }
     // check on opening devtools if we're inspecting GBF.
-    chrome.devtools.inspectedWindow.eval("window.location.href", host => {
-      notifyStateOfInspectedPage(host as unknown as string);
+    chrome.devtools.inspectedWindow.eval("window.location.href", (url: string) => {
+      notifyStateOfInspectedPage(url);
     });
 
     chrome.devtools.network.onNavigated.addListener(notifyStateOfInspectedPage);
@@ -143,6 +144,8 @@ export default function GodsightPanel() {
       chrome.devtools.network.onRequestFinished.removeListener(onRequestFinishedListener);
     };
   }, [onGbfPage]);
+
+  // const [view, setView] = useState(View.CURRENT_BATTLE);
 
   const manifest = chrome.runtime.getManifest();
   return (

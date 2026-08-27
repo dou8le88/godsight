@@ -16,23 +16,29 @@ export default function BattleTracker({ battleData }: { battleData: GodsightBatt
     );
 
     output = (
-      <div className="party-wrapper">
-        {frontliners.map(char => {
-          return (
-            <Avatar key={char.characterId} characterData={char} />
-          );
-        })}
-        {backliners.map(char => {
-          return (
-            <Avatar key={char.characterId} characterData={char} />
-          );
-        })}
-      </div>
+      <>
+        <div className="battle-metadata">Raid #{battleData.raidId}: vs {battleData.boss[0].name}</div>
+        <div className="party-wrapper">
+          {frontliners.map(char => {
+            return (
+              <Avatar key={char.characterId} characterData={char} />
+            );
+          })}
+          {backliners.map(char => {
+            return (
+              <Avatar key={char.characterId} characterData={char} />
+            );
+          })}
+        </div>
+        <div className="turn-history">
+          Turn data here.
+        </div>
+      </>
     );
   }
 
   return (
-    <div className="party-info">
+    <div className="battle-info">
       {output}
     </div>
   );

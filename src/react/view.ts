@@ -1,0 +1,5 @@
+export enum View {
+  BATTLE_LIST,
+  CURRENT_BATTLE,
+  SPECIFIC_BATTLE,
+}

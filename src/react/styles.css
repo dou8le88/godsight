@@ -23,7 +23,7 @@ html {
     background: linear-gradient(90deg, rgba(255, 255, 255, 1) 0%, rgba(156, 227, 255, 1) 100%);
 }
 
-.full-banner {
+.full-warn-banner {
     width: 100%;
     height: calc(100vh - 20px);
     font-size: 20px;
@@ -36,10 +36,18 @@ html {
     row-gap: 20px;
 }
 
-.party-info {
+.battle-info {
     width: 100%;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+
+    .battle-metadata {
+        margin: 10px;
+        align-self: flex-start;
+        font-size: 20px;
+    }
 
     .party-wrapper {
         display: flex;
