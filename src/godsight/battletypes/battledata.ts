@@ -1,5 +1,5 @@
 import { BattleAction } from "./battleaction";
-import { GodsightBossFormationData } from "./bossformationdata";
+import { GodsightBossData } from "./bossdata";
 import { GodsightPartyFormationData } from "./partyformationdata";
 
 export type GodsightBattleData = {
@@ -7,8 +7,9 @@ export type GodsightBattleData = {
   "questId": string,
   "IsCoopRaid": boolean,
   "isHost": boolean,
-  "turn": number,
+  "currentTurn": number,
+  "honors": number,
   "party": GodsightPartyFormationData,
-  "boss": GodsightBossFormationData,
-  "actions": BattleAction[],
+  "boss": GodsightBossData[],
+  "turnData": { [key: number]: BattleAction[] },
 }

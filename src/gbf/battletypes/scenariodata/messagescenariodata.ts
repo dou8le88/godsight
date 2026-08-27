@@ -20,7 +20,7 @@ export type AppliedStatus = {
 
 export type MessageData = {
   "boss"?: AppliedStatus[][],
-  "player"?: AppliedStatus[][],
+  "player"?: { [key: string]: AppliedStatus[] },
 }
 
 export type MessageScenarioData = GenericScenarioData & {

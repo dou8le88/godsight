@@ -6,7 +6,6 @@ import { ScenarioCommand } from "./scenariocommand";
 
 export type BossSpecialAttackScenarioData = GenericScenarioData & {
   "cmd": ScenarioCommand.BOSS_SPECIAL_ATTACK,
-  "kind": "esp_9102883_04",
   "name": string,
   /**
    * Source of the special attack.
@@ -21,7 +20,7 @@ export type BossSpecialAttackScenarioData = GenericScenarioData & {
 }
 
 export type BossSpecialAttackDamageSummary = {
-  damage: BossSpecialAttackDamageInstance[],
+  "damage": BossSpecialAttackDamageInstance[],
 }
 
 export type BossSpecialAttackDamageInstance = {

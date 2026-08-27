@@ -7,9 +7,9 @@
  */
 export enum ActionType {
   /**
-   * Used a skill. It may buff, debuff, do damage, etc.
+   * Used a skill, either manually or by automatically meeting conditions. It may buff, debuff, do damage, etc.
    */
-  USED_SKILL = "skill",
+  ACTIVATED_ABILITY = "activated_ability",
   /**
    * An automatic effect fired as a result of some action.
    * This is bonus skill damage after a CA, bonus buffs, skill damage on casting a dispel, etc.
@@ -18,7 +18,8 @@ export enum ActionType {
   /**
    * Buff and debuff list changed.
    */
-  BUFFS_ANDS_DEBUFF_CHANGED = "status_changed",
+  CONDITION_CHANGED = "status_changed",
+  CA_METER_CHANGED = "ca_meter_changed",
   /**
    * Self damage comes in several forms.
    * - Debuffs that deal EOT damage like burn/poison.
@@ -35,12 +36,18 @@ export enum ActionType {
   NORMAL_ATTACK = "normal_attack",
   CHARGED_ATTACK = "charged_attack",
   CHAIN_BURST = "chain_burst",
+  /**
+   * The player or the boss died.
+   */
   DEATH = "death",
+  DAMAGE_DEALT = "damage_dealt",
   /**
    * Mostly happens during death and should be grouped under it as such,
    * but swaps from skills should also trigger this.
    */
   REPLACED_CHARACTER = "replaced_character",
+  UPDATE_BOSS_STATUS = "update_boss_status",
   USED_POTION = "used_potion",
   USED_FULL_ELIXIR = "used_full_elixir",
+  WINDOW_EFFECT = "window_effect",
 }

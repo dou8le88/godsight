@@ -18,7 +18,7 @@ export type ConditionSummary = {
 }
 
 export type ConditionChangedScenarioData = GenericScenarioData & {
-  "cmd": ScenarioCommand.BUFF_AND_DEBUFF_CHANGED,
+  "cmd": ScenarioCommand.CONDITION,
   "to": Target,
   "pos": number,
   "condition": ConditionSummary,

@@ -2,8 +2,11 @@ import { GenericScenarioData } from "./genericscenariodata";
 import { GameElementValue } from "./mechanics/element";
 import { ScenarioCommand } from "./scenariocommand";
 
-export type BossHpScenarioData = GenericScenarioData & {
-  "cmd": ScenarioCommand.BOSS_HP,
+export type BossStatusScenarioData = GenericScenarioData & {
+  "cmd": ScenarioCommand.BOSS_STATUS,
+  "name": {
+    "en": string,
+  },
   "pos": number,
   "attr": GameElementValue,
   "hp": number,

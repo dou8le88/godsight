@@ -181,10 +181,9 @@ export type BossData = {
    * Numeric boolean (0/1).
    */
   "is_key_enemy": number,
-  /**
-   * Effectively the real name field.
-   */
-  "monster": string,
+  "name": {
+    "en": string,
+  },
   "Lv": string,
   "attribute": PrettyElementName,
   /**

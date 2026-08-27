@@ -14,10 +14,12 @@ export type SkillOrDebuffDamageInstance = {
    * Target's HP after this instance of damage
    */
   "hp": number,
-  "color"?: GameElementValue,
+  "color": GameElementValue,
   "critical": boolean,
   /**
    * TODO: Expanded boolean with 0/1/2, for different types of missing?
    */
   "miss": AttackAccuracyResult,
+  "guard": boolean,
+  "pos": number,
 }

@@ -29,7 +29,7 @@ export enum ScenarioCommand {
    * A previous action produced changes to the player's buff and debuff list.
    * Contains the total list, may be ignorable in some or all scenarios.
    */
-  BUFF_AND_DEBUFF_CHANGED = "condition",
+  CONDITION = "condition",
   /**
    * The command that actually causes messages like  "<icon> ATK Up" text to appear when characters gain buffs/debuffs.
    * Occasionally contains data like proper EN names for effects that otherwise display their Japanese names, such as
@@ -37,9 +37,11 @@ export enum ScenarioCommand {
    */
   MESSAGE = "message",
   /**
-   * TODO: Boss HP changed?
+   * Current boss status, such as HP, charge diamonds, etc.
+   * Includes changing the boss's name if necessary (e.g., Hexa).
+   * TODO: Omen status?
    */
-  BOSS_HP = "boss_gauge",
+  BOSS_STATUS = "boss_gauge",
   /**
    * A single instance of damage was dealt, probably skill damage.
    */
@@ -85,10 +87,6 @@ export enum ScenarioCommand {
    */
   MC_CHARGED_ATTACK = "special",
   /**
-   * A chain burst or Fated Chain was activated.
-   */
-  CHAIN_BURST = "effect",
-  /**
    * TODO: Some special HP change happened - max HP hit?
    * Seems to also happen after `REPLACE_CHARACTER`.
    */
@@ -111,7 +109,35 @@ export enum ScenarioCommand {
   FULL_ELIXIR = "rematch",
   RETREAT = "retire",
   POTIONS_CHANGED = "temporary",
+
+  FORM_CHANGE = "formchange",
+
+
+
   /**
    * TODO: Charm, Can't Act, etc.
    */
+
+  /**
+   * Ignored command, do not use, exists for type completeness in the parser.
+   */
+  TURN = "turn",
+  /**
+   * Ignored command, do not use, exists for type completeness in the parser.
+   */
+  BGM = "bgm",
+  /**
+   * A screen effect was activated.
+   * Used for chain bursts or Fated Chains as well as some other actions, but
+   * we don't use it directly.
+   */
+  SCREEN_EFFECT = "effect",
+  /**
+   * Ignored command, do not use, exists for type completeness in the parser.
+   */
+  BATTLE_LOG = "battlelog",
+  /**
+   * Ignored command, do not use, exists for type completeness in the parser.
+   */
+  SPECIAL_CHANGE = "special_change",
 }

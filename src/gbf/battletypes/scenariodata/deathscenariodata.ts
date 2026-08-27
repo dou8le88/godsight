@@ -6,6 +6,6 @@ export type DeathScenarioData = GenericScenarioData & {
   "cmd": ScenarioCommand.DEATH,
   "to": Target,
   "pos": number,
-  // "index": null,
+  "index": number | null | undefined,
   // "chain": 0,
 }

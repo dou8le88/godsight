@@ -1,9 +1,7 @@
 import { GenericScenarioData } from "./genericscenariodata";
 import { ScenarioCommand } from "./scenariocommand";
 
-
-export type ChainBurstScenarioData = GenericScenarioData & {
-  "cmd": ScenarioCommand.CHAIN_BURST,
+export type WindowEffectScenarioData = GenericScenarioData & {
+  "cmd": ScenarioCommand.WINDOW_EFFECT,
   "name": string,
-  "is_fatal_chain"?: boolean,
 }
