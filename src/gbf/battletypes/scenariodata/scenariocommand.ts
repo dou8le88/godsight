@@ -98,6 +98,8 @@ export enum ScenarioCommand {
 
   FORM_CHANGE = "formchange",
 
+  CHAIN_BURST = "chain_cutin",
+
   /**
    * Beginning of a sequence of `NORMAL_ATTACK` commands by one character.
    * A triple attack would consist of three `NORMAL_ATTACK` commands afterwards,

@@ -45,6 +45,9 @@ import { SummonScenarioData } from "./gbf/battletypes/scenariodata/summonscenari
 import { SummonAction } from "./godsight/battletypes/summonaction";
 import { BattleProgressStatus } from "./godsight/battletypes/battlestatus";
 import { WonBattleScenarioData } from "./gbf/battletypes/scenariodata/wonbattlescenariodata";
+import { ChainBurstScenarioData } from "./gbf/battletypes/scenariodata/chainburstscenariodata";
+import { ChainBurstAction } from "./godsight/battletypes/chainburstaction";
+import { ScreenEffectScenarioData } from "./gbf/battletypes/scenariodata/screeneffectscenariodata";
 
 export class BattleScenarioParser {
   constructor() {
@@ -407,6 +410,61 @@ export class BattleScenarioParser {
           i += subactions.lastIndex;
           break;
 
+        case ScenarioCommand.CHAIN_BURST:
+          if (stopOnMainAction) {
+            break baseLoop;
+          }
+          const chainBurstScenario = scenario as ChainBurstScenarioData;
+          const chainBurstAction: ChainBurstAction = {
+            "action": ActionType.CHAIN_BURST,
+            "chainCount": chainBurstScenario["chain_num"],
+            "name": "Unknown",
+            "damageInstances": [],
+          };
+          // A CHAIN_BURST command should be immediately followed by _SCREEN_EFFECT
+          // with its name and a DAMAGE_DEALT or DAMAGE_DEALT_MULTIHIT command
+          // (the latter is solely for special multihit chainbursts like Higurashi's)
+          const screenEffectScenario = scenarioData[i + 1];
+          const chainBurstDamageScenario = scenarioData[i + 2];
+          if (screenEffectScenario["cmd"] == ScenarioCommand._SCREEN_EFFECT) {
+            chainBurstAction["name"] = (screenEffectScenario as ScreenEffectScenarioData)["name"];
+            // Make sure to skip the command since we already processed it.
+            i += 1;
+          }
+          if (chainBurstDamageScenario["cmd"] == ScenarioCommand.DAMAGE_DEALT) {
+            const damageScenario = chainBurstDamageScenario as DamageScenarioData;
+            chainBurstAction["damageInstances"] = damageScenario["list"].map(d => {
+              return {
+                "element": d["color"],
+                "position": d["pos"],
+                "value": d["value"],
+                "targetHpAfterDamage": d["hp"],
+                "critical": d["critical"],
+                "miss": d["miss"],
+                "guarded": d["guard"],
+              };
+            });
+            // Make sure to skip the command since we already processed it.
+            i += 1;
+          } else if (chainBurstDamageScenario["cmd"] == ScenarioCommand.DAMAGE_DEALT_MULTIHIT) {
+            const multihitDamageScenario = chainBurstDamageScenario as MultihitDamageScenarioData;
+            chainBurstAction["damageInstances"] = multihitDamageScenario["list"].flat(1).map(d => {
+              return {
+                "element": d["color"],
+                "position": d["pos"],
+                "value": d["value"],
+                "targetHpAfterDamage": d["hp"],
+                "critical": d["critical"],
+                "miss": d["miss"],
+                "guarded": d["guard"],
+              };
+            });
+            // Make sure to skip the command since we already processed it.
+            i += 1;
+          }
+          actions.push(chainBurstAction);
+          break;
+
         case ScenarioCommand.RETREAT:
           battleData["battleProgressStatus"] = BattleProgressStatus.RETREATED;
           break baseLoop;
@@ -418,13 +476,19 @@ export class BattleScenarioParser {
           }
           break;
 
+
+        case ScenarioCommand._TURN:
+          if (stopOnMainAction) {
+            break baseLoop;
+          }
+          break;
+
         // All of these commands are recognized but ignored.
         case ScenarioCommand._POTIONS_CHANGED:
         case ScenarioCommand._HP_CHANGED:
         case ScenarioCommand._SPECIAL_CHANGE:
         case ScenarioCommand._CONDITION:
         case ScenarioCommand._SCREEN_EFFECT:
-        case ScenarioCommand._TURN:
         case ScenarioCommand._BGM:
         case ScenarioCommand._BATTLE_LOG:
         case ScenarioCommand._MODE_CHANGE:
