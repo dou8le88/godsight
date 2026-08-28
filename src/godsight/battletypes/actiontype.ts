@@ -30,10 +30,11 @@ export enum ActionType {
    * a directly-associated source in GBF's scenario paradigm.
    * Certain effects like sacrificing HP as part of an ability or CA will likely be grouped under those actions.
    */
-  SELF_DAMAGE = "damage_over_time",
+  SELF_DAMAGE = "self_damage",
   CALLED_SUMMON = "summon",
   BOSS_SPECIAL_ATTACK = "boss_special",
   NORMAL_ATTACK = "normal_attack",
+  SINGULAR_NORMAL_ATTACK = "singular_normal_attack",
   CHARGED_ATTACK = "charged_attack",
   CHAIN_BURST = "chain_burst",
   /**
@@ -41,10 +42,8 @@ export enum ActionType {
    */
   DEATH = "death",
   DAMAGE_DEALT = "damage_dealt",
-  /**
-   * Mostly happens during death and should be grouped under it as such,
-   * but swaps from skills should also trigger this.
-   */
+  DAMAGE_DEALT_MULTIHIT = "damage_dealt_multihit",
+  HEAL = "heal",
   REPLACED_CHARACTER = "replaced_character",
   UPDATE_BOSS_STATUS = "update_boss_status",
   USED_POTION = "used_potion",

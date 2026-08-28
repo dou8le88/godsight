@@ -1,0 +1,42 @@
+import { GenericScenarioData } from "./genericscenariodata";
+import { GameElementValue } from "./mechanics/element";
+import { Target } from "./mechanics/target";
+import { ScenarioCommand } from "./scenariocommand";
+
+
+export interface ChargedAttackScenarioData extends GenericScenarioData {
+  "cmd": ScenarioCommand.CHARACTER_CHARGED_ATTACK | ScenarioCommand.MC_CHARGED_ATTACK,
+  "name": string,
+  "pos": number,
+  "num": number,
+  "target": Target,
+  "to": number,
+  "chain": string,
+  "count": number,
+  "attr": GameElementValue,
+  "total": ChargedAttackDamageInstance[],
+  "list": ChargedAttackPartitionedDamage[],
+}
+
+export type ChargedAttackPartitionedDamage = {
+  "damage": ChargedAttackPartitionedDamageInstance[],
+}
+
+export type ChargedAttackPartitionedDamageInstance = {
+  "attr": GameElementValue,
+  "critical": boolean,
+  "hp": number,
+}
+
+export interface ChargedAttackDamageInstance {
+  "pos": number;
+  "split": string[];
+  "attr": GameElementValue;
+  "count": number;
+}
+
+export class ChargedAttackDamageInstance {
+  static getTotal(i: ChargedAttackDamageInstance): number {
+    return Number(i.split.join(""));
+  }
+}

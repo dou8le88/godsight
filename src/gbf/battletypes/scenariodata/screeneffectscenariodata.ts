@@ -3,7 +3,7 @@ import { ScenarioCommand } from "./scenariocommand";
 
 
 export type ScreenEffectScenarioData = GenericScenarioData & {
-  "cmd": ScenarioCommand.SCREEN_EFFECT,
+  "cmd": ScenarioCommand._SCREEN_EFFECT,
   "name": string,
   "is_fatal_chain"?: boolean,
 }

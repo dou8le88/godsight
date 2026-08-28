@@ -26,11 +26,6 @@ export enum ScenarioCommand {
    */
   WINDOW_EFFECT = "windoweffect",
   /**
-   * A previous action produced changes to the player's buff and debuff list.
-   * Contains the total list, may be ignorable in some or all scenarios.
-   */
-  CONDITION = "condition",
-  /**
    * The command that actually causes messages like  "<icon> ATK Up" text to appear when characters gain buffs/debuffs.
    * Occasionally contains data like proper EN names for effects that otherwise display their Japanese names, such as
    * when MC gains the Trance buff with Beelzebub subsummon. The controlling logic should handle such a scenario.
@@ -75,10 +70,6 @@ export enum ScenarioCommand {
    */
   CA_METER_CHANGED = "recast",
   /**
-   * The player initiated a normal attack.
-   */
-  NORMAL_ATTACK = "attack",
-  /**
    * A character other than MC used a charged attack.
    */
   CHARACTER_CHARGED_ATTACK = "special_npc",
@@ -86,11 +77,6 @@ export enum ScenarioCommand {
    * The main character used a charged attack.
    */
   MC_CHARGED_ATTACK = "special",
-  /**
-   * TODO: Some special HP change happened - max HP hit?
-   * Seems to also happen after `REPLACE_CHARACTER`.
-   */
-  HP_CHANGED = "hp",
   /**
    * An entity died, player or boss.
    */
@@ -108,36 +94,64 @@ export enum ScenarioCommand {
    */
   FULL_ELIXIR = "rematch",
   RETREAT = "retire",
-  POTIONS_CHANGED = "temporary",
+  _POTIONS_CHANGED = "temporary",
 
   FORM_CHANGE = "formchange",
 
-
+  /**
+   * Beginning of a sequence of `NORMAL_ATTACK` commands by one character.
+   * A triple attack would consist of three `NORMAL_ATTACK` commands afterwards,
+   * followed by a `NORMAL_ATTACK_END` command.
+   */
+  NORMAL_ATTACK_START = "normal_attack_start",
+  /**
+   * The player initiated a single normal attack.
+   */
+  NORMAL_ATTACK = "attack",
+  /**
+   * End of a sequence of normal attacks by one character.
+   */
+  NORMAL_ATTACK_END = "normal_attack_end",
 
   /**
    * TODO: Charm, Can't Act, etc.
    */
 
+
+
   /**
    * Ignored command, do not use, exists for type completeness in the parser.
    */
-  TURN = "turn",
+  _TURN = "turn",
   /**
    * Ignored command, do not use, exists for type completeness in the parser.
    */
-  BGM = "bgm",
+  _BGM = "bgm",
   /**
    * A screen effect was activated.
    * Used for chain bursts or Fated Chains as well as some other actions, but
    * we don't use it directly.
    */
-  SCREEN_EFFECT = "effect",
+  _SCREEN_EFFECT = "effect",
   /**
    * Ignored command, do not use, exists for type completeness in the parser.
    */
-  BATTLE_LOG = "battlelog",
+  _BATTLE_LOG = "battlelog",
   /**
    * Ignored command, do not use, exists for type completeness in the parser.
    */
-  SPECIAL_CHANGE = "special_change",
+  _SPECIAL_CHANGE = "special_change",
+  /**
+   * Ignored command, do not use, exists for type completeness in the parser.
+   */
+  _HP_CHANGED = "hp",
+  /**
+   * Ignored command, do not use, exists for type completeness in the parser.
+   */
+  _CONDITION = "condition",
+  /**
+   * Mode bar changed.
+   * Ignored command, do not use, exists for type completeness in the parser.
+   */
+  _MODE_CHANGE = "modechange",
 }

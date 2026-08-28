@@ -1,4 +1,4 @@
-import { GranblueBattleData } from "./battledata"
+import { BattleStatus, GranblueBattleData } from "./battledata"
 import { ConditionSummary } from "./scenariodata/conditionchangedscenariodata"
 import { GenericScenarioData } from "./scenariodata/genericscenariodata"
 import { GameElementValue, PrettyElementName } from "./scenariodata/mechanics/element"
@@ -13,6 +13,10 @@ export type StartData = GranblueBattleData & {
   "quest_id": string,
   "is_coopraid": boolean,
   "is_host": boolean,
+  /**
+   * In seconds till the timer expires.
+   */
+  "timer": number,
   "turn": number,
   /**
    * Seems to be number of skill presses since battle start?
@@ -48,6 +52,7 @@ export type StartData = GranblueBattleData & {
    * Battle refreshes will show an empty scenario.
    */
   "scenario": GenericScenarioData[],
+  "status": BattleStatus,
 }
 
 export type WaveData = {

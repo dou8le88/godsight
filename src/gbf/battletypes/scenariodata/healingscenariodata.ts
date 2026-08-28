@@ -2,7 +2,7 @@ import { GenericScenarioData } from "./genericscenariodata";
 import { Target } from "./mechanics/target";
 import { ScenarioCommand } from "./scenariocommand";
 
-export type HealingInstance = {
+export type GbfHealingInstance = {
   /**
    * The position of the healing recipient.
    */
@@ -20,6 +20,6 @@ export type HealingInstance = {
 export type HealingScenarioData = GenericScenarioData & {
   "cmd": ScenarioCommand.HEALING,
   "to": Target,
-  "list": HealingInstance[],
+  "list": GbfHealingInstance[],
   //"kind": "ab_3000",
 }
