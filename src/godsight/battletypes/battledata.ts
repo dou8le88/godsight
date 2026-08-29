@@ -1,7 +1,8 @@
-import { BattleAction } from "./battleaction";
-import { BattleProgressStatus } from "./battlestatus";
+import { BattleStats } from "./battlestats";
+import { BattleProgressStatus } from "./battleprogressstatus";
 import { GodsightBossData } from "./bossdata";
 import { GodsightPartyFormationData } from "./partyformationdata";
+import { TurnData } from "./turndata";
 
 export type GodsightBattleData = {
   "raidId": number,
@@ -15,5 +16,6 @@ export type GodsightBattleData = {
   "expirationTime": number,
   "party": GodsightPartyFormationData,
   "boss": GodsightBossData[],
-  "turnData": { [key: number]: BattleAction[] },
+  "battleStats": BattleStats,
+  "turnData": { [key: number]: TurnData },
 }

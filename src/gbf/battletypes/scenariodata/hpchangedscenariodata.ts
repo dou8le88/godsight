@@ -1,10 +1,10 @@
 import { GenericScenarioData } from "./genericscenariodata";
-import { Target } from "./mechanics/target";
+import { Actor } from "./mechanics/actor";
 import { ScenarioCommand } from "./scenariocommand";
 
 export type HPChangedScenarioData = GenericScenarioData & {
   "cmd": ScenarioCommand._HP_CHANGED,
-  "to": Target,
+  "to": Actor,
   "pos": number,
   /**
    * Current HP.

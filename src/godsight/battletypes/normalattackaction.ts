@@ -1,7 +1,22 @@
 import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
+import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
-export type NormalAttackAction = BattleAction & {
-  "action": ActionType.NORMAL_ATTACK,
-  "subactions": BattleAction[],
+export class NormalAttackAction implements BattleAction {
+
+  constructor(
+    public subactions: BattleAction[],
+  ) {
+  }
+
+  getStats(): StatsUpdate {
+    const update = StatsUpdateHelper.getEmptyStatsUpdate();
+
+    const subactionUpdates = this.subactions.map(action => action.getStats());
+
+    return subactionUpdates.reduce(
+      (prev, cur) => StatsUpdateHelper.concatUpdates(prev, cur),
+      update
+    );
+  }
 }

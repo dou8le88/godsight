@@ -1,7 +1,14 @@
 import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
+import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
-export type WindowEffectAction = BattleAction & {
-  "action": ActionType.WINDOW_EFFECT,
-  "name": string,
+export class WindowEffectAction implements BattleAction {
+  constructor(
+    public name: string,
+  ) {
+  }
+
+  getStats(): StatsUpdate {
+    return StatsUpdateHelper.getEmptyStatsUpdate();
+  }
 }

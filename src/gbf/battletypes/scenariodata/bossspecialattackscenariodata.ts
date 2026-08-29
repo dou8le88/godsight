@@ -1,7 +1,7 @@
 import { GenericScenarioData } from "./genericscenariodata";
 import { GameElementValue } from "./mechanics/element";
 import { AttackAccuracyResult } from "./mechanics/attackaccuracyresult";
-import { Target } from "./mechanics/target";
+import { Actor } from "./mechanics/actor";
 import { ScenarioCommand } from "./scenariocommand";
 
 export type BossSpecialAttackScenarioData = GenericScenarioData & {
@@ -12,7 +12,7 @@ export type BossSpecialAttackScenarioData = GenericScenarioData & {
    */
   "pos": number,
   "num": number,
-  "target": Target,
+  "target": Actor,
   "count": number,
   "attr": GameElementValue,
   "total": [],

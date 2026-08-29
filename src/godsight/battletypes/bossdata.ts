@@ -2,8 +2,7 @@ import { GameElementValue } from "../../gbf/battletypes/scenariodata/mechanics/e
 
 export type GodsightBossData = {
   "name": string,
-  "element": GameElementValue
-  // "position": number,
+  "element": GameElementValue,
   "hpMax": number,
   "hpCurrent": number,
   "maxDiamonds": number,

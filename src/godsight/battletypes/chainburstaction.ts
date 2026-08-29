@@ -1,10 +1,23 @@
-import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { DamageInstance } from "./damageinstance";
+import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
-export type ChainBurstAction = BattleAction & {
-  "action": ActionType.CHAIN_BURST,
-  "chainCount": number,
-  "name": string,
-  "damageInstances": DamageInstance[],
+export class ChainBurstAction implements BattleAction {
+  constructor(
+    public chainCount: number,
+    public name: string,
+    public damageInstances: DamageInstance[],
+  ) {
+  }
+
+  getStats(): StatsUpdate {
+    const update = StatsUpdateHelper.getEmptyStatsUpdate();
+
+    this.damageInstances.forEach(instance => {
+      update["generalStats"]["otherDamage"] += instance["value"];
+    });
+    update["generalStats"]["hitCount"] += this.damageInstances.length;
+
+    return update;
+  }
 }

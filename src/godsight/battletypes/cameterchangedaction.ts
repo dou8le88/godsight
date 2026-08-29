@@ -1,15 +1,16 @@
-import { Target } from "../../gbf/battletypes/scenariodata/mechanics/target";
-import { ActionType } from "./actiontype";
+import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
 import { BattleAction } from "./battleaction";
+import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
-export type CAMeterChangedAction = BattleAction & {
-  "action": ActionType.CA_METER_CHANGED,
-  "target": Target,
-  "position": number,
-  "newValue": number,
-  /**
-   * Calculated difference between last known meter value and the new value.
-   */
-  "change": number,
-  // "max": "",
+export class CAMeterChangedAction implements BattleAction {
+  constructor(
+    public target: Actor,
+    public position: number,
+    public newValue: number,
+    public change: number,
+  ) {
+  }
+  getStats(): StatsUpdate {
+    return StatsUpdateHelper.getEmptyStatsUpdate();
+  }
 }

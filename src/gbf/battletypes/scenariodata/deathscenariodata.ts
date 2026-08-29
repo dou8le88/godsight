@@ -1,10 +1,10 @@
 import { GenericScenarioData } from "./genericscenariodata";
-import { Target } from "./mechanics/target";
+import { Actor } from "./mechanics/actor";
 import { ScenarioCommand } from "./scenariocommand";
 
 export type DeathScenarioData = GenericScenarioData & {
   "cmd": ScenarioCommand.DEATH,
-  "to": Target,
+  "to": Actor,
   "pos": number,
   "index": number | null | undefined,
   // "chain": 0,

@@ -1,5 +1,5 @@
 import { GameElementValue } from "./mechanics/element";
-import { Target } from "./mechanics/target";
+import { Actor } from "./mechanics/actor";
 import { ScenarioCommand } from "./scenariocommand";
 import { GenericScenarioData } from "./genericscenariodata";
 import { SkillOrDebuffDamageInstance } from "./individualdamageinstance";
@@ -7,6 +7,6 @@ import { SkillOrDebuffDamageInstance } from "./individualdamageinstance";
 export type DamageScenarioData = GenericScenarioData & {
   "cmd": ScenarioCommand.DAMAGE_DEALT,
   "color": GameElementValue,
-  "to": Target,
+  "to": Actor,
   "list": SkillOrDebuffDamageInstance[],
 }

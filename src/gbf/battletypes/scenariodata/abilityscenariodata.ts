@@ -1,6 +1,6 @@
 import { ScenarioCommand } from "./scenariocommand";
 import { GenericScenarioData } from "./genericscenariodata";
-import { Target } from "./mechanics/target";
+import { Actor } from "./mechanics/actor";
 
 export type AbilityScenarioData = GenericScenarioData & {
   "cmd": ScenarioCommand.ABILITY,
@@ -9,5 +9,5 @@ export type AbilityScenarioData = GenericScenarioData & {
   /**
    * Despite the field name, it's the entity activating the ability.
    */
-  "to": Target,
+  "to": Actor,
 }

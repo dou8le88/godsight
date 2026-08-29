@@ -1,6 +1,6 @@
 import { GenericScenarioData } from "./genericscenariodata";
 import { GameElementValue } from "./mechanics/element";
-import { Target } from "./mechanics/target";
+import { Actor } from "./mechanics/actor";
 import { ScenarioCommand } from "./scenariocommand";
 
 
@@ -9,7 +9,7 @@ export interface ChargedAttackScenarioData extends GenericScenarioData {
   "name": string,
   "pos": number,
   "num": number,
-  "target": Target,
+  "target": Actor,
   "to": number,
   "chain": string,
   "count": number,

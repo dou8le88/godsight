@@ -1,19 +1,27 @@
-import { StatusType } from "../../gbf/battletypes/scenariodata/mechanics/statustype";
-import { Target } from "../../gbf/battletypes/scenariodata/mechanics/target";
-import { ActionType } from "./actiontype";
+import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
 import { BattleAction } from "./battleaction";
+import { StatsUpdate, StatsUpdateHelper } from "./stats";
+import { GodsightCondition } from "./condition";
 
-export type ConditionChangeAction = BattleAction & {
-  "action": ActionType.CONDITION_CHANGED,
-  "target": Target,
-  "position": number,
-  "buffs": GodsightCondition[],
-  "debuffs": GodsightCondition[],
-  "unclassified": GodsightCondition[],
-}
+export class ConditionChangeAction implements BattleAction {
+  constructor(
+    public target: Actor,
+    public position: number,
+    public buffs: GodsightCondition[],
+    public debuffs: GodsightCondition[],
+    public unclassified: GodsightCondition[],
+  ) {
+  }
 
-export type GodsightCondition = {
-  "type": StatusType,
-  "name": string,
-  "icon": string,
+  getStats(): StatsUpdate {
+    const update = StatsUpdateHelper.getEmptyStatsUpdate();
+    if (this.target == Actor.BOSS) {
+      update["generalStats"]["debuffsInflictedCount"] += this.debuffs.length;
+      // TODO: figure out a way of associating the debuffs with a specific character.
+      // May not be consistently possible.
+      return update;
+    } else {
+      return update;
+    }
+  }
 }

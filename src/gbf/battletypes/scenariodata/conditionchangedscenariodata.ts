@@ -1,4 +1,4 @@
-import { Target } from "./mechanics/target";
+import { Actor } from "./mechanics/actor";
 import { ScenarioCommand } from "./scenariocommand";
 import { GenericScenarioData } from "./genericscenariodata";
 
@@ -19,7 +19,7 @@ export type ConditionSummary = {
 
 export type ConditionChangedScenarioData = GenericScenarioData & {
   "cmd": ScenarioCommand._CONDITION,
-  "to": Target,
+  "to": Actor,
   "pos": number,
   "condition": ConditionSummary,
 }

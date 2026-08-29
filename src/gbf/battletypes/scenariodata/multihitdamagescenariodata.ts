@@ -1,5 +1,5 @@
 import { GameElement, GameElementValue } from "./mechanics/element";
-import { Target } from "./mechanics/target";
+import { Actor } from "./mechanics/actor";
 import { ScenarioCommand } from "./scenariocommand";
 import { GenericScenarioData } from "./genericscenariodata";
 import { SkillOrDebuffDamageInstance } from "./individualdamageinstance";
@@ -22,7 +22,7 @@ export class TotalDamageDealt {
 export type MultihitDamageScenarioData = GenericScenarioData & {
   "cmd": ScenarioCommand.DAMAGE_DEALT_MULTIHIT,
   "color": GameElementValue,
-  "to": Target,
+  "to": Actor,
   "list": SkillOrDebuffDamageInstance[][],
   "total": TotalDamageDealt[],
 }

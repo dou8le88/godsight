@@ -1,6 +1,6 @@
 import { GenericScenarioData } from "./genericscenariodata";
 import { GameElementValue } from "./mechanics/element";
-import { Target } from "./mechanics/target";
+import { Actor } from "./mechanics/actor";
 import { ScenarioCommand } from "./scenariocommand";
 
 /**
@@ -17,5 +17,5 @@ export type FormChangeScenarioData = GenericScenarioData & {
     },
   }
   "pos": number,
-  "to": Target.BOSS,
+  "to": Actor.BOSS,
 }

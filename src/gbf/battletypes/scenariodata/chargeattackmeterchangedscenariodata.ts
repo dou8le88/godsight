@@ -1,11 +1,11 @@
 import { GenericScenarioData } from "./genericscenariodata";
-import { Target } from "./mechanics/target";
+import { Actor } from "./mechanics/actor";
 import { ScenarioCommand } from "./scenariocommand";
 
 
 export type ChargeAttackMeterChangedScenarioData = GenericScenarioData & {
   "cmd": ScenarioCommand.CA_METER_CHANGED,
-  "to": Target,
+  "to": Actor,
   "pos": number,
   /**
    * New meter value.

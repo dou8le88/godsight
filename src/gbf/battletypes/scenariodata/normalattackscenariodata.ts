@@ -1,13 +1,13 @@
 import { GenericScenarioData } from "./genericscenariodata"
 import { GameElementValue } from "./mechanics/element"
 import { AttackAccuracyResult } from "./mechanics/attackaccuracyresult"
-import { Target } from "./mechanics/target"
+import { Actor } from "./mechanics/actor"
 import { ScenarioCommand } from "./scenariocommand"
 
 
 export type NormalAttackScenarioData = GenericScenarioData & {
   "cmd": ScenarioCommand.NORMAL_ATTACK,
-  "from": Target,
+  "from": Actor,
   "pos": number,
   "num": number,
   "color": GameElementValue,

@@ -1,10 +1,17 @@
-import { Target } from "../../gbf/battletypes/scenariodata/mechanics/target";
+import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
 import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
+import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
-export type DeathAction = BattleAction & {
-  "action": ActionType.DEATH,
-  "target": Target,
-  "position": number,
-  "index": number | undefined,
+export class DeathAction implements BattleAction {
+  constructor(
+    public target: Actor,
+    public position: number,
+    public index: number | undefined,
+  ) {
+  }
+
+  getStats(): StatsUpdate {
+    return StatsUpdateHelper.getEmptyStatsUpdate();
+  }
 }

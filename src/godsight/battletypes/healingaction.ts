@@ -1,10 +1,30 @@
-import { Target } from "../../gbf/battletypes/scenariodata/mechanics/target";
+import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
 import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { HealingInstance } from "./healinginstance";
+import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
-export type HealingAction = BattleAction & {
-  "action": ActionType.HEAL,
-  "target": Target,
-  "healingInstances": HealingInstance[],
+export class HealingAction implements BattleAction {
+  constructor(
+    public target: Actor,
+    public healingInstances: HealingInstance[],
+  ) {
+  }
+
+  getStats(): StatsUpdate {
+    const update = StatsUpdateHelper.getEmptyStatsUpdate();
+
+    // Bosses can heal as well but we do not currently track that.
+    if (this.target == Actor.PLAYER) {
+      this.healingInstances.forEach(instance => {
+        if (!update["characterStats"][instance["position"]]) {
+          update["characterStats"][instance["position"]] = StatsUpdateHelper.getEmptyStats();
+        }
+        update["generalStats"]["healingReceived"] += instance["value"];
+        update["characterStats"][instance["position"]]["healingReceived"] += instance["value"];
+      });
+    }
+
+    return update;
+  }
 }

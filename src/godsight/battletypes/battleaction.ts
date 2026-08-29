@@ -1,5 +1,5 @@
-import { ActionType } from "./actiontype"
+import { StatsUpdate } from "./stats";
 
-export type BattleAction = {
-  "action": ActionType,
+export interface BattleAction {
+  getStats(): StatsUpdate;
 }

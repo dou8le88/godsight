@@ -13,7 +13,7 @@ import { HonorsGainedScenarioData } from "./gbf/battletypes/scenariodata/honorsg
 import { HPChangedScenarioData } from "./gbf/battletypes/scenariodata/hpchangedscenariodata";
 import { GameElementHelper, GameElementValue } from "./gbf/battletypes/scenariodata/mechanics/element";
 import { StatusType } from "./gbf/battletypes/scenariodata/mechanics/statustype";
-import { Target } from "./gbf/battletypes/scenariodata/mechanics/target";
+import { Actor } from "./gbf/battletypes/scenariodata/mechanics/actor";
 import { MessageScenarioData } from "./gbf/battletypes/scenariodata/messagescenariodata";
 import { MultihitDamageScenarioData, TotalDamageDealt } from "./gbf/battletypes/scenariodata/multihitdamagescenariodata";
 import { NormalAttackDamage, NormalAttackScenarioData } from "./gbf/battletypes/scenariodata/normalattackscenariodata";
@@ -30,7 +30,7 @@ import { GodsightBossData } from "./godsight/battletypes/bossdata";
 import { BossSpecialAttackAction } from "./godsight/battletypes/bossspecialattackaction";
 import { CAMeterChangedAction } from "./godsight/battletypes/cameterchangedaction";
 import { ChargedAttackAction } from "./godsight/battletypes/chargedattackaction";
-import { GodsightCondition, ConditionChangeAction } from "./godsight/battletypes/conditionchangeaction";
+import { ConditionChangeAction } from "./godsight/battletypes/conditionchangeaction";
 import { DamageAction } from "./godsight/battletypes/damageaction";
 import { DamageInstance } from "./godsight/battletypes/damageinstance";
 import { DeathAction } from "./godsight/battletypes/deathaction";
@@ -43,11 +43,15 @@ import { WindowEffectAction } from "./godsight/battletypes/windoweffectaction";
 import { HealingAction } from "./godsight/battletypes/healingaction";
 import { SummonScenarioData } from "./gbf/battletypes/scenariodata/summonscenariodata";
 import { SummonAction } from "./godsight/battletypes/summonaction";
-import { BattleProgressStatus } from "./godsight/battletypes/battlestatus";
+import { BattleProgressStatus } from "./godsight/battletypes/battleprogressstatus";
 import { WonBattleScenarioData } from "./gbf/battletypes/scenariodata/wonbattlescenariodata";
 import { ChainBurstScenarioData } from "./gbf/battletypes/scenariodata/chainburstscenariodata";
 import { ChainBurstAction } from "./godsight/battletypes/chainburstaction";
 import { ScreenEffectScenarioData } from "./gbf/battletypes/scenariodata/screeneffectscenariodata";
+import { TurnData } from "./godsight/battletypes/turndata";
+import { GodsightCondition } from "./godsight/battletypes/condition";
+import { GodsightStatusType } from "./godsight/battletypes/statustype";
+import { StatsUpdateHelper } from "./godsight/battletypes/stats";
 
 export class BattleScenarioParser {
   constructor() {
@@ -103,17 +107,16 @@ export class BattleScenarioParser {
           }
           const bossSpecialAttackScenario = scenario as BossSpecialAttackScenarioData;
           const subactions = this._parseScenarioData(scenarioData.slice(i + 1), battleData, stopOnMainAction);
-          const bossSpecialAttackAction: BossSpecialAttackAction = {
-            "action": ActionType.BOSS_SPECIAL_ATTACK,
-            "name": bossSpecialAttackScenario["name"],
-            "count": bossSpecialAttackScenario["count"],
-            "element": bossSpecialAttackScenario["attr"],
-            "source": battleData["boss"][bossSpecialAttackScenario["pos"]]["name"],
-            "target": bossSpecialAttackScenario["target"],
-            "damageInstances": bossSpecialAttackScenario["list"].flatMap(l => l["damage"]).map(instance => {
+          const bossSpecialAttackAction = new BossSpecialAttackAction(
+            bossSpecialAttackScenario["name"],
+            battleData["boss"][bossSpecialAttackScenario["pos"]]["name"],
+            bossSpecialAttackScenario["target"],
+            bossSpecialAttackScenario["count"],
+            bossSpecialAttackScenario["attr"],
+            bossSpecialAttackScenario["list"].flatMap(l => l["damage"]).map(instance => {
               const damageInstance: DamageInstance = {
                 "element": instance["attr"],
-                "position": instance["pos"],
+                "receiverPosition": instance["pos"],
                 "value": instance["value"],
                 "targetHpAfterDamage": instance["hp"],
                 "critical": instance["critical"],
@@ -123,8 +126,8 @@ export class BattleScenarioParser {
               return damageInstance;
             }),
             // Peek ahead at further scenarios to find out the consequences of this one, so we can associate them.
-            "subactions": subactions.actions,
-          };
+            subactions.actions,
+          );
           actions.push(bossSpecialAttackAction);
           // Skip ahead past actions we already included as subactions.
           i += subactions.lastIndex;
@@ -157,22 +160,21 @@ export class BattleScenarioParser {
             // The real ability command should happen next so just break and continue the loop.
             break;
           }
-          const abilityAction: AbilityAction = {
-            "action": ActionType.ACTIVATED_ABILITY,
-            "name": abilityScenario["name"],
-            "source": abilityScenario["to"],
-            "position": abilityScenario["pos"],
-            "subactions": subactions.actions,
-          }
+          const abilityAction = new AbilityAction(
+            abilityScenario["name"],
+            abilityScenario["to"],
+            abilityScenario["pos"],
+            subactions.actions,
+          );
           // Fix some abilities activating without names (or with untranslated names) in the ability itself
           // but the correct name shows up in subactions.
-          if (!abilityAction["name"] || this.containsJapaneseRegex.test(abilityAction["name"])) {
-            const windowSubactions = abilityAction["subactions"].filter(a => a["action"] == ActionType.WINDOW_EFFECT) as WindowEffectAction[];
+          if (!abilityAction.name || this.containsJapaneseRegex.test(abilityAction.name)) {
+            const windowSubactions = abilityAction.subactions.filter(a => a instanceof WindowEffectAction) as WindowEffectAction[];
             const firstNamedWindowSubaction = windowSubactions.find(a =>
-              a["name"] && !this.containsJapaneseRegex.test(a["name"])
+              a.name && !this.containsJapaneseRegex.test(a.name)
             );
             if (firstNamedWindowSubaction) {
-              abilityAction["name"] = firstNamedWindowSubaction["name"];
+              abilityAction.name = firstNamedWindowSubaction.name;
               // TODO: filter out subaction used for name?
             }
           }
@@ -194,35 +196,33 @@ export class BattleScenarioParser {
           const replaceCharacterScenario = scenario as ReplaceCharacterScenarioData;
           const position = replaceCharacterScenario["pos"];
           const newCharacter = Number(replaceCharacterScenario["npc"]);
-          const replaceCharacterAction: ReplaceCharacterAction = {
-            "action": ActionType.REPLACED_CHARACTER,
-            "position": position,
-            "newCharacter": newCharacter,
-          };
+          const replaceCharacterAction = new ReplaceCharacterAction(
+            position,
+            newCharacter,
+          );
           actions.push(replaceCharacterAction);
-          // TODO: test logic with Tactical Relocation, assuming it's the same command.
+          // TODO: test logic with Tactical Relocation, assuming it's the same command,
+          // to verify that the parameters are named correctly.
           // const currentCharacterAtPos = battleData["party"]["frontline"][position];
           // battleData["party"]["frontline"][position] = newCharacter;
           break;
 
         case ScenarioCommand.WINDOW_EFFECT:
           const windowScenario = scenario as WindowEffectScenarioData;
-          const windowAction: WindowEffectAction = {
-            "action": ActionType.WINDOW_EFFECT,
-            "name": windowScenario["name"],
-          };
+          const windowAction = new WindowEffectAction(
+            windowScenario["name"],
+          );
           actions.push(windowAction);
           break;
 
         case ScenarioCommand.DAMAGE_DEALT:
           const damageDealtScenario = scenario as DamageScenarioData;
-          const damageAction: DamageAction = {
-            "action": ActionType.DAMAGE_DEALT,
-            "element": damageDealtScenario["color"],
-            "target": damageDealtScenario["to"],
-            "instances": damageDealtScenario["list"].map(l => {
+          const damageAction = new DamageAction(
+            damageDealtScenario["color"],
+            damageDealtScenario["to"],
+            damageDealtScenario["list"].map(l => {
               return {
-                "position": l["pos"],
+                "receiverPosition": l["pos"],
                 "currentHit": l["attack_num"],
                 "element": l["color"],
                 "value": l["value"],
@@ -232,20 +232,19 @@ export class BattleScenarioParser {
                 "miss": l["miss"],
               };
             }),
-          };
+          );
           actions.push(damageAction);
           break;
 
         case ScenarioCommand.DAMAGE_DEALT_MULTIHIT:
           const multihitDamageScenario = scenario as MultihitDamageScenarioData;
-          const multihitDamageAction: MultihitDamageAction = {
-            "action": ActionType.DAMAGE_DEALT_MULTIHIT,
-            "element": multihitDamageScenario["color"],
-            "target": multihitDamageScenario["to"],
-            "hits": multihitDamageScenario["list"].flat(1).map(hit => {
+          const multihitDamageAction = new MultihitDamageAction(
+            multihitDamageScenario["color"],
+            multihitDamageScenario["to"],
+            multihitDamageScenario["list"].flat(1).map(hit => {
               return {
                 "element": hit["color"],
-                "position": hit["pos"],
+                "receiverPosition": hit["pos"],
                 "value": hit["value"],
                 "targetHpAfterDamage": hit["hp"],
                 "critical": hit["critical"],
@@ -253,8 +252,8 @@ export class BattleScenarioParser {
                 "miss": hit["miss"],
               };
             }),
-            "totals": multihitDamageScenario["total"].map(t => TotalDamageDealt.getTotal(t)),
-          };
+            multihitDamageScenario["total"].map(t => TotalDamageDealt.getTotal(t)),
+          );
           actions.push(multihitDamageAction);
           break;
 
@@ -263,10 +262,9 @@ export class BattleScenarioParser {
             break baseLoop;
           }
           const subactions = this._parseScenarioData(scenarioData.slice(i + 1), battleData, stopOnMainAction);
-          const normalAttackAction: NormalAttackAction = {
-            "action": ActionType.NORMAL_ATTACK,
-            "subactions": subactions.actions,
-          };
+          const normalAttackAction = new NormalAttackAction(
+            subactions.actions,
+          );
           actions.push(normalAttackAction);
           i += subactions.lastIndex;
           break;
@@ -289,16 +287,14 @@ export class BattleScenarioParser {
           } else {
             damageArray = Object.keys(sourceDamageInstances).map(key => sourceDamageInstances[key]).flat(1);
           }
-          const singularNormalAttackAction: SingularNormalAttackAction = {
-            "action": ActionType.SINGULAR_NORMAL_ATTACK,
-            "from": singularNormalAttackScenario["from"],
-            "attackerPosition": singularNormalAttackScenario["pos"],
-            "targetPosition": singularNormalAttackScenario["num"],
-            "element": singularNormalAttackScenario["color"],
-            "damage": damageArray.map(damage => {
+          const singularNormalAttackAction = new SingularNormalAttackAction(
+            singularNormalAttackScenario["from"],
+            singularNormalAttackScenario["pos"],
+            singularNormalAttackScenario["color"],
+            damageArray.map(damage => {
               return {
                 "element": damage["color"],
-                "position": damage["pos"],
+                "receiverPosition": damage["pos"],
                 "value": damage["value"],
                 "targetHpAfterDamage": damage["hp"],
                 "critical": damage["critical"],
@@ -306,7 +302,7 @@ export class BattleScenarioParser {
                 "miss": damage["miss"],
               };
             }),
-          };
+          );
           actions.push(singularNormalAttackAction);
           break;
 
@@ -325,27 +321,26 @@ export class BattleScenarioParser {
           });
           const hpAfterDamage = allSplitChargedAttackDamage[-1]["hp"];
           const subactions = this._parseScenarioData(scenarioData.slice(i + 1), battleData, stopOnMainAction);
-          const chargedAttackAction: ChargedAttackAction = {
-            "action": ActionType.CHARGED_ATTACK,
-            "name": chargedAttackScenario["name"],
-            "element": chargedAttackScenario["attr"],
-            "position": chargedAttackScenario["pos"],
-            "targetPosition": chargedAttackScenario["to"],
-            "target": chargedAttackScenario["target"],
-            "damageTotals": chargedAttackScenario["total"].map(damage => {
+          const chargedAttackAction = new ChargedAttackAction(
+            chargedAttackScenario["name"],
+            chargedAttackScenario["pos"],
+            chargedAttackScenario["to"],
+            chargedAttackScenario["target"],
+            chargedAttackScenario["attr"],
+            chargedAttackScenario["total"].map(damage => {
               const damageTotal = ChargedAttackDamageInstance.getTotal(damage);
               return {
                 "element": damage["attr"],
                 "value": damageTotal,
                 "critical": wasCriticalHit.get(damage["attr"])!,
-                "position": damage["pos"],
+                "receiverPosition": damage["pos"],
                 "targetHpAfterDamage": hpAfterDamage,
                 "miss": damageTotal > 0 ? 0 : 2,
                 "guarded": false,
               };
             }),
-            "subactions": subactions.actions,
-          };
+            subactions.actions,
+          );
           actions.push(chargedAttackAction);
           i += subactions.lastIndex;
           break;
@@ -360,39 +355,36 @@ export class BattleScenarioParser {
           // You can't use a full elixir in the middle of a turn, it's always its own button press,
           // so all subsequent commands like increasing character meter and reviving are subactions.
           const subactions = this._parseScenarioData(scenarioData.slice(i + 1), battleData);
-          const fullElixirAction: FullElixirAction = {
-            "action": ActionType.USED_FULL_ELIXIR,
-            "subactions": subactions.actions,
-          };
+          const fullElixirAction = new FullElixirAction(
+            subactions.actions,
+          );
           actions.push(fullElixirAction);
           break baseLoop;
         }
 
         case ScenarioCommand.HEALING:
           const healingScenario = scenario as HealingScenarioData;
-          const healingAction: HealingAction = {
-            "action": ActionType.HEAL,
-            "target": healingScenario["to"],
-            "healingInstances": healingScenario["list"].map(h => {
+          const healingAction = new HealingAction(
+            healingScenario["to"],
+            healingScenario["list"].map(h => {
               return {
-                "position": h["pos"],
+                "receiverPosition": h["pos"],
                 "value": h["value"],
                 "hpAfterHealing": h["hp"],
               };
             })
-          };
+          );
           actions.push(healingAction);
           break;
 
         case ScenarioCommand.SUMMON:
           const summonScenario = scenario as SummonScenarioData;
           const subactions = this._parseScenarioData(scenarioData.slice(i + 1), battleData, true);
-          const summonAction: SummonAction = {
-            "action": ActionType.CALLED_SUMMON,
-            "name": summonScenario["name"],
-            "damageInstances": summonScenario["list"].flatMap(l => l["damage"]).map(damage => {
+          const summonAction = new SummonAction(
+            summonScenario["name"],
+            summonScenario["list"].flatMap(l => l["damage"]).map(damage => {
               return {
-                "position": damage["pos"],
+                "receiverPosition": damage["pos"],
                 "element": damage["color"],
                 "value": damage["value"],
                 "targetHpAfterDamage": damage["hp"],
@@ -404,8 +396,8 @@ export class BattleScenarioParser {
                 "miss": 0,
               }
             }),
-            "subactions": subactions.actions,
-          };
+            subactions.actions,
+          );
           actions.push(summonAction);
           i += subactions.lastIndex;
           break;
@@ -415,28 +407,29 @@ export class BattleScenarioParser {
             break baseLoop;
           }
           const chainBurstScenario = scenario as ChainBurstScenarioData;
-          const chainBurstAction: ChainBurstAction = {
-            "action": ActionType.CHAIN_BURST,
-            "chainCount": chainBurstScenario["chain_num"],
-            "name": "Unknown",
-            "damageInstances": [],
-          };
+          const chainBurstAction = new ChainBurstAction(
+            chainBurstScenario["chain_num"],
+            "Unknown",
+            [],
+          );
           // A CHAIN_BURST command should be immediately followed by _SCREEN_EFFECT
           // with its name and a DAMAGE_DEALT or DAMAGE_DEALT_MULTIHIT command
           // (the latter is solely for special multihit chainbursts like Higurashi's)
           const screenEffectScenario = scenarioData[i + 1];
           const chainBurstDamageScenario = scenarioData[i + 2];
           if (screenEffectScenario["cmd"] == ScenarioCommand._SCREEN_EFFECT) {
-            chainBurstAction["name"] = (screenEffectScenario as ScreenEffectScenarioData)["name"];
+            chainBurstAction.name = (screenEffectScenario as ScreenEffectScenarioData)["name"];
             // Make sure to skip the command since we already processed it.
             i += 1;
+          } else {
+            console.error(`Chainburst command's first followup was ${screenEffectScenario["cmd"]}`);
           }
           if (chainBurstDamageScenario["cmd"] == ScenarioCommand.DAMAGE_DEALT) {
             const damageScenario = chainBurstDamageScenario as DamageScenarioData;
-            chainBurstAction["damageInstances"] = damageScenario["list"].map(d => {
+            chainBurstAction.damageInstances = damageScenario["list"].map(d => {
               return {
                 "element": d["color"],
-                "position": d["pos"],
+                "receiverPosition": d["pos"],
                 "value": d["value"],
                 "targetHpAfterDamage": d["hp"],
                 "critical": d["critical"],
@@ -448,10 +441,10 @@ export class BattleScenarioParser {
             i += 1;
           } else if (chainBurstDamageScenario["cmd"] == ScenarioCommand.DAMAGE_DEALT_MULTIHIT) {
             const multihitDamageScenario = chainBurstDamageScenario as MultihitDamageScenarioData;
-            chainBurstAction["damageInstances"] = multihitDamageScenario["list"].flat(1).map(d => {
+            chainBurstAction.damageInstances = multihitDamageScenario["list"].flat(1).map(d => {
               return {
                 "element": d["color"],
-                "position": d["pos"],
+                "receiverPosition": d["pos"],
                 "value": d["value"],
                 "targetHpAfterDamage": d["hp"],
                 "critical": d["critical"],
@@ -461,6 +454,8 @@ export class BattleScenarioParser {
             });
             // Make sure to skip the command since we already processed it.
             i += 1;
+          } else {
+            console.error(`Chainburst command's second followup was ${chainBurstDamageScenario["cmd"]}`);
           }
           actions.push(chainBurstAction);
           break;
@@ -506,18 +501,17 @@ export class BattleScenarioParser {
   }
 
   private handleDeathScenario(deathScenario: DeathScenarioData): BattleAction {
-    const action: DeathAction = {
-      "action": ActionType.DEATH,
-      "target": deathScenario["to"],
-      "position": deathScenario["pos"],
-      "index": typeof deathScenario["index"] === "number" ? deathScenario["index"] : undefined,
-    };
+    const action = new DeathAction(
+      deathScenario["to"],
+      deathScenario["pos"],
+      typeof deathScenario["index"] === "number" ? deathScenario["index"] : undefined,
+    );
 
     return action;
   }
 
   private handleFormChangeScenario(formChangeScenario: FormChangeScenarioData, battleData: GodsightBattleData): void {
-    if (formChangeScenario["to"] == Target.BOSS) {
+    if (formChangeScenario["to"] == Actor.BOSS) {
       battleData.boss[formChangeScenario["pos"]] =
         this.getBossDataFromFormChangeScenario(formChangeScenario, battleData["boss"][formChangeScenario["pos"]]);
     }
@@ -536,7 +530,7 @@ export class BattleScenarioParser {
     const target = meterChangeScenario["to"];
     let newValue = meterChangeScenario["value"];
     let initialValue = newValue;
-    if (target == Target.PLAYER) {
+    if (target == Actor.PLAYER) {
       const allyIndex = battleData["party"]["frontline"][position];
       const targetAlly = battleData["party"]["members"][allyIndex];
       initialValue = targetAlly.meter;
@@ -549,13 +543,12 @@ export class BattleScenarioParser {
       boss["currentDiamonds"] = boss["maxDiamonds"] - newValue;
     }
 
-    const action: CAMeterChangedAction = {
-      "action": ActionType.CA_METER_CHANGED,
-      "target": target,
-      "position": position,
-      "newValue": newValue,
-      "change": newValue - initialValue,
-    };
+    const action = new CAMeterChangedAction(
+      target,
+      position,
+      newValue,
+      newValue - initialValue,
+    );
 
     return action;
   }
@@ -573,38 +566,42 @@ export class BattleScenarioParser {
       const allBossConditionActions: { [key: string]: ConditionChangeAction } = {};
 
       uniquePositions.forEach(pos => {
-        allBossConditionActions[pos] = {
-          "action": ActionType.CONDITION_CHANGED,
-          "target": Target.BOSS,
-          "position": pos,
-          "buffs": [],
-          "debuffs": [],
-          "unclassified": [],
-        };
+        allBossConditionActions[pos] = new ConditionChangeAction(
+          Actor.BOSS,
+          Number(pos),
+          [],
+          [],
+          [],
+        );
       });
 
       allBossChanges.forEach(change => {
         const position = change["pos"];
-        let destination = [];
+        let destination: GodsightCondition[] = [];
+        let type = GodsightStatusType.UNKNOWN;
         switch (String(change["type"])) {
           case StatusType.PLAYER_BUFF:
+            type = GodsightStatusType.BUFF;
             console.error("Player debuff status type in boss list? Must be wrong classification.");
             break;
           case StatusType.GLOBAL_DEBUFF_OR_PLAYER_DEBUFF:
           case StatusType.LOCAL_BOSS_DEBUFF:
-            destination = allBossConditionActions[position]["debuffs"];
+            type = GodsightStatusType.DEBUFF;
+            destination = allBossConditionActions[position].debuffs;
             break;
           case StatusType.LOCAL_BOSS_BUFF:
-            destination = allBossConditionActions[position]["buffs"];
+            type = GodsightStatusType.BUFF;
+            destination = allBossConditionActions[position].buffs;
             break;
           default:
-            destination = allBossConditionActions[position]["unclassified"];
+            type = GodsightStatusType.UNKNOWN;
+            destination = allBossConditionActions[position].unclassified;
             break;
         }
 
         destination.push({
           "name": change["text"],
-          "type": change["type"],
+          "type": type,
           "icon": change["status"],
         });
       });
@@ -620,38 +617,42 @@ export class BattleScenarioParser {
       const allPlayerConditionActions: { [key: string]: ConditionChangeAction } = {};
 
       uniquePositions.forEach(pos => {
-        allPlayerConditionActions[pos] = {
-          "action": ActionType.CONDITION_CHANGED,
-          "target": Target.PLAYER,
-          "position": Number(pos),
-          "buffs": [],
-          "debuffs": [],
-          "unclassified": [],
-        };
+        allPlayerConditionActions[pos] = new ConditionChangeAction(
+          Actor.PLAYER,
+          Number(pos),
+          [],
+          [],
+          [],
+        );
       });
 
       allPositions.forEach(position => {
         playerChanges[position].forEach(change => {
-          let destination = [];
+          let destination: GodsightCondition[] = [];
+          let type = GodsightStatusType.UNKNOWN;
           switch (String(change["type"])) {
             case StatusType.PLAYER_BUFF:
-              destination = allPlayerConditionActions[position]["buffs"];
+              type = GodsightStatusType.BUFF;
+              destination = allPlayerConditionActions[position].buffs;
               break;
             case StatusType.GLOBAL_DEBUFF_OR_PLAYER_DEBUFF:
-              destination = allPlayerConditionActions[position]["debuffs"];
+              type = GodsightStatusType.DEBUFF;
+              destination = allPlayerConditionActions[position].debuffs;
               break;
             case StatusType.LOCAL_BOSS_DEBUFF:
             case StatusType.LOCAL_BOSS_BUFF:
+              type = GodsightStatusType.UNKNOWN;
               console.error("Boss debuff status types in player list? Must be wrong classification.");
               break;
             default:
-              destination = allPlayerConditionActions[position]["unclassified"];
+              type = GodsightStatusType.UNKNOWN;
+              destination = allPlayerConditionActions[position].unclassified;
               break;
           }
 
           destination.push({
             "name": change["text"],
-            "type": change["type"],
+            "type": type,
             "icon": change["status"],
           });
         });
@@ -676,6 +677,7 @@ export class BattleScenarioParser {
        * We only receive commands that tell us about increases to this value and not the current value.
        */
       "honors": 0,
+      "battleStats": StatsUpdateHelper.getEmptyStatsUpdate(),
       "fatedChainGauge": Number(startData["status"]["chain_burst_gauge"] || 0),
       "battleProgressStatus": BattleProgressStatus.ACTIVE,
       /**
@@ -687,28 +689,28 @@ export class BattleScenarioParser {
         "partyMemberCount": startData["player"]["number"],
         "frontline": startData["formation"].map(idx => Number(idx)),
         "backline": startData["back_formation"].map(idx => Number(idx)),
-        "members": startData["player"]["param"].map(char => {
+        "members": startData["player"]["param"].map(character => {
           return {
-            "name": char["name"],
-            "characterId": String(char["setting_id"]),
-            "isMC": Boolean(char["leader"]),
+            "name": character["name"],
+            "characterId": String(character["setting_id"]),
+            "isMC": Boolean(character["leader"]),
             /**
              * Portrait filename to be used in the URL.
              */
-            "portraitImageId": char["pid_image"],
-            "hpMax": char["hpmax"],
-            "hp": char["hp"],
-            "meter": char["recast"],
-            "meterMax": Number.parseInt(char["recastmax"]),
-            "element": char["attr"],
-            "weaponProficiency": char["weapon"],
-            "alive": Boolean(char["alive"]),
-            "buffCount": (char["condition"]["buff"] || []).length,
-            "debuffCount": (char["condition"]["debuff"] || []).length,
-            "canBeResurrected": char["resurrection_availble_flag"],
-            "isGuarding": Boolean(Number.parseInt(char["is_guard_status"])),
-            "canGuard": !Boolean(Number.parseInt(char["is_guard_unavailable"])),
-            "isVanished": Boolean(char["is_vanished"]),
+            "portraitImageId": character["pid_image"],
+            "hpMax": character["hpmax"],
+            "hp": character["hp"],
+            "meter": character["recast"],
+            "meterMax": Number.parseInt(character["recastmax"]),
+            "element": character["attr"],
+            "weaponProficiency": character["weapon"],
+            "alive": Boolean(character["alive"]),
+            "buffCount": (character["condition"]["buff"] || []).length,
+            "debuffCount": (character["condition"]["debuff"] || []).length,
+            "canBeResurrected": character["resurrection_availble_flag"], // sic
+            "isGuarding": Boolean(Number.parseInt(character["is_guard_status"])),
+            "canGuard": !Boolean(Number.parseInt(character["is_guard_unavailable"])),
+            "isVanished": Boolean(character["is_vanished"]),
           };
         }),
       },
@@ -720,10 +722,26 @@ export class BattleScenarioParser {
     // It's empty when loading into a raid in the middle of some arbitrary turn,
     // so if we have a non-empty scenario, our convention is that those entries belong to turn 0.
     if (startData["scenario"].length) {
-      battleData["turnData"][0] = this.parseScenarioData(startData["scenario"], battleData);
+      const actions = this.parseScenarioData(startData["scenario"], battleData);
+      battleData["turnData"][0] = this.processTurnActionData(actions);
     }
 
     return battleData;
+  }
+
+  private processTurnActionData(battleActions: BattleAction[]): TurnData {
+    const baseStats = StatsUpdateHelper.getEmptyStatsUpdate();
+    const statUpdates = battleActions.map(action => action.getStats());
+    const totalStats = statUpdates.reduce(
+      (prev, cur) => StatsUpdateHelper.concatUpdates(prev, cur),
+      baseStats
+    );
+
+    return {
+      "turnStats": totalStats["generalStats"],
+      "characterCurrentTurnStats": totalStats["characterStats"],
+      "turnActions": battleActions,
+    };
   }
 
   private getBossData(b: BossData): GodsightBossData {

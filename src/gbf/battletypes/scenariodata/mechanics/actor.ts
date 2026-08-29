@@ -1,4 +1,4 @@
-export enum Target {
+export enum Actor {
   BOSS = "boss",
   PLAYER = "player",
 }

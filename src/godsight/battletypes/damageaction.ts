@@ -1,12 +1,48 @@
 import { GameElementValue } from "../../gbf/battletypes/scenariodata/mechanics/element";
-import { Target } from "../../gbf/battletypes/scenariodata/mechanics/target";
+import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
 import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { DamageInstance } from "./damageinstance";
+import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
-export type DamageAction = BattleAction & {
-  "action": ActionType.DAMAGE_DEALT,
-  "element": GameElementValue,
-  "target": Target,
-  "instances": DamageInstance[],
+export class DamageAction implements BattleAction {
+
+  constructor(
+    public element: GameElementValue,
+    public target: Actor,
+    public instances: DamageInstance[],
+  ) {
+  }
+
+  getStats(): StatsUpdate {
+    const update = StatsUpdateHelper.getEmptyStatsUpdate();
+    switch (this.target) {
+      case Actor.BOSS:
+        // Since other commands all seem to directly associate damage dealt with the command, the only
+        // time DamageAction comes up seems to be with skill damage.
+        // Currently we have no way to associate a source character with this damage and have to do it in AbilityAction. TODO: fix that.
+        this.instances.forEach(instance => {
+          // Boss-targeted DamageActions are always skill damage *ONLY BECAUSE*
+          // other damage types directly associate their damage with their commands.
+          // Chain Bursts appear to be the only exception, but we handle those commands specially
+          // so we never end up with a DamageAction for a chain burst damage instance.
+          update["generalStats"]["skillDamage"] += instance["value"];
+          update["generalStats"]["skillDamage"] += 1;
+        });
+        break;
+      case Actor.PLAYER:
+        // Boss "skill damage" can occur in certain raids like Macutanmacar or Esoteric Mastery Trial.
+        this.instances.forEach(instance => {
+          update["generalStats"]["damageTaken"] += instance["value"];
+          if (!update["characterStats"][instance["receiverPosition"]]) {
+            update["characterStats"][instance["receiverPosition"]] = StatsUpdateHelper.getEmptyStats();
+          }
+          update["characterStats"][instance["receiverPosition"]]["damageTaken"] += instance["value"];
+        });
+        break;
+      default:
+        console.error(`Unknown actor ${this.target} in DamageAction stats`);
+    }
+    return update;
+  }
 }
