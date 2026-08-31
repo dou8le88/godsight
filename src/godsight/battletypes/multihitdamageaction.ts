@@ -26,18 +26,18 @@ export class MultihitDamageAction implements BattleAction {
           // other damage types directly associate their damage with their commands.
           // Chain Bursts appear to be the only exception, but we handle those commands specially
           // so we never end up with a DamageAction for a chain burst damage instance.
-          update["generalStats"]["skillDamage"] += instance["value"];
+          update["generalStats"]["skillDamage"][instance["element"]] += instance["value"];
           update["generalStats"]["hitCount"] += 1;
         });
         break;
       case Actor.PLAYER:
         // Boss "skill damage" can occur in certain raids like Macutanmacar or Esoteric Mastery Trial.
         this.hits.forEach(instance => {
-          update["generalStats"]["damageTaken"] += instance["value"];
+          update["generalStats"]["damageTaken"][instance["element"]] += instance["value"];
           if (!update["characterStats"][instance["receiverPosition"]]) {
             update["characterStats"][instance["receiverPosition"]] = StatsUpdateHelper.getEmptyStats();
           }
-          update["characterStats"][instance["receiverPosition"]]["damageTaken"] += instance["value"];
+          update["characterStats"][instance["receiverPosition"]]["damageTaken"][instance["element"]] += instance["value"];
         });
         break;
       default:

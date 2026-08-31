@@ -38,6 +38,10 @@ const numericElementToName: { [key: number]: string } = elementValues.reduce((ob
 }, {} as { [key: number]: string });
 
 export class GameElementHelper {
+  static getAllElements(): GameElementValue[] {
+    return Object.values(GameElement);
+  }
+
   static getNumericGameElement(elt: GameElementValue): typeof GameElement[keyof typeof GameElement] {
     if (elt === "" || elt === undefined || elt === null) {
       return GameElement.NULL_PLAIN;

@@ -1,4 +1,5 @@
 import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
+import { GameElementHelper } from "../../gbf/battletypes/scenariodata/mechanics/element";
 import { BattleAction } from "./battleaction";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
@@ -31,7 +32,9 @@ export class AbilityAction implements BattleAction {
         }
         allUpdates["characterStats"][this.position]["hitCount"] += subactionHitCount;
         allUpdates["characterStats"][this.position]["debuffsInflictedCount"] += subactionDebuffs;
-        allUpdates["characterStats"][this.position]["skillDamage"] += subactionSkillDamage;
+        GameElementHelper.getAllElements().forEach(element => {
+          allUpdates["characterStats"][this.position]["skillDamage"][element] += subactionSkillDamage[element];
+        });
         break;
       case Actor.BOSS:
         // The boss used an "ability", can happen in certain raids.

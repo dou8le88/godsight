@@ -17,11 +17,11 @@ export class HealingAction implements BattleAction {
     // Bosses can heal as well but we do not currently track that.
     if (this.target == Actor.PLAYER) {
       this.healingInstances.forEach(instance => {
-        if (!update["characterStats"][instance["position"]]) {
-          update["characterStats"][instance["position"]] = StatsUpdateHelper.getEmptyStats();
+        if (!update["characterStats"][instance["receiverPosition"]]) {
+          update["characterStats"][instance["receiverPosition"]] = StatsUpdateHelper.getEmptyStats();
         }
         update["generalStats"]["healingReceived"] += instance["value"];
-        update["characterStats"][instance["position"]]["healingReceived"] += instance["value"];
+        update["characterStats"][instance["receiverPosition"]]["healingReceived"] += instance["value"];
       });
     }
 

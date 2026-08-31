@@ -1,13 +1,17 @@
+import { GameElementHelper } from "../../gbf/battletypes/scenariodata/mechanics/element";
+
 export type Stats = {
   "hitCount": number,
   "debuffsInflictedCount": number,
-  "normalAttackDamage": number,
-  "skillDamage": number,
-  "chargedAttackDamage": number,
-  "otherDamage": number,
   "healingReceived": number,
-  "damageTaken": number,
+  "normalAttackDamage": DamageByElement,
+  "skillDamage": DamageByElement,
+  "chargedAttackDamage": DamageByElement,
+  "otherDamage": DamageByElement,
+  "damageTaken": DamageByElement,
 }
+
+export type DamageByElement = { [key: string | number]: number };
 
 export type StatsUpdate = {
   // TODO: basically everything is using position for character stats,
@@ -21,16 +25,26 @@ export type StatsUpdate = {
 }
 
 export class StatsUpdateHelper {
+  private static getEmptyElementValues(): DamageByElement {
+    const damageByElement: DamageByElement = {};
+
+    GameElementHelper.getAllElements().forEach(element => {
+      damageByElement[element] = 0;
+    });
+
+    return damageByElement;
+  }
+
   static getEmptyStats(): Stats {
     return {
       "hitCount": 0,
       "debuffsInflictedCount": 0,
-      "normalAttackDamage": 0,
-      "skillDamage": 0,
-      "chargedAttackDamage": 0,
-      "otherDamage": 0,
       "healingReceived": 0,
-      "damageTaken": 0,
+      "normalAttackDamage": this.getEmptyElementValues(),
+      "skillDamage": this.getEmptyElementValues(),
+      "chargedAttackDamage": this.getEmptyElementValues(),
+      "otherDamage": this.getEmptyElementValues(),
+      "damageTaken": this.getEmptyElementValues(),
     };
   }
 
@@ -76,15 +90,18 @@ export class StatsUpdateHelper {
     return output;
   }
 
-  private static mergeStats(other: Stats, into: Stats) {
+  private static mergeStats(other: Stats, into: Stats): void {
     into["hitCount"] += other["hitCount"];
     into["debuffsInflictedCount"] += other["debuffsInflictedCount"];
-    into["normalAttackDamage"] += other["normalAttackDamage"];
-    into["skillDamage"] += other["skillDamage"];
-    into["chargedAttackDamage"] += other["chargedAttackDamage"];
-    into["chargedAttackDamage"] += other["chargedAttackDamage"];
-    into["otherDamage"] += other["otherDamage"];
     into["healingReceived"] += other["healingReceived"];
-    into["damageTaken"] += other["damageTaken"];
+
+    GameElementHelper.getAllElements().forEach(element => {
+      into["normalAttackDamage"][element] += other["normalAttackDamage"][element];
+      into["skillDamage"][element] += other["skillDamage"][element];
+      into["chargedAttackDamage"][element] += other["chargedAttackDamage"][element];
+      into["chargedAttackDamage"][element] += other["chargedAttackDamage"][element];
+      into["otherDamage"][element] += other["otherDamage"][element];
+      into["damageTaken"][element] += other["damageTaken"][element];
+    });
   }
 }

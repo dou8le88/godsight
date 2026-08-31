@@ -21,11 +21,11 @@ export class ChargedAttackAction implements BattleAction {
     const update = StatsUpdateHelper.getEmptyStatsUpdate();
     if (this.target == Actor.BOSS) {
       this.damageTotals.forEach(instance => {
-        update["generalStats"]["chargedAttackDamage"] += instance["value"];
+        update["generalStats"]["chargedAttackDamage"][instance["element"]] += instance["value"];
         if (!update["characterStats"][this.attackerPosition]) {
           update["characterStats"][this.attackerPosition] = StatsUpdateHelper.getEmptyStats();
         }
-        update["characterStats"][this.attackerPosition]["chargedAttackDamage"] += instance["value"];
+        update["characterStats"][this.attackerPosition]["chargedAttackDamage"][instance["element"]] += instance["value"];
         update["characterStats"][this.attackerPosition]["hitCount"] += 1;
       });
       const subactionStatsUpdates = this.subactions.map(action => action.getStats());

@@ -15,7 +15,7 @@ export class SummonAction implements BattleAction {
     const update = StatsUpdateHelper.getEmptyStatsUpdate();
 
     this.damageInstances.forEach(instance => {
-      update["generalStats"]["otherDamage"] += instance["value"];
+      update["generalStats"]["otherDamage"][instance["element"]] += instance["value"];
     });
 
     const subactionUpdates = this.subactions.map(action => action.getStats());

@@ -23,19 +23,19 @@ export class SingularNormalAttackAction implements BattleAction {
           if (!update["characterStats"][this.attackerPosition]) {
             update["characterStats"][this.attackerPosition] = StatsUpdateHelper.getEmptyStats();
           }
-          update["generalStats"]["normalAttackDamage"] += instance["value"];
-          update["characterStats"][this.attackerPosition]["normalAttackDamage"] += instance["value"];
+          update["generalStats"]["normalAttackDamage"][instance["element"]] += instance["value"];
+          update["characterStats"][this.attackerPosition]["normalAttackDamage"][instance["element"]] += instance["value"];
           update["generalStats"]["hitCount"] += 1;
           update["characterStats"][this.attackerPosition]["hitCount"] += 1;
         });
         break;
       case Actor.BOSS:
         this.damageInstances.forEach(instance => {
-          if (!update["characterStats"][this.targetPosition]) {
-            update["characterStats"][this.targetPosition] = StatsUpdateHelper.getEmptyStats();
+          if (!update["characterStats"][instance["receiverPosition"]]) {
+            update["characterStats"][instance["receiverPosition"]] = StatsUpdateHelper.getEmptyStats();
           }
-          update["generalStats"]["damageTaken"] += instance["value"];
-          update["characterStats"][this.targetPosition]["damageTaken"] += instance["value"];
+          update["generalStats"]["damageTaken"][instance["element"]] += instance["value"];
+          update["characterStats"][instance["receiverPosition"]]["damageTaken"][instance["element"]] += instance["value"];
         });
         break;
       default:

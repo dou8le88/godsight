@@ -23,11 +23,11 @@ export class BossSpecialAttackAction implements BattleAction {
     if (this.target == Actor.PLAYER) {
       this.damageInstances.forEach(instance => {
         const damage = instance["value"];
-        update["generalStats"]["damageTaken"] += damage;
+        update["generalStats"]["damageTaken"][instance["element"]] += damage;
         if (!update["characterStats"][instance["receiverPosition"]]) {
           update["characterStats"][instance["receiverPosition"]] = StatsUpdateHelper.getEmptyStats();
         }
-        update["characterStats"][instance["receiverPosition"]]["damageTaken"] += damage;
+        update["characterStats"][instance["receiverPosition"]]["damageTaken"][instance["element"]] += damage;
       });
       const subactionStatsUpdates = this.subactions.map(action => action.getStats());
       return subactionStatsUpdates.reduce(
