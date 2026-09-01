@@ -5,8 +5,9 @@ import { BattleAction } from "./battleaction";
 import { DamageInstance } from "./damageinstance";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
-export class ChargedAttackAction implements BattleAction {
+export class ChargedAttackAction extends BattleAction {
   constructor(
+    public actionNumber: number,
     public name: string,
     public attackerPosition: number,
     public targetPosition: number,
@@ -15,6 +16,17 @@ export class ChargedAttackAction implements BattleAction {
     public damageTotals: DamageInstance[],
     public subactions: BattleAction[],
   ) {
+    super();
+  }
+
+  getDescription(): string {
+    const damage = this.damageTotals.map(d => d["value"]).join("+");
+
+    return `${this.attackerPosition} made a charged attack against ${this.target} at position ${this.targetPosition}, and dealt ${damage} damage!`;
+  }
+
+  getSubactions(): BattleAction[] {
+    return this.subactions;
   }
 
   getStats(): StatsUpdate {

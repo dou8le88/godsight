@@ -3,14 +3,24 @@ import { BattleAction } from "./battleaction";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { GodsightCondition } from "./condition";
 
-export class ConditionChangeAction implements BattleAction {
+export class ConditionChangeAction extends BattleAction {
   constructor(
+    public actionNumber: number,
     public target: Actor,
     public position: number,
     public buffs: GodsightCondition[],
     public debuffs: GodsightCondition[],
     public unclassified: GodsightCondition[],
   ) {
+    super();
+  }
+
+  getDescription(): string {
+    return `${this.target} at position ${this.position} gained ${this.buffs.length} buffs, ${this.debuffs.length} debuffs, and ${this.unclassified.length} unclassified statuses!`;
+  }
+
+  getSubactions(): BattleAction[] {
+    return [];
   }
 
   getStats(): StatsUpdate {

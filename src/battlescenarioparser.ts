@@ -62,13 +62,15 @@ export class BattleScenarioParser {
    * Parses game battle scenario data.
    * @param scenarioData The data to process
    * @param battleData Main info about the battle, such as boss and party member status.
+   * @param baseActionNumber The baseline action counter. 0 for a fresh turn, or 1 + the last known action counter.
    * @returns a list of actions describing the scenario.
    */
   public parseScenarioData(
     scenarioData: GenericScenarioData[],
     battleData: GodsightBattleData,
+    baseActionNumber: number,
   ): BattleAction[] {
-    return this._parseScenarioData(scenarioData, battleData).actions;
+    return this._parseScenarioData(scenarioData, battleData, baseActionNumber).actions;
   }
 
   private containsJapaneseRegex = /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u;
@@ -83,6 +85,7 @@ export class BattleScenarioParser {
   private _parseScenarioData(
     scenarioData: GenericScenarioData[],
     battleData: GodsightBattleData,
+    baseActionNumber: number,
     stopOnMainAction?: boolean
   ): { actions: BattleAction[], lastIndex: number } {
     const actions: BattleAction[] = [];
@@ -106,8 +109,14 @@ export class BattleScenarioParser {
             break baseLoop;
           }
           const bossSpecialAttackScenario = scenario as BossSpecialAttackScenarioData;
-          const subactions = this._parseScenarioData(scenarioData.slice(i + 1), battleData, stopOnMainAction);
+          const subactions = this._parseScenarioData(
+            scenarioData.slice(i + 1),
+            battleData,
+            baseActionNumber + i + 1,
+            stopOnMainAction,
+          );
           const bossSpecialAttackAction = new BossSpecialAttackAction(
+            baseActionNumber + i,
             bossSpecialAttackScenario["name"],
             battleData["boss"][bossSpecialAttackScenario["pos"]]["name"],
             bossSpecialAttackScenario["target"],
@@ -131,22 +140,25 @@ export class BattleScenarioParser {
           actions.push(bossSpecialAttackAction);
           // Skip ahead past actions we already included as subactions.
           i += subactions.lastIndex;
+          baseActionNumber += subactions.lastIndex;
           break;
         }
 
         case ScenarioCommand.CA_METER_CHANGED:
           const meterChangeScenario = scenario as ChargeAttackMeterChangedScenarioData;
-          actions.push(this.handleMeterChangeScenario(meterChangeScenario, battleData));
+          actions.push(this.handleMeterChangeScenario(meterChangeScenario, battleData, baseActionNumber + i));
           break;
 
         case ScenarioCommand.MESSAGE:
           const buffDebuffChangeScenario = scenario as MessageScenarioData;
-          actions.push(...this.handleMessageScenario(buffDebuffChangeScenario));
+          const buffDebuffActions = this.handleMessageScenario(buffDebuffChangeScenario, baseActionNumber + i);
+          actions.push(...buffDebuffActions);
+          baseActionNumber += buffDebuffActions.length;
           break;
 
         case ScenarioCommand.DEATH:
           const deathScenario = scenario as DeathScenarioData;
-          actions.push(this.handleDeathScenario(deathScenario));
+          actions.push(this.handleDeathScenario(deathScenario, baseActionNumber + i));
           break;
 
         case ScenarioCommand.ABILITY: {
@@ -154,13 +166,19 @@ export class BattleScenarioParser {
             break baseLoop;
           }
           const abilityScenario = scenario as AbilityScenarioData;
-          const subactions = this._parseScenarioData(scenarioData.slice(i + 1), battleData, stopOnMainAction);
+          const subactions = this._parseScenarioData(
+            scenarioData.slice(i + 1),
+            battleData,
+            baseActionNumber + i + 1,
+            stopOnMainAction,
+          );
           if (subactions.actions.length == 0) {
             // Sometimes we have empty ability commands followed by real ones, dunno why, the client is weird.
             // The real ability command should happen next so just break and continue the loop.
             break;
           }
           const abilityAction = new AbilityAction(
+            baseActionNumber + i,
             abilityScenario["name"],
             abilityScenario["to"],
             abilityScenario["pos"],
@@ -197,6 +215,7 @@ export class BattleScenarioParser {
           const position = replaceCharacterScenario["pos"];
           const newCharacter = Number(replaceCharacterScenario["npc"]);
           const replaceCharacterAction = new ReplaceCharacterAction(
+            baseActionNumber + i,
             position,
             newCharacter,
           );
@@ -210,6 +229,7 @@ export class BattleScenarioParser {
         case ScenarioCommand.WINDOW_EFFECT:
           const windowScenario = scenario as WindowEffectScenarioData;
           const windowAction = new WindowEffectAction(
+            baseActionNumber + i,
             windowScenario["name"],
           );
           actions.push(windowAction);
@@ -218,6 +238,7 @@ export class BattleScenarioParser {
         case ScenarioCommand.DAMAGE_DEALT:
           const damageDealtScenario = scenario as DamageScenarioData;
           const damageAction = new DamageAction(
+            baseActionNumber + i,
             damageDealtScenario["color"],
             damageDealtScenario["to"],
             damageDealtScenario["list"].map(l => {
@@ -239,6 +260,7 @@ export class BattleScenarioParser {
         case ScenarioCommand.DAMAGE_DEALT_MULTIHIT:
           const multihitDamageScenario = scenario as MultihitDamageScenarioData;
           const multihitDamageAction = new MultihitDamageAction(
+            baseActionNumber + i,
             multihitDamageScenario["color"],
             multihitDamageScenario["to"],
             multihitDamageScenario["list"].flat(1).map(hit => {
@@ -261,8 +283,14 @@ export class BattleScenarioParser {
           if (stopOnMainAction) {
             break baseLoop;
           }
-          const subactions = this._parseScenarioData(scenarioData.slice(i + 1), battleData, stopOnMainAction);
+          const subactions = this._parseScenarioData(
+            scenarioData.slice(i + 1),
+            battleData,
+            baseActionNumber + i + 1,
+            stopOnMainAction,
+          );
           const normalAttackAction = new NormalAttackAction(
+            baseActionNumber + i,
             subactions.actions,
           );
           actions.push(normalAttackAction);
@@ -288,6 +316,7 @@ export class BattleScenarioParser {
             damageArray = Object.keys(sourceDamageInstances).map(key => sourceDamageInstances[key]).flat(1);
           }
           const singularNormalAttackAction = new SingularNormalAttackAction(
+            baseActionNumber + i,
             singularNormalAttackScenario["from"],
             singularNormalAttackScenario["pos"],
             singularNormalAttackScenario["color"],
@@ -320,8 +349,14 @@ export class BattleScenarioParser {
             }
           });
           const hpAfterDamage = allSplitChargedAttackDamage[-1]["hp"];
-          const subactions = this._parseScenarioData(scenarioData.slice(i + 1), battleData, stopOnMainAction);
+          const subactions = this._parseScenarioData(
+            scenarioData.slice(i + 1),
+            battleData,
+            baseActionNumber + i + 1,
+            stopOnMainAction,
+          );
           const chargedAttackAction = new ChargedAttackAction(
+            baseActionNumber + i,
             chargedAttackScenario["name"],
             chargedAttackScenario["pos"],
             chargedAttackScenario["to"],
@@ -354,8 +389,13 @@ export class BattleScenarioParser {
         case ScenarioCommand.FULL_ELIXIR: {
           // You can't use a full elixir in the middle of a turn, it's always its own button press,
           // so all subsequent commands like increasing character meter and reviving are subactions.
-          const subactions = this._parseScenarioData(scenarioData.slice(i + 1), battleData);
+          const subactions = this._parseScenarioData(
+            scenarioData.slice(i + 1),
+            battleData,
+            baseActionNumber + i + 1,
+          );
           const fullElixirAction = new FullElixirAction(
+            baseActionNumber + i,
             subactions.actions,
           );
           actions.push(fullElixirAction);
@@ -365,6 +405,7 @@ export class BattleScenarioParser {
         case ScenarioCommand.HEALING:
           const healingScenario = scenario as HealingScenarioData;
           const healingAction = new HealingAction(
+            baseActionNumber + i,
             healingScenario["to"],
             healingScenario["list"].map(h => {
               return {
@@ -379,8 +420,14 @@ export class BattleScenarioParser {
 
         case ScenarioCommand.SUMMON:
           const summonScenario = scenario as SummonScenarioData;
-          const subactions = this._parseScenarioData(scenarioData.slice(i + 1), battleData, true);
+          const subactions = this._parseScenarioData(
+            scenarioData.slice(i + 1),
+            battleData,
+            baseActionNumber + i + 1,
+            true,
+          );
           const summonAction = new SummonAction(
+            baseActionNumber + i,
             summonScenario["name"],
             summonScenario["list"].flatMap(l => l["damage"]).map(damage => {
               return {
@@ -408,6 +455,7 @@ export class BattleScenarioParser {
           }
           const chainBurstScenario = scenario as ChainBurstScenarioData;
           const chainBurstAction = new ChainBurstAction(
+            baseActionNumber + i,
             chainBurstScenario["chain_num"],
             "Unknown",
             [],
@@ -500,8 +548,9 @@ export class BattleScenarioParser {
     };
   }
 
-  private handleDeathScenario(deathScenario: DeathScenarioData): BattleAction {
+  private handleDeathScenario(deathScenario: DeathScenarioData, actionNumber: number): BattleAction {
     const action = new DeathAction(
+      actionNumber,
       deathScenario["to"],
       deathScenario["pos"],
       typeof deathScenario["index"] === "number" ? deathScenario["index"] : undefined,
@@ -524,7 +573,8 @@ export class BattleScenarioParser {
 
   private handleMeterChangeScenario(
     meterChangeScenario: ChargeAttackMeterChangedScenarioData,
-    battleData: GodsightBattleData
+    battleData: GodsightBattleData,
+    actionNumber: number,
   ): BattleAction {
     const position = meterChangeScenario["pos"];
     const target = meterChangeScenario["to"];
@@ -544,6 +594,7 @@ export class BattleScenarioParser {
     }
 
     const action = new CAMeterChangedAction(
+      actionNumber,
       target,
       position,
       newValue,
@@ -553,7 +604,7 @@ export class BattleScenarioParser {
     return action;
   }
 
-  private handleMessageScenario(buffDebuffChangeScenario: MessageScenarioData): BattleAction[] {
+  private handleMessageScenario(buffDebuffChangeScenario: MessageScenarioData, actionNumber: number): BattleAction[] {
     const actions: BattleAction[] = [];
 
     // Buffs and debuffs changed.
@@ -567,6 +618,7 @@ export class BattleScenarioParser {
 
       uniquePositions.forEach(pos => {
         allBossConditionActions[pos] = new ConditionChangeAction(
+          actionNumber,
           Actor.BOSS,
           Number(pos),
           [],
@@ -618,6 +670,7 @@ export class BattleScenarioParser {
 
       uniquePositions.forEach(pos => {
         allPlayerConditionActions[pos] = new ConditionChangeAction(
+          actionNumber,
           Actor.PLAYER,
           Number(pos),
           [],
@@ -678,13 +731,14 @@ export class BattleScenarioParser {
        */
       "honors": 0,
       "battleStats": StatsUpdateHelper.getEmptyStatsUpdate(),
-      "fatedChainGauge": Number(startData["status"]["chain_burst_gauge"] || 0),
+      "fatedChainGauge": Number(startData["chain_burst_gauge"] || 0),
       "battleProgressStatus": BattleProgressStatus.ACTIVE,
       /**
        * If we miss a battle finish action while Godsight is closed,
        * we can use this time reference to determine if it has already expired.
        */
       "expirationTime": Date.now() + (startData["timer"] * 1000),
+      "lastUpdated": Date.now(),
       "party": {
         "partyMemberCount": startData["player"]["number"],
         "frontline": startData["formation"].map(idx => Number(idx)),
@@ -722,7 +776,7 @@ export class BattleScenarioParser {
     // It's empty when loading into a raid in the middle of some arbitrary turn,
     // so if we have a non-empty scenario, our convention is that those entries belong to turn 0.
     if (startData["scenario"].length) {
-      const actions = this.parseScenarioData(startData["scenario"], battleData);
+      const actions = this.parseScenarioData(startData["scenario"], battleData, 0);
       battleData["turnData"][0] = this.processTurnActionData(actions);
     }
 

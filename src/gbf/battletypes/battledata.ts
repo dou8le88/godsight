@@ -33,7 +33,6 @@ export type BattleStatus = {
    */
   "ability_turn": number,
   "is_guard_status": GuardStatus[],
-  "chain_burst_gauge": string,
   "ability": PartyAbilityStatus,
   // "lyria_pos": number,
   "group_gauge": GroupGaugeStatus,

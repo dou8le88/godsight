@@ -53,6 +53,7 @@ export type StartData = GranblueBattleData & {
    */
   "scenario": GenericScenarioData[],
   "status": BattleStatus,
+  "chain_burst_gauge"?: string;
 }
 
 export type WaveData = {

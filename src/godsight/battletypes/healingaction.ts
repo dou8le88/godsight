@@ -4,11 +4,23 @@ import { BattleAction } from "./battleaction";
 import { HealingInstance } from "./healinginstance";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
-export class HealingAction implements BattleAction {
+export class HealingAction extends BattleAction {
   constructor(
+    public actionNumber: number,
     public target: Actor,
     public healingInstances: HealingInstance[],
   ) {
+    super();
+  }
+
+  getDescription(): string {
+    const healing = this.healingInstances.map(h => h["value"]).join("+");
+
+    return `${this.target} was healed for ${healing}!`;
+  }
+
+  getSubactions(): BattleAction[] {
+    return [];
   }
 
   getStats(): StatsUpdate {

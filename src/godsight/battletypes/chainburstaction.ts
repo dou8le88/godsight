@@ -2,12 +2,24 @@ import { BattleAction } from "./battleaction";
 import { DamageInstance } from "./damageinstance";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
-export class ChainBurstAction implements BattleAction {
+export class ChainBurstAction extends BattleAction {
   constructor(
+    public actionNumber: number,
     public chainCount: number,
     public name: string,
     public damageInstances: DamageInstance[],
   ) {
+    super();
+  }
+
+  getDescription(): string {
+    const damage = this.damageInstances.map(i => i["value"]).join("+");
+
+    return `The party activated a chain burst, ${this.name}, dealing ${damage} damage!`;
+  }
+
+  getSubactions(): BattleAction[] {
+    return [];
   }
 
   getStats(): StatsUpdate {

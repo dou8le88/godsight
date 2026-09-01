@@ -5,13 +5,26 @@ import { BattleAction } from "./battleaction";
 import { DamageInstance } from "./damageinstance";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
-export class MultihitDamageAction implements BattleAction {
+export class MultihitDamageAction extends BattleAction {
   constructor(
+    public actionNumber: number,
     public element: GameElementValue,
     public target: Actor,
     public hits: DamageInstance[],
     public totals: number[],
   ) {
+    super();
+  }
+
+  getDescription(): string {
+    const hitDamage = this.hits.map(h => h["value"]).join("+");
+    const totalDamage = this.totals.join("+");
+
+    return `${this.target} took ${hitDamage} damage, for a total of ${totalDamage}!`;
+  }
+
+  getSubactions(): BattleAction[] {
+    return [];
   }
 
   getStats(): StatsUpdate {

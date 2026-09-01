@@ -5,13 +5,25 @@ import { BattleAction } from "./battleaction";
 import { DamageInstance } from "./damageinstance";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
-export class DamageAction implements BattleAction {
+export class DamageAction extends BattleAction {
 
   constructor(
+    public actionNumber: number,
     public element: GameElementValue,
     public target: Actor,
     public instances: DamageInstance[],
   ) {
+    super();
+  }
+
+  getDescription(): string {
+    const damage = this.instances.map(i => i["value"]).join("+");
+
+    return `${this.target} took ${damage} damage!`;
+  }
+
+  getSubactions(): BattleAction[] {
+    return [];
   }
 
   getStats(): StatsUpdate {

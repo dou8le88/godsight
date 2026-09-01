@@ -1,4 +1,5 @@
 import { GodsightBattleData } from "../battletypes/battledata";
+import { StatsUpdateHelper } from "../battletypes/stats";
 import { defaultSettings, GodsightSettings } from "../godsightsettings";
 import { GodsightStorage } from "./battlestorage";
 
@@ -96,9 +97,38 @@ export class GodsightStorageManager {
     return this.storageCache["battles"][battleId];
   }
 
-  public setBattleData(battleId: number, battleData: GodsightBattleData) {
+  public setOrMergeBattleData(battleId: number, battleData: GodsightBattleData) {
     this.storageCache = structuredClone(this.storageCache);
-    this.storageCache["battles"][battleId] = battleData;
+    const existingBattleData = this.storageCache["battles"][battleId];
+    if (existingBattleData) {
+      existingBattleData["currentTurn"] = battleData["currentTurn"];
+      existingBattleData["honors"] += battleData["honors"];
+      existingBattleData["fatedChainGauge"] = battleData["fatedChainGauge"];
+      existingBattleData["battleProgressStatus"] = battleData["battleProgressStatus"];
+      existingBattleData["party"] = battleData["party"];
+      existingBattleData["boss"] = battleData["boss"];
+
+      StatsUpdateHelper.mergeStats(
+        battleData["battleStats"]["generalStats"],
+        existingBattleData["battleStats"]["generalStats"]
+      );
+      Object.keys(battleData["battleStats"]["characterStats"]).forEach(characterId => {
+        StatsUpdateHelper.mergeStats(
+          battleData["battleStats"]["characterStats"][characterId],
+          existingBattleData["battleStats"]["characterStats"][characterId]
+        );
+      });
+    } else {
+      this.storageCache["battles"][battleId] = battleData;
+    }
+    this.updateStorageAndNotify();
+  }
+
+  public deleteBattle(battleId: string | number) {
+    this.storageCache = structuredClone(this.storageCache);
+
+    delete this.storageCache["battles"][battleId];
+
     this.updateStorageAndNotify();
   }
 

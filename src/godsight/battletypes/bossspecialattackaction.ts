@@ -5,9 +5,10 @@ import { BattleAction } from "./battleaction"
 import { DamageInstance } from "./damageinstance"
 import { StatsUpdate, StatsUpdateHelper } from "./stats"
 
-export class BossSpecialAttackAction implements BattleAction {
+export class BossSpecialAttackAction extends BattleAction {
 
   constructor(
+    public actionNumber: number,
     public attackName: string,
     public sourceName: string,
     public target: Actor,
@@ -16,6 +17,15 @@ export class BossSpecialAttackAction implements BattleAction {
     public damageInstances: DamageInstance[],
     public subactions: BattleAction[]
   ) {
+    super();
+  }
+
+  getDescription(): string {
+    return `${this.sourceName} used ${this.attackName}!`;
+  }
+
+  getSubactions(): BattleAction[] {
+    return this.subactions;
   }
 
   getStats(): StatsUpdate {

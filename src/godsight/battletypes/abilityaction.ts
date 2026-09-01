@@ -3,13 +3,23 @@ import { GameElementHelper } from "../../gbf/battletypes/scenariodata/mechanics/
 import { BattleAction } from "./battleaction";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
-export class AbilityAction implements BattleAction {
+export class AbilityAction extends BattleAction {
 
   constructor(
+    public actionNumber: number,
     public name: string,
     public source: Actor,
     public position: number,
     public subactions: BattleAction[]) {
+    super();
+  }
+
+  getDescription(): string {
+    return `${this.source} at position ${this.position} activated ${this.name}!`;
+  }
+
+  getSubactions(): BattleAction[] {
+    return this.subactions;
   }
 
   getStats(): StatsUpdate {

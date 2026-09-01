@@ -2,10 +2,20 @@ import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
-export class FullElixirAction implements BattleAction {
+export class FullElixirAction extends BattleAction {
   constructor(
+    public actionNumber: number,
     public subactions: BattleAction[],
   ) {
+    super();
+  }
+
+  getDescription(): string {
+    return `The party used a Full Elixir!`;
+  }
+
+  getSubactions(): BattleAction[] {
+    return this.subactions;
   }
 
   getStats(): StatsUpdate {

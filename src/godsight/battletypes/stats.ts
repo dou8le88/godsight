@@ -90,7 +90,7 @@ export class StatsUpdateHelper {
     return output;
   }
 
-  private static mergeStats(other: Stats, into: Stats): void {
+  static mergeStats(other: Stats, into: Stats): void {
     into["hitCount"] += other["hitCount"];
     into["debuffsInflictedCount"] += other["debuffsInflictedCount"];
     into["healingReceived"] += other["healingReceived"];

@@ -5,8 +5,9 @@ import { StartData } from "../gbf/battletypes/startdata";
 import { RetreatData } from "../gbf/battletypes/retiredata";
 import BattleTracker from "./battletracker/battletracker";
 import { BattleScenarioParser } from "../battlescenarioparser";
-import { GodsightBattleData } from "../godsight/battletypes/battledata";
-import { View } from "./view";
+import { useGodsightStorage } from "./battletracker/usegodsightstorage";
+import { GodsightStorageManager } from "../godsight/godsightstorage/godsightstoragemanager";
+import BattleSummary from "./battletracker/battlesummary";
 
 export default function GodsightPanel() {
   const validHosts = [
@@ -42,8 +43,9 @@ export default function GodsightPanel() {
     };
   }, []);
 
-  const [godsightBattleData, setGodsightBattleData] = useState<GodsightBattleData | undefined>(undefined);
+  const storageManager = GodsightStorageManager.getInstance();
   const battleScenarioParser = new BattleScenarioParser();
+  const godsightStorage = useGodsightStorage();
 
   // Only listen for network requests when we're inspecting GBF.
   useEffect(() => {
@@ -54,7 +56,7 @@ export default function GodsightPanel() {
 
       const godsightBattleData = battleScenarioParser.parseStartData(data);
 
-      setGodsightBattleData(godsightBattleData);
+      storageManager.setOrMergeBattleData(godsightBattleData["raidId"], godsightBattleData);
     }
 
     function battleDataHandler(data: GranblueBattleData, endpoint: string) {
@@ -145,7 +147,8 @@ export default function GodsightPanel() {
     };
   }, [onGbfPage]);
 
-  // const [view, setView] = useState(View.CURRENT_BATTLE);
+  const allBattles = Object.keys(godsightStorage["battles"]);
+  const [selectedBattle, setSelectedBattle] = useState<string | undefined>(undefined);
 
   const manifest = chrome.runtime.getManifest();
   return (
@@ -158,7 +161,23 @@ export default function GodsightPanel() {
       {!onGbfPage ? (
         <WrongWebsiteBanner />
       ) : (
-        <BattleTracker battleData={godsightBattleData} />
+        <>
+          {selectedBattle ? (
+            <BattleTracker battleData={godsightStorage["battles"][selectedBattle]} />
+          ) : (
+            <>
+              {allBattles.length > 0 ? (
+                <>
+                  {allBattles.map(battle =>
+                    <BattleSummary key={battle} battleData={godsightStorage["battles"][battle]} onClick={() => setSelectedBattle(battle)} deleteEntry={() => storageManager.deleteBattle(battle)} />
+                  )}
+                </>
+              ) : (
+                <>No battles recorded. Start a raid battle to record data.</>
+              )}
+            </>
+          )}
+        </>
       )}
     </>
   );

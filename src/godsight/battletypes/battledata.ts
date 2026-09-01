@@ -14,8 +14,9 @@ export type GodsightBattleData = {
   "fatedChainGauge": number,
   "battleProgressStatus": BattleProgressStatus,
   "expirationTime": number,
+  "lastUpdated": number,
   "party": GodsightPartyFormationData,
   "boss": GodsightBossData[],
   "battleStats": BattleStats,
-  "turnData": { [key: number]: TurnData },
+  "turnData": { [key: number | string]: TurnData },
 }

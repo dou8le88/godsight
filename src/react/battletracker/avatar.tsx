@@ -11,9 +11,9 @@ export default function Avatar({ characterData }: { characterData: GodsightParty
   }
 
   return (
-    <div className="avatar-wrapper">
-      <img className="portrait" src={avatarUrl(characterData.portraitImageId, characterData.isMC)} />
-      <div className={`element-icon icon-attribute-${characterData.element}`} />
+    <div className="avatar-container">
+      <img className="portrait" src={avatarUrl(characterData["portraitImageId"], characterData["isMC"])} />
+      <div className={`element-icon icon-attribute-${characterData["element"]}`} />
       <div className="mask" />
     </div>
   );

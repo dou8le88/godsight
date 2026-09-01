@@ -2,11 +2,21 @@ import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
-export class NormalAttackAction implements BattleAction {
+export class NormalAttackAction extends BattleAction {
 
   constructor(
+    public actionNumber: number,
     public subactions: BattleAction[],
   ) {
+    super();
+  }
+
+  getDescription(): string {
+    return `An entity made a normal attack!`;
+  }
+
+  getSubactions(): BattleAction[] {
+    return this.subactions;
   }
 
   getStats(): StatsUpdate {

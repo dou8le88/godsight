@@ -3,5 +3,5 @@ import { GodsightSettings } from "../godsightsettings";
 
 export type GodsightStorage = {
   "settings": GodsightSettings,
-  "battles": { [key: number]: GodsightBattleData }
+  "battles": { [key: string | number]: GodsightBattleData }
 }

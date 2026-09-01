@@ -5,13 +5,25 @@ import { BattleAction } from "./battleaction";
 import { DamageInstance } from "./damageinstance";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
-export class SingularNormalAttackAction implements BattleAction {
+export class SingularNormalAttackAction extends BattleAction {
   constructor(
+    public actionNumber: number,
     public source: Actor,
     public attackerPosition: number,
     public element: GameElementValue,
     public damageInstances: DamageInstance[],
   ) {
+    super();
+  }
+
+  getDescription(): string {
+    const damage = this.damageInstances.map(d => d["value"]).join("+");
+
+    return `${this.source} at position ${this.attackerPosition} made a normal attack, dealing ${damage} damage!`;
+  }
+
+  getSubactions(): BattleAction[] {
+    return [];
   }
 
   getStats(): StatsUpdate {
