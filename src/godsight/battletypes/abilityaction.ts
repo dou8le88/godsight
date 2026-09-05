@@ -1,25 +1,25 @@
 import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
 import { GameElementHelper } from "../../gbf/battletypes/scenariodata/mechanics/element";
+import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
+import { BattleActionParser } from "./battleactionparser";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
 export class AbilityAction extends BattleAction {
+  public actionType: ActionType = ActionType.ACTIVATED_ABILITY;
 
   constructor(
     public actionNumber: number,
     public name: string,
     public source: Actor,
     public position: number,
-    public subactions: BattleAction[]) {
+    public subactions: BattleAction[],
+  ) {
     super();
   }
 
   getDescription(): string {
     return `${this.source} at position ${this.position} activated ${this.name}!`;
-  }
-
-  getSubactions(): BattleAction[] {
-    return this.subactions;
   }
 
   getStats(): StatsUpdate {
@@ -57,5 +57,23 @@ export class AbilityAction extends BattleAction {
     }
 
     return allUpdates;
+  }
+
+  static fromJSON(json: Record<string, unknown>): AbilityAction | undefined {
+    const actionType = json["actionType"];
+    if (actionType == ActionType.ACTIVATED_ABILITY) {
+      return new AbilityAction(
+        json["actionNumber"] as number,
+        json["name"] as string,
+        json["source"] as Actor,
+        json["position"] as number,
+        (json["subactions"] as Record<string, unknown>[]).map((action: any) => {
+          return BattleActionParser.fromJSON(action);
+        }) as BattleAction[],
+      );
+    } else {
+      console.error(`AbilityAction.fromJSON called on ${json}`);
+      return undefined;
+    }
   }
 }

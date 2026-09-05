@@ -1,10 +1,12 @@
+import { BattleAction } from "../battletypes/battleaction";
+import { BattleActionParser } from "../battletypes/battleactionparser";
 import { GodsightBattleData } from "../battletypes/battledata";
 import { StatsUpdateHelper } from "../battletypes/stats";
 import { defaultSettings, GodsightSettings } from "../godsightsettings";
 import { GodsightStorage } from "./battlestorage";
 
 export class GodsightStorageManager {
-  private static godsightStorageKey: "godsightStorage";
+  private static godsightStorageKey = "godsightStorage";
   private static instance: GodsightStorageManager;
 
   private storageCache: GodsightStorage = {
@@ -29,13 +31,28 @@ export class GodsightStorageManager {
   }
 
   private async initialize() {
-    const key = GodsightStorageManager.godsightStorageKey;
-    const existingData = await chrome.storage.local.get(key) as { [key]?: GodsightStorage };
+    const existingData = await chrome.storage.local.get(GodsightStorageManager.godsightStorageKey) as { [GodsightStorageManager.godsightStorageKey]?: string };
 
-    if (existingData[key]) {
-      this.storageCache = existingData[key];
+    if (existingData[GodsightStorageManager.godsightStorageKey]) {
+      const storage = JSON.parse(existingData[GodsightStorageManager.godsightStorageKey]!) as GodsightStorage;
+
+      Object.keys(storage["battles"]).forEach(battle => {
+        const battleJson = storage["battles"][battle];
+
+        const turns = Object.keys(battleJson["turnData"]);
+
+        turns.forEach(turn => {
+          battleJson["turnData"][turn]["turnActions"] = battleJson["turnData"][turn]["turnActions"].map(action => {
+            return BattleActionParser.fromJSON(action);
+          }).filter(i => i) as BattleAction[];
+        });
+      });
+
+      this.storageCache = storage;
     } else {
-      await chrome.storage.local.set({ [key]: this.storageCache });
+      await chrome.storage.local.set({ [GodsightStorageManager.godsightStorageKey]: JSON.stringify(this.storageCache) }).catch(reason => {
+        console.error("Unable to initialize godsight storage", reason);
+      });
     }
 
     this.fireChangeListeners();
@@ -54,12 +71,12 @@ export class GodsightStorageManager {
   /**
    * Updates the underlying chrome extension storage with the current cached storage.
    * Guarantees that updates are sequential,
-   * such that a later update cannot override a former.
+   * such that a later update cannot override an earlier one.
    * Also notifies listeners that the storage cache was updated.
    */
-  private updateStorageAndNotify() {
+  private updateUnderlyingStorageAndNotify() {
     this.lastSetPromise = this.lastSetPromise.then(() => {
-      return chrome.storage.local.set({ [GodsightStorageManager.godsightStorageKey]: this.storageCache });
+      return chrome.storage.local.set({ [GodsightStorageManager.godsightStorageKey]: JSON.stringify(this.storageCache) });
     }).catch((reason) => {
       console.error(`Failed to update godsight storage with reason ${reason}`);
     });
@@ -97,43 +114,21 @@ export class GodsightStorageManager {
     return this.storageCache["battles"][battleId];
   }
 
-  public setOrMergeBattleData(battleId: number, battleData: GodsightBattleData) {
+  public setBattleData(battleId: number, battleData: GodsightBattleData) {
     this.storageCache = structuredClone(this.storageCache);
-    const existingBattleData = this.storageCache["battles"][battleId];
-    if (existingBattleData) {
-      existingBattleData["currentTurn"] = battleData["currentTurn"];
-      existingBattleData["honors"] += battleData["honors"];
-      existingBattleData["fatedChainGauge"] = battleData["fatedChainGauge"];
-      existingBattleData["battleProgressStatus"] = battleData["battleProgressStatus"];
-      existingBattleData["party"] = battleData["party"];
-      existingBattleData["boss"] = battleData["boss"];
-
-      StatsUpdateHelper.mergeStats(
-        battleData["battleStats"]["generalStats"],
-        existingBattleData["battleStats"]["generalStats"]
-      );
-      Object.keys(battleData["battleStats"]["characterStats"]).forEach(characterId => {
-        StatsUpdateHelper.mergeStats(
-          battleData["battleStats"]["characterStats"][characterId],
-          existingBattleData["battleStats"]["characterStats"][characterId]
-        );
-      });
-    } else {
-      this.storageCache["battles"][battleId] = battleData;
-    }
-    this.updateStorageAndNotify();
+    this.storageCache["battles"][battleId] = battleData;
+    this.updateUnderlyingStorageAndNotify();
   }
 
   public deleteBattle(battleId: string | number) {
     this.storageCache = structuredClone(this.storageCache);
-
     delete this.storageCache["battles"][battleId];
-
-    this.updateStorageAndNotify();
+    this.updateUnderlyingStorageAndNotify();
   }
 
   public setSettings(settings: GodsightSettings) {
+    this.storageCache = structuredClone(this.storageCache);
     this.storageCache["settings"] = settings;
-    this.updateStorageAndNotify();
+    this.updateUnderlyingStorageAndNotify();
   }
 }

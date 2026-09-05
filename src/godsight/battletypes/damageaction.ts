@@ -6,6 +6,8 @@ import { DamageInstance } from "./damageinstance";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
 export class DamageAction extends BattleAction {
+  public actionType: ActionType = ActionType.DAMAGE_DEALT;
+  public subactions: BattleAction[] = [];
 
   constructor(
     public actionNumber: number,
@@ -22,10 +24,6 @@ export class DamageAction extends BattleAction {
     return `${this.target} took ${damage} damage!`;
   }
 
-  getSubactions(): BattleAction[] {
-    return [];
-  }
-
   getStats(): StatsUpdate {
     const update = StatsUpdateHelper.getEmptyStatsUpdate();
     switch (this.target) {
@@ -39,7 +37,9 @@ export class DamageAction extends BattleAction {
           // Chain Bursts appear to be the only exception, but we handle those commands specially
           // so we never end up with a DamageAction for a chain burst damage instance.
           update["generalStats"]["skillDamage"][instance["element"]] += instance["value"];
-          update["generalStats"]["hitCount"] += 1;
+          if (instance["value"] > 0) {
+            update["generalStats"]["hitCount"] += 1;
+          }
         });
         break;
       case Actor.PLAYER:
@@ -56,5 +56,20 @@ export class DamageAction extends BattleAction {
         console.error(`Unknown actor ${this.target} in DamageAction stats`);
     }
     return update;
+  }
+
+  static fromJSON(json: { [key: string]: any; }): DamageAction | undefined {
+    const actionType = json["actionType"];
+    if (actionType == ActionType.DAMAGE_DEALT) {
+      return new DamageAction(
+        json["actionNumber"] as number,
+        json["element"] as GameElementValue,
+        json["target"] as Actor,
+        json["instances"] as DamageInstance[],
+      );
+    } else {
+      console.error(`DamageAction.fromJSON called on ${json}`);
+      return undefined;
+    }
   }
 }

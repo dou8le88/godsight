@@ -16,6 +16,8 @@ export type AppliedStatus = {
    * Status ID.
    */
   "status": string,
+  "miss"?: number,
+  "dispel"?: number,
 }
 
 export type MessageData = {

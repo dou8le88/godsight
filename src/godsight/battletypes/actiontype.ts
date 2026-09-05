@@ -29,7 +29,9 @@ export enum ActionType {
   DAMAGE_DEALT_MULTIHIT = "damage_dealt_multihit",
   HEAL = "heal",
   REPLACED_CHARACTER = "replaced_character",
-  USED_POTION = "used_potion",
+  STANDBY = "standby",
+  TURN_CHANGE = "turn_change",
   USED_FULL_ELIXIR = "used_full_elixir",
   WINDOW_EFFECT = "window_effect",
+  OMEN_CANCELLED = "omen_cancelled",
 }

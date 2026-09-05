@@ -52,6 +52,12 @@ import { TurnData } from "./godsight/battletypes/turndata";
 import { GodsightCondition } from "./godsight/battletypes/condition";
 import { GodsightStatusType } from "./godsight/battletypes/statustype";
 import { StatsUpdateHelper } from "./godsight/battletypes/stats";
+import { TurnChangeScenarioData } from "./gbf/battletypes/scenariodata/turnchangescenariodata";
+import { TurnChangeAction } from "./godsight/battletypes/turnchangeaction";
+import { OmenCancelScenarioData } from "./gbf/battletypes/scenariodata/omencancelscenariodata";
+import { OmenCancelAction } from "./godsight/battletypes/omencancelaction";
+import { StandbyScenarioData } from "./gbf/battletypes/scenariodata/standbyscenariodata";
+import { StandbyAction } from "./godsight/battletypes/standbyaction";
 
 export class BattleScenarioParser {
   constructor() {
@@ -113,7 +119,7 @@ export class BattleScenarioParser {
             scenarioData.slice(i + 1),
             battleData,
             baseActionNumber + i + 1,
-            stopOnMainAction,
+            true,
           );
           const bossSpecialAttackAction = new BossSpecialAttackAction(
             baseActionNumber + i,
@@ -170,7 +176,7 @@ export class BattleScenarioParser {
             scenarioData.slice(i + 1),
             battleData,
             baseActionNumber + i + 1,
-            stopOnMainAction,
+            true,
           );
           if (subactions.actions.length == 0) {
             // Sometimes we have empty ability commands followed by real ones, dunno why, the client is weird.
@@ -287,7 +293,7 @@ export class BattleScenarioParser {
             scenarioData.slice(i + 1),
             battleData,
             baseActionNumber + i + 1,
-            stopOnMainAction,
+            true,
           );
           const normalAttackAction = new NormalAttackAction(
             baseActionNumber + i,
@@ -348,12 +354,12 @@ export class BattleScenarioParser {
               wasCriticalHit.set(d["attr"], true);
             }
           });
-          const hpAfterDamage = allSplitChargedAttackDamage[-1]["hp"];
+          const hpAfterDamage = allSplitChargedAttackDamage.at(-1)!["hp"];
           const subactions = this._parseScenarioData(
             scenarioData.slice(i + 1),
             battleData,
             baseActionNumber + i + 1,
-            stopOnMainAction,
+            true,
           );
           const chargedAttackAction = new ChargedAttackAction(
             baseActionNumber + i,
@@ -519,11 +525,53 @@ export class BattleScenarioParser {
           }
           break;
 
+        case ScenarioCommand.TURN_CHANGE:
+          const turnChangeScenario = scenario as TurnChangeScenarioData;
+          const turnChangeAction = new TurnChangeAction(
+            baseActionNumber + i,
+            turnChangeScenario["turn"],
+          );
+          battleData["updateTurnTo"] = turnChangeAction.turn;
+          actions.push(turnChangeAction);
+          break;
+
 
         case ScenarioCommand._TURN:
           if (stopOnMainAction) {
             break baseLoop;
           }
+          break;
+
+        case ScenarioCommand.OMEN_CANCEL:
+          const omenCancelScenario = scenario as OmenCancelScenarioData;
+          const omenCancelAction = new OmenCancelAction(
+            baseActionNumber + i,
+            omenCancelScenario["pos"],
+          );
+          actions.push(omenCancelAction);
+          break;
+
+        case ScenarioCommand.STANDBY:
+          // A disabling effect like charm or paralyze stopped a character from acting.
+          // Some disabling effects display a custom message in the previous command.
+          if (stopOnMainAction) {
+            break baseLoop;
+          }
+          const standbyScenario = scenario as StandbyScenarioData;
+          let battleMessage: string | undefined;
+          const previousScenario = scenarioData[i - 1];
+          if (previousScenario && previousScenario["cmd"] == ScenarioCommand._BATTLE_LOG) {
+            if ((previousScenario as any)["body"]) {
+              battleMessage = (previousScenario as any)["body"];
+            }
+          }
+          const standbyAction = new StandbyAction(
+            baseActionNumber + i,
+            standbyScenario["pos"],
+            standbyScenario["standby"],
+            battleMessage,
+          );
+          actions.push(standbyAction);
           break;
 
         // All of these commands are recognized but ignored.
@@ -535,9 +583,13 @@ export class BattleScenarioParser {
         case ScenarioCommand._BGM:
         case ScenarioCommand._BATTLE_LOG:
         case ScenarioCommand._MODE_CHANGE:
+        case ScenarioCommand._WAIT:
+        case ScenarioCommand._IMAGE_CHANGE:
+        case ScenarioCommand._DROP:
+        case undefined:
           break;
         default:
-          console.trace(`Unhandled command ${scenario["cmd"]}`);
+          console.warn(`Unhandled command ${scenario["cmd"]}`);
           break;
       }
     }
@@ -553,7 +605,7 @@ export class BattleScenarioParser {
       actionNumber,
       deathScenario["to"],
       deathScenario["pos"],
-      typeof deathScenario["index"] === "number" ? deathScenario["index"] : undefined,
+      typeof deathScenario["index"] === "number" ? deathScenario["index"] : null,
     );
 
     return action;
@@ -618,9 +670,10 @@ export class BattleScenarioParser {
 
       uniquePositions.forEach(pos => {
         allBossConditionActions[pos] = new ConditionChangeAction(
-          actionNumber,
+          actionNumber++,
           Actor.BOSS,
           Number(pos),
+          0,
           [],
           [],
           [],
@@ -630,6 +683,7 @@ export class BattleScenarioParser {
       allBossChanges.forEach(change => {
         const position = change["pos"];
         let destination: GodsightCondition[] = [];
+        const missPool: GodsightCondition[] = [];
         let type = GodsightStatusType.UNKNOWN;
         switch (String(change["type"])) {
           case StatusType.PLAYER_BUFF:
@@ -646,15 +700,21 @@ export class BattleScenarioParser {
             destination = allBossConditionActions[position].buffs;
             break;
           default:
-            type = GodsightStatusType.UNKNOWN;
-            destination = allBossConditionActions[position].unclassified;
-            break;
+            if (change["miss"] !== undefined && change["miss"] > 0) {
+              destination = missPool;
+              allBossConditionActions[position].missCount += 1;
+            } else {
+              type = GodsightStatusType.UNKNOWN;
+              destination = allBossConditionActions[position].unclassified;
+              break;
+            }
         }
 
         destination.push({
           "name": change["text"],
           "type": type,
           "icon": change["status"],
+          "dispelled": ("dispel" in change && change["dispel"] == 1),
         });
       });
 
@@ -670,9 +730,10 @@ export class BattleScenarioParser {
 
       uniquePositions.forEach(pos => {
         allPlayerConditionActions[pos] = new ConditionChangeAction(
-          actionNumber,
+          actionNumber++,
           Actor.PLAYER,
           Number(pos),
+          0,
           [],
           [],
           [],
@@ -682,6 +743,7 @@ export class BattleScenarioParser {
       allPositions.forEach(position => {
         playerChanges[position].forEach(change => {
           let destination: GodsightCondition[] = [];
+          const missPool: GodsightCondition[] = [];
           let type = GodsightStatusType.UNKNOWN;
           switch (String(change["type"])) {
             case StatusType.PLAYER_BUFF:
@@ -698,8 +760,14 @@ export class BattleScenarioParser {
               console.error("Boss debuff status types in player list? Must be wrong classification.");
               break;
             default:
-              type = GodsightStatusType.UNKNOWN;
-              destination = allPlayerConditionActions[position].unclassified;
+              if (change["miss"] !== undefined && change["miss"] > 0) {
+                destination = missPool;
+                allPlayerConditionActions[position].missCount += 1;
+              } else {
+                type = GodsightStatusType.UNKNOWN;
+                destination = allPlayerConditionActions[position].unclassified;
+                break;
+              }
               break;
           }
 
@@ -707,6 +775,7 @@ export class BattleScenarioParser {
             "name": change["text"],
             "type": type,
             "icon": change["status"],
+            "dispelled": ("dispel" in change && change["dispel"] == 1),
           });
         });
       });
@@ -783,7 +852,7 @@ export class BattleScenarioParser {
     return battleData;
   }
 
-  private processTurnActionData(battleActions: BattleAction[]): TurnData {
+  public processTurnActionData(battleActions: BattleAction[]): TurnData {
     const baseStats = StatsUpdateHelper.getEmptyStatsUpdate();
     const statUpdates = battleActions.map(action => action.getStats());
     const totalStats = statUpdates.reduce(

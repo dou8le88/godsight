@@ -6,6 +6,9 @@ import { DamageInstance } from "./damageinstance";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
 export class MultihitDamageAction extends BattleAction {
+  public actionType: ActionType = ActionType.DAMAGE_DEALT_MULTIHIT;
+  public subactions: BattleAction[] = [];
+
   constructor(
     public actionNumber: number,
     public element: GameElementValue,
@@ -23,10 +26,6 @@ export class MultihitDamageAction extends BattleAction {
     return `${this.target} took ${hitDamage} damage, for a total of ${totalDamage}!`;
   }
 
-  getSubactions(): BattleAction[] {
-    return [];
-  }
-
   getStats(): StatsUpdate {
     const update = StatsUpdateHelper.getEmptyStatsUpdate();
     switch (this.target) {
@@ -40,7 +39,9 @@ export class MultihitDamageAction extends BattleAction {
           // Chain Bursts appear to be the only exception, but we handle those commands specially
           // so we never end up with a DamageAction for a chain burst damage instance.
           update["generalStats"]["skillDamage"][instance["element"]] += instance["value"];
-          update["generalStats"]["hitCount"] += 1;
+          if (instance["value"] > 0) {
+            update["generalStats"]["hitCount"] += 1;
+          }
         });
         break;
       case Actor.PLAYER:
@@ -57,5 +58,21 @@ export class MultihitDamageAction extends BattleAction {
         console.error(`Unknown actor ${this.target} in MultihitDamageAction stats`);
     }
     return update;
+  }
+
+  static fromJSON(json: { [key: string]: any; }): MultihitDamageAction | undefined {
+    const actionType = json["actionType"];
+    if (actionType == ActionType.DAMAGE_DEALT_MULTIHIT) {
+      return new MultihitDamageAction(
+        json["actionNumber"] as number,
+        json["element"] as GameElementValue,
+        json["target"] as Actor,
+        json["hits"] as DamageInstance[],
+        json["totals"] as number[],
+      );
+    } else {
+      console.error(`MultihitDamageAction.fromJSON called on ${json}`);
+      return undefined;
+    }
   }
 }

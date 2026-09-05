@@ -2,8 +2,7 @@
  * GBF handles the result of battle actions via "commands", JSON objects that contain
  * data on how to manipulate the battle UI.
  *
- * The total number of commands is much higher than shown here, but we only include the ones
- * we care about.
+ * Many do not map to actions we care about; these are prefixed with an underscore (_).
  */
 export enum ScenarioCommand {
   /**
@@ -114,12 +113,20 @@ export enum ScenarioCommand {
    * End of a sequence of normal attacks by one character.
    */
   NORMAL_ATTACK_END = "normal_attack_end",
+  /**
+   * Set the turn counter.
+   */
+  TURN_CHANGE = "turn_change",
+
+  OMEN_CANCEL = "special_skill_interrupt",
 
   /**
-   * TODO: Charm, Can't Act, etc.
+   * An effect disabled the player's attack phase (e.g., charm).
+   * Boss probably uses something else cuz there's no target field.
    */
+  STANDBY = "standby",
 
-
+  // TODO: Charm, Can't Act, etc.
 
   /**
    * Ignored command, do not use, exists for type completeness in the parser.
@@ -156,4 +163,16 @@ export enum ScenarioCommand {
    * Ignored command, do not use, exists for type completeness in the parser.
    */
   _MODE_CHANGE = "modechange",
+  /**
+   * Ignored command, do not use, exists for type completeness in the parser.
+   */
+  _WAIT = "wait",
+  /**
+   * Ignored command, do not use, exists for type completeness in the parser.
+   */
+  _IMAGE_CHANGE = "image_change",
+  /**
+   * Ignored command, do not use, exists for type completeness in the parser.
+   */
+  _DROP = "drop",
 }

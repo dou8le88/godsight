@@ -37,7 +37,9 @@ export default function BattleTracker({ battleData }: { battleData: GodsightBatt
           {turns.length > 0 ? (
             <>
               {turns.map(turnNumber => {
-                <Turn turnData={battleData["turnData"][turnNumber]} turnNumber={Number(turnNumber)} />
+                return (
+                  <Turn key={turnNumber} turnData={battleData["turnData"][turnNumber]} turnNumber={Number(turnNumber)} />
+                );
               })}
             </>
           ) : (

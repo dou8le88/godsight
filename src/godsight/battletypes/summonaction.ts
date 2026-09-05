@@ -1,9 +1,12 @@
 import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
+import { BattleActionParser } from "./battleactionparser";
 import { DamageInstance } from "./damageinstance";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
 export class SummonAction extends BattleAction {
+  public actionType: ActionType = ActionType.CALLED_SUMMON;
+
   constructor(
     public actionNumber: number,
     public name: string,
@@ -16,11 +19,7 @@ export class SummonAction extends BattleAction {
   getDescription(): string {
     const damage = this.damageInstances.map(d => d["value"]).join("+");
 
-    return `${name} was called, dealing ${damage} damage!`;
-  }
-
-  getSubactions(): BattleAction[] {
-    return this.subactions;
+    return `${this.name} was called, dealing ${damage} damage!`;
   }
 
   getStats(): StatsUpdate {
@@ -36,5 +35,22 @@ export class SummonAction extends BattleAction {
       (prev, cur) => StatsUpdateHelper.concatUpdates(prev, cur),
       update
     );
+  }
+
+  static fromJSON(json: { [key: string]: any; }): SummonAction | undefined {
+    const actionType = json["actionType"];
+    if (actionType == ActionType.CALLED_SUMMON) {
+      return new SummonAction(
+        json["actionNumber"] as number,
+        json["name"] as string,
+        json["damageInstances"] as DamageInstance[],
+        json["subactions"].map((action: any) => {
+          return BattleActionParser.fromJSON(action);
+        }) as BattleAction[],
+      );
+    } else {
+      console.error(`SummonAction.fromJSON called on ${json}`);
+      return undefined;
+    }
   }
 }

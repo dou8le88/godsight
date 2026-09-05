@@ -4,8 +4,10 @@ import { ActionType } from "./actiontype"
 import { BattleAction } from "./battleaction"
 import { DamageInstance } from "./damageinstance"
 import { StatsUpdate, StatsUpdateHelper } from "./stats"
+import { BattleActionParser } from "./battleactionparser"
 
 export class BossSpecialAttackAction extends BattleAction {
+  public actionType: ActionType = ActionType.BOSS_SPECIAL_ATTACK;
 
   constructor(
     public actionNumber: number,
@@ -15,17 +17,13 @@ export class BossSpecialAttackAction extends BattleAction {
     public count: number,
     public element: GameElementValue,
     public damageInstances: DamageInstance[],
-    public subactions: BattleAction[]
+    public subactions: BattleAction[],
   ) {
     super();
   }
 
   getDescription(): string {
     return `${this.sourceName} used ${this.attackName}!`;
-  }
-
-  getSubactions(): BattleAction[] {
-    return this.subactions;
   }
 
   getStats(): StatsUpdate {
@@ -47,6 +45,27 @@ export class BossSpecialAttackAction extends BattleAction {
     } else {
       console.error(`Got ${this.target} target for BossSpecialAttackAction`);
       return update;
+    }
+  }
+
+  static fromJSON(json: { [key: string]: any }): BossSpecialAttackAction | undefined {
+    const actionType = json["actionType"];
+    if (actionType == ActionType.BOSS_SPECIAL_ATTACK) {
+      return new BossSpecialAttackAction(
+        json["actionNumber"] as number,
+        json["attackName"] as string,
+        json["sourceName"] as string,
+        json["target"] as Actor,
+        json["count"] as number,
+        json["element"] as GameElementValue,
+        json["damageInstances"] as DamageInstance[],
+        json["subactions"].map((action: any) => {
+          return BattleActionParser.fromJSON(action);
+        }) as BattleAction[],
+      );
+    } else {
+      console.error(`BossSpecialAttackAction.fromJSON called on ${json}`);
+      return undefined;
     }
   }
 }

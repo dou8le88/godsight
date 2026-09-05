@@ -6,6 +6,9 @@ import { DamageInstance } from "./damageinstance";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
 export class SingularNormalAttackAction extends BattleAction {
+  public actionType: ActionType = ActionType.SINGULAR_NORMAL_ATTACK;
+  public subactions: BattleAction[] = [];
+
   constructor(
     public actionNumber: number,
     public source: Actor,
@@ -22,10 +25,6 @@ export class SingularNormalAttackAction extends BattleAction {
     return `${this.source} at position ${this.attackerPosition} made a normal attack, dealing ${damage} damage!`;
   }
 
-  getSubactions(): BattleAction[] {
-    return [];
-  }
-
   getStats(): StatsUpdate {
     const update = StatsUpdateHelper.getEmptyStatsUpdate();
 
@@ -37,8 +36,10 @@ export class SingularNormalAttackAction extends BattleAction {
           }
           update["generalStats"]["normalAttackDamage"][instance["element"]] += instance["value"];
           update["characterStats"][this.attackerPosition]["normalAttackDamage"][instance["element"]] += instance["value"];
-          update["generalStats"]["hitCount"] += 1;
-          update["characterStats"][this.attackerPosition]["hitCount"] += 1;
+          if (instance["value"] > 0) {
+            update["generalStats"]["hitCount"] += 1;
+            update["characterStats"][this.attackerPosition]["hitCount"] += 1;
+          }
         });
         break;
       case Actor.BOSS:
@@ -56,5 +57,21 @@ export class SingularNormalAttackAction extends BattleAction {
     }
 
     return update;
+  }
+
+  static fromJSON(json: { [key: string]: any; }): SingularNormalAttackAction | undefined {
+    const actionType = json["actionType"];
+    if (actionType == ActionType.SINGULAR_NORMAL_ATTACK) {
+      return new SingularNormalAttackAction(
+        json["actionNumber"] as number,
+        json["source"] as Actor,
+        json["attackerPosition"] as number,
+        json["element"] as GameElementValue,
+        json["damageInstances"] as DamageInstance[],
+      );
+    } else {
+      console.error(`SingularNormalAttackAction.fromJSON called on ${json}`);
+      return undefined;
+    }
   }
 }

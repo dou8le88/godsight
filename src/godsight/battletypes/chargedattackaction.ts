@@ -4,8 +4,11 @@ import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { DamageInstance } from "./damageinstance";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
+import { BattleActionParser } from "./battleactionparser";
 
 export class ChargedAttackAction extends BattleAction {
+  public actionType: ActionType = ActionType.CHARGED_ATTACK;
+
   constructor(
     public actionNumber: number,
     public name: string,
@@ -25,10 +28,6 @@ export class ChargedAttackAction extends BattleAction {
     return `${this.attackerPosition} made a charged attack against ${this.target} at position ${this.targetPosition}, and dealt ${damage} damage!`;
   }
 
-  getSubactions(): BattleAction[] {
-    return this.subactions;
-  }
-
   getStats(): StatsUpdate {
     const update = StatsUpdateHelper.getEmptyStatsUpdate();
     if (this.target == Actor.BOSS) {
@@ -38,7 +37,9 @@ export class ChargedAttackAction extends BattleAction {
           update["characterStats"][this.attackerPosition] = StatsUpdateHelper.getEmptyStats();
         }
         update["characterStats"][this.attackerPosition]["chargedAttackDamage"][instance["element"]] += instance["value"];
-        update["characterStats"][this.attackerPosition]["hitCount"] += 1;
+        if (instance["value"] > 0) {
+          update["characterStats"][this.attackerPosition]["hitCount"] += 1;
+        }
       });
       const subactionStatsUpdates = this.subactions.map(action => action.getStats());
       return subactionStatsUpdates.reduce(
@@ -49,6 +50,26 @@ export class ChargedAttackAction extends BattleAction {
       console.error(`Got ${this.target} target for ChargedAttackAction`);
       return update;
     }
+  }
 
+  static fromJSON(json: { [key: string]: any; }): ChargedAttackAction | undefined {
+    const actionType = json["actionType"];
+    if (actionType == ActionType.CHARGED_ATTACK) {
+      return new ChargedAttackAction(
+        json["actionNumber"] as number,
+        json["name"] as string,
+        json["attackerPosition"] as number,
+        json["targetPosition"] as number,
+        json["target"] as Actor,
+        json["element"] as GameElementValue,
+        json["damageTotals"] as DamageInstance[],
+        json["subactions"].map((action: any) => {
+          return BattleActionParser.fromJSON(action);
+        }) as BattleAction[],
+      );
+    } else {
+      console.error(`ChargedAttackAction.fromJSON called on ${json}`);
+      return undefined;
+    }
   }
 }

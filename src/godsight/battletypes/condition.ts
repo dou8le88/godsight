@@ -5,6 +5,7 @@ export class GodsightCondition {
     public name: string,
     public type: GodsightStatusType,
     public icon: string,
+    public dispelled: boolean,
   ) {
   }
 }

@@ -3,6 +3,6 @@ import { Stats } from "./stats";
 
 export type TurnData = {
   "turnStats": Stats,
-  "characterCurrentTurnStats": { [key: number]: Stats },
+  "characterCurrentTurnStats": { [key: string | number]: Stats },
   "turnActions": BattleAction[],
 }

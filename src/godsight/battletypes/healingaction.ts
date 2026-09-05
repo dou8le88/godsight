@@ -5,6 +5,9 @@ import { HealingInstance } from "./healinginstance";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
 export class HealingAction extends BattleAction {
+  public actionType: ActionType = ActionType.HEAL;
+  public subactions: BattleAction[] = [];
+
   constructor(
     public actionNumber: number,
     public target: Actor,
@@ -17,10 +20,6 @@ export class HealingAction extends BattleAction {
     const healing = this.healingInstances.map(h => h["value"]).join("+");
 
     return `${this.target} was healed for ${healing}!`;
-  }
-
-  getSubactions(): BattleAction[] {
-    return [];
   }
 
   getStats(): StatsUpdate {
@@ -38,5 +37,19 @@ export class HealingAction extends BattleAction {
     }
 
     return update;
+  }
+
+  static fromJSON(json: { [key: string]: any; }): HealingAction | undefined {
+    const actionType = json["actionType"];
+    if (actionType == ActionType.HEAL) {
+      return new HealingAction(
+        json["actionNumber"] as number,
+        json["target"] as Actor,
+        json["healingInstances"] as HealingInstance[],
+      );
+    } else {
+      console.error(`HealingAction.fromJSON called on ${json}`);
+      return undefined;
+    }
   }
 }

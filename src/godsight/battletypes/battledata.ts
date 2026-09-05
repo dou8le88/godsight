@@ -10,6 +10,7 @@ export type GodsightBattleData = {
   "IsCoopRaid": boolean,
   "isHost": boolean,
   "currentTurn": number,
+  "updateTurnTo"?: number,
   "honors": number,
   "fatedChainGauge": number,
   "battleProgressStatus": BattleProgressStatus,

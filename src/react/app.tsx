@@ -8,6 +8,11 @@ import { BattleScenarioParser } from "../battlescenarioparser";
 import { useGodsightStorage } from "./battletracker/usegodsightstorage";
 import { GodsightStorageManager } from "../godsight/godsightstorage/godsightstoragemanager";
 import BattleSummary from "./battletracker/battlesummary";
+import { StatsUpdateHelper } from "../godsight/battletypes/stats";
+import { GodsightBattleData } from "../godsight/battletypes/battledata";
+import { BattleProgressStatus } from "../godsight/battletypes/battleprogressstatus";
+import { BattleAction } from "../godsight/battletypes/battleaction";
+import { BattleActionParser } from "../godsight/battletypes/battleactionparser";
 
 export default function GodsightPanel() {
   const validHosts = [
@@ -17,7 +22,11 @@ export default function GodsightPanel() {
 
   // /rest/raid/*.json for solo battles/free quests.
   // /rest/multiraid/*.json for multiplayer battles.
-  const battleApiRegex = /^\/rest\/(multi)?raid/;
+  const battleApiRegex = /^\/rest\/(?:multi)?raid/;
+
+  // raid/123456
+  // raid_multi/123456
+  const battleIdRegex = /^raid(?:_multi)\/(\d+)/;
 
   // Find out if we're inspecting a GBF page.
   const [onGbfPage, setOnGbfPage] = useState(false);
@@ -52,23 +61,97 @@ export default function GodsightPanel() {
     if (!onGbfPage) return;
 
     function startDataHandler(data: StartData, endpoint: string) {
-      console.trace(`Got start data for ${endpoint}`);
+      console.info(`Got start data for ${endpoint}`);
 
       const godsightBattleData = battleScenarioParser.parseStartData(data);
+      const raidId = godsightBattleData["raidId"];
 
-      storageManager.setOrMergeBattleData(godsightBattleData["raidId"], godsightBattleData);
+      setSelectedBattle(String(raidId));
+      storageManager.setBattleData(raidId, godsightBattleData);
+    }
+
+    function withActiveBattle(callback: (battleId: string, raid: GodsightBattleData) => any) {
+      chrome.devtools.inspectedWindow.eval("window.location.href", (url: string) => {
+        const fragment = url.split("#").at(-1);
+        const battleId = ((fragment || "").match(battleIdRegex) || []).at(-1);
+
+        if (battleId) {
+          const raid = godsightStorage["battles"][battleId];
+          if (raid) {
+            const raidCopy = structuredClone(raid);
+            callback(battleId, raidCopy);
+          } else {
+            console.error("Unable to record battle actions: no known active battle (refresh the battle while the Godsight panel is open)");
+          }
+        } else {
+          console.error("Couldn't determine the active battle.");
+        }
+      });
     }
 
     function battleDataHandler(data: GranblueBattleData, endpoint: string) {
-      console.log(`Got battle data for ${endpoint}`);
-    }
+      console.info(`Got battle data for ${endpoint}`);
 
-    function retreatDataHandler(data: RetreatData) {
+      withActiveBattle((battleId, raid) => {
+        Object.keys(raid["turnData"]).forEach(turnNumber => {
+          raid["turnData"][turnNumber]["turnActions"] = raid["turnData"][turnNumber]["turnActions"].map(action => {
+            const rehydratedAction = BattleActionParser.fromJSON(action);
+            if (rehydratedAction) {
+              return rehydratedAction;
+            } else {
+              return action;
+            }
+          });
+        });
+        const currentTurnNumber = raid["currentTurn"];
+        let currentTurn = raid["turnData"][currentTurnNumber];
 
+        if (!currentTurn) {
+          raid["turnData"][currentTurnNumber] = {
+            "turnStats": StatsUpdateHelper.getEmptyStats(),
+            "characterCurrentTurnStats": {},
+            "turnActions": [],
+          }
+
+          currentTurn = raid["turnData"][currentTurnNumber];
+        }
+
+        const existingTurnActions = currentTurn["turnActions"];
+        let currentActionNumber = 0;
+        if (existingTurnActions.length > 0) {
+          let lastAction = (existingTurnActions.at(-1) || existingTurnActions.at(0))!;
+          if (lastAction.subactions.length) {
+            lastAction = (lastAction.subactions.at(-1) || lastAction.subactions.at(0))!;
+          }
+          currentActionNumber = lastAction["actionNumber"] + 1;
+        }
+
+        const newActions = battleScenarioParser.parseScenarioData(data["scenario"], raid, currentActionNumber);
+        existingTurnActions.push(...newActions);
+        const newTurnData = battleScenarioParser.processTurnActionData(existingTurnActions);
+        raid["turnData"][currentTurnNumber] = newTurnData;
+
+        if ("updateTurnTo" in raid) {
+          raid["currentTurn"] = raid["updateTurnTo"]!;
+          delete raid["updateTurnTo"];
+        }
+
+        storageManager.setBattleData(Number(battleId), raid);
+      });
     }
 
     function retryBattleHandler() {
       // Since there's no response body to this, we just edit the currently-tracked battle.
+      withActiveBattle((battleId, raid) => {
+        raid["currentTurn"] = 0;
+        raid["battleStats"] = {
+          "generalStats": StatsUpdateHelper.getEmptyStats(),
+          "characterStats": {},
+        };
+        raid["turnData"] = {};
+
+        storageManager.setBattleData(Number(battleId), raid);
+      });
     }
 
     async function onRequestFinishedListener(request: chrome.devtools.network.Request) {
@@ -94,6 +177,7 @@ export default function GodsightPanel() {
               case "summon_result.json":
               case "temporary_item_result.json":
               case "user_recovery.json":
+              case "retire.json":
                 try {
                   const body = JSON.parse(content) as GranblueBattleData;
                   battleDataHandler(body, endpoint);
@@ -101,6 +185,7 @@ export default function GodsightPanel() {
                   console.error(e);
                 }
                 return;
+
               case "start.json":
                 // On battle start or on refreshing a page.
                 try {
@@ -110,15 +195,7 @@ export default function GodsightPanel() {
                   console.error(e);
                 }
                 return;
-              case "retire.json":
-                // Retreating.
-                try {
-                  const body = JSON.parse(content) as RetreatData;
-                  retreatDataHandler(body);
-                } catch (e: unknown) {
-                  console.error(e);
-                }
-                return;
+
               case "retry_trialbattle.json":
                 // Restarting a trial battle
                 retryBattleHandler();
@@ -145,7 +222,7 @@ export default function GodsightPanel() {
     return () => {
       chrome.devtools.network.onRequestFinished.removeListener(onRequestFinishedListener);
     };
-  }, [onGbfPage]);
+  }, [onGbfPage, godsightStorage]);
 
   const allBattles = Object.keys(godsightStorage["battles"]);
   const [selectedBattle, setSelectedBattle] = useState<string | undefined>(undefined);
@@ -173,7 +250,7 @@ export default function GodsightPanel() {
                   )}
                 </>
               ) : (
-                <>No battles recorded. Start a raid battle to record data.</>
+                <div>No battles recorded. Start a raid battle, or refresh an active raid to start recording data.</div>
               )}
             </>
           )}

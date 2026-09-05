@@ -8,7 +8,7 @@ export default function Turn({ turnData, turnNumber }: { turnData: TurnData, tur
 
       <div className="turn-action-container">
         {turnData["turnActions"].map(action =>
-          <Action action={action} />
+          <Action key={action.actionNumber} action={action} />
         )}
       </div>
     </details>
