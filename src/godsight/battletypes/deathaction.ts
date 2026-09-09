@@ -16,7 +16,7 @@ export class DeathAction extends BattleAction {
     super();
   }
 
-  getDescription(): string {
+  getSimpleDescription(): string {
     return `${this.target} at position ${this.position} was knocked out!`;
   }
 

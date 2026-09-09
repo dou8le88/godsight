@@ -20,7 +20,7 @@ export class ConditionChangeAction extends BattleAction {
     super();
   }
 
-  getDescription(): string {
+  getSimpleDescription(): string {
     return `${this.target} at position ${this.position} gained ${this.buffs.length} buffs, ${this.debuffs.length} debuffs, and ${this.unclassified.length} unclassified statuses!`;
   }
 

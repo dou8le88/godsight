@@ -16,7 +16,7 @@ export class SummonAction extends BattleAction {
     super();
   }
 
-  getDescription(): string {
+  getSimpleDescription(): string {
     const damage = this.damageInstances.map(d => d["value"]).join("+");
 
     return `${this.name} was called, dealing ${damage} damage!`;

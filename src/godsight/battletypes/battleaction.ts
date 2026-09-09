@@ -8,7 +8,7 @@ export abstract class BattleAction {
 
   abstract getStats(): StatsUpdate;
 
-  abstract getDescription(): string;
+  abstract getSimpleDescription(): string;
 
   static fromJSON(json: { [key: string]: any; }): BattleAction | undefined {
     throw new Error("BattleAction subclasses must implement a `static fromJSON` method!");

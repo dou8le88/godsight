@@ -19,7 +19,7 @@ export class StandbyAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
-  getDescription(): string {
+  getSimpleDescription(): string {
     const baseMessage = `Player at position ${this.position} couldn't attack!`;
     if (this.battleMessage) {
       return `${this.battleMessage} ${baseMessage}`

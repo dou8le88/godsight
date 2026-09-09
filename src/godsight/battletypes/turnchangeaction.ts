@@ -17,7 +17,7 @@ export class TurnChangeAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
-  getDescription(): string {
+  getSimpleDescription(): string {
     return `The turn counter became ${this.turn}!`;
   }
 

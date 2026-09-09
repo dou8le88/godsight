@@ -16,7 +16,7 @@ export class HealingAction extends BattleAction {
     super();
   }
 
-  getDescription(): string {
+  getSimpleDescription(): string {
     const healing = this.healingInstances.map(h => h["value"]).join("+");
 
     return `${this.target} was healed for ${healing}!`;

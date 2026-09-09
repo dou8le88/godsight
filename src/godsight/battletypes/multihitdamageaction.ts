@@ -19,7 +19,7 @@ export class MultihitDamageAction extends BattleAction {
     super();
   }
 
-  getDescription(): string {
+  getSimpleDescription(): string {
     const hitDamage = this.hits.map(h => h["value"]).join("+");
     const totalDamage = this.totals.join("+");
 

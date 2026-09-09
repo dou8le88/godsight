@@ -143,7 +143,7 @@ export default function GodsightPanel() {
     function retryBattleHandler() {
       // Since there's no response body to this, we just edit the currently-tracked battle.
       withActiveBattle((battleId, raid) => {
-        raid["currentTurn"] = 0;
+        raid["currentTurn"] = 1;
         raid["battleStats"] = {
           "generalStats": StatsUpdateHelper.getEmptyStats(),
           "characterStats": {},

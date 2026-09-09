@@ -13,7 +13,7 @@ export class WindowEffectAction extends BattleAction {
     super();
   }
 
-  getDescription(): string {
+  getSimpleDescription(): string {
     return `Window effect ${this.name} was activated!`;
   }
 

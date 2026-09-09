@@ -17,7 +17,7 @@ export class OmenCancelAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
-  getDescription(): string {
+  getSimpleDescription(): string {
     return `${this.canceledBossPosition}'s omen was canceled!`;
   }
 

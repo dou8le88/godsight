@@ -1,4 +1,4 @@
-# Godsight - A GBF Theorycrafting Extension
+# Godsight - A GBF Battle Analysis Extension
 
 Godsight is a free browser extension intended to be used with the browser game [Granblue Fantasy](https://game.granbluefantasy.jp/). It reads game actions sent to the client from the server and processes them into useful information, breakdowns, charts, etc.
 
@@ -24,34 +24,34 @@ This project is currently under active development.
 - [x] Schema types for common battle actions.
 - [x] Listen to browser navigation and disable response parsing if on other webpages, and enable it when on the GBF website.
 - [x] Display a banner in the Godsight panel when on other websites, and show the normal UI when navigating to the game.
-- [ ] Parse response bodies to determine command schemas.
-- [ ] Handle commands and relevant battle data.
-    - [ ] ABILITY
-    - [ ] WINDOW_EFFECT
-    - [ ] BUFF_AND_DEBUFF_CHANGED
-    - [ ] MESSAGE
-    - [ ] BOSS_HP
-    - [ ] DAMAGE_DEALT
-    - [ ] DAMAGE_DEALT_MULTIHIT
-    - [ ] HONORS_GAINED
-    - [ ] FATED_CHAIN_GAUGE_CHANGE
-    - [ ] SUMMON
-    - [ ] HEALING
-    - [ ] BOSS_SPECIAL_ATTACK
-    - [ ] CA_METER_CHANGED
-    - [ ] NORMAL_ATTACK
-    - [ ] CHARACTER_CHARGED_ATTACK
-    - [ ] MC_CHARGED_ATTACK
-    - [ ] CHAIN_BURST
-    - [ ] HP_CHANGED
-    - [ ] DEATH
+- [x] Parse response bodies to determine command schemas.
+- [x] Handle commands and relevant battle data.
+    - [x] ABILITY
+    - [x] WINDOW_EFFECT
+    - [x] BUFF_AND_DEBUFF_CHANGED
+    - [x] MESSAGE
+    - [x] BOSS_HP
+    - [x] DAMAGE_DEALT
+    - [x] DAMAGE_DEALT_MULTIHIT
+    - [x] HONORS_GAINED
+    - [x] FATED_CHAIN_GAUGE_CHANGE
+    - [x] SUMMON
+    - [x] HEALING
+    - [x] BOSS_SPECIAL_ATTACK
+    - [x] CA_METER_CHANGED
+    - [x] NORMAL_ATTACK
+    - [x] CHARACTER_CHARGED_ATTACK
+    - [x] MC_CHARGED_ATTACK
+    - [x] CHAIN_BURST
+    - [x] HP_CHANGED
+    - [x] DEATH
     - [ ] REPLACE_CHARACTER
-    - [ ] WON_BATTLE
-    - [ ] FULL_ELIXIR
+    - [x] WON_BATTLE
+    - [x] FULL_ELIXIR
     - [ ] Disabling effects on characters and bosses (Can't Act, Charm, Weakened, etc.)
     - [ ] Other
 - [x] Basic UI with party member portraits
-- [ ] Basic battle summary describing the outcomes of actions.
+- [x] Basic battle summary describing the outcomes of actions.
 - [ ] Select a portrait to view that character's specific battle contributions.
 - [ ] More detailed result display: hitcounts (total/by damage type), debuffs applied count, etc.
 - [ ] Pie chart - damage by type.

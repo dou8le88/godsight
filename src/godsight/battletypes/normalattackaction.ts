@@ -13,7 +13,7 @@ export class NormalAttackAction extends BattleAction {
     super();
   }
 
-  getDescription(): string {
+  getSimpleDescription(): string {
     return `An entity made a normal attack!`;
   }
 

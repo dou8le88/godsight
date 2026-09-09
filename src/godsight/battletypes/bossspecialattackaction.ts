@@ -22,30 +22,29 @@ export class BossSpecialAttackAction extends BattleAction {
     super();
   }
 
-  getDescription(): string {
+  getSimpleDescription(): string {
     return `${this.sourceName} used ${this.attackName}!`;
   }
 
   getStats(): StatsUpdate {
     const update = StatsUpdateHelper.getEmptyStatsUpdate();
-    if (this.target == Actor.PLAYER) {
-      this.damageInstances.forEach(instance => {
+    this.damageInstances.forEach(instance => {
+      // Bosses can target themselves (e.g., with self-buff or stance-changey kinds of specials),
+      // so ignore effects for the purposes of stats if they aren't targeting a player.
+      if (this.target == Actor.PLAYER) {
         const damage = instance["value"];
         update["generalStats"]["damageTaken"][instance["element"]] += damage;
         if (!update["characterStats"][instance["receiverPosition"]]) {
           update["characterStats"][instance["receiverPosition"]] = StatsUpdateHelper.getEmptyStats();
         }
         update["characterStats"][instance["receiverPosition"]]["damageTaken"][instance["element"]] += damage;
-      });
-      const subactionStatsUpdates = this.subactions.map(action => action.getStats());
-      return subactionStatsUpdates.reduce(
-        (prev, cur) => StatsUpdateHelper.concatUpdates(prev, cur),
-        update
-      );
-    } else {
-      console.error(`Got ${this.target} target for BossSpecialAttackAction`);
-      return update;
-    }
+      }
+    });
+    const subactionStatsUpdates = this.subactions.map(action => action.getStats());
+    return subactionStatsUpdates.reduce(
+      (prev, cur) => StatsUpdateHelper.concatUpdates(prev, cur),
+      update
+    );
   }
 
   static fromJSON(json: { [key: string]: any }): BossSpecialAttackAction | undefined {

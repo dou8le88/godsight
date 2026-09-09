@@ -126,6 +126,11 @@ export enum ScenarioCommand {
    */
   STANDBY = "standby",
 
+  /**
+   * TODO: what does it mean
+   */
+  RESURRECTION_AVAILABLE = "resurrection_available",
+
   // TODO: Charm, Can't Act, etc.
 
   /**

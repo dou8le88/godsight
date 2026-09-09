@@ -1,5 +1,5 @@
 export enum PrettyElementName {
-  NULL_PLAIN = "None",
+  NULL_PLAIN = "Plain",
   FIRE = "Fire",
   WATER = "Water",
   EARTH = "Earth",

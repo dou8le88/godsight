@@ -33,3 +33,21 @@ export type GodsightPartyMemberData = {
   "canGuard": boolean,
   "isVanished": boolean,
 }
+
+export class PartyFormationHelper {
+  static getNameOfFrontlineCharacterInPosition(formation: GodsightPartyFormationData, position: string | number): string {
+    const characterIndex = formation["frontline"][position];
+    if (characterIndex) {
+      const character = formation["members"][characterIndex];
+      if (character) {
+        return character["name"];
+      } else {
+        console.error(`No party member at ${characterIndex} when looking up character name!`);
+        return "Unknown2";
+      }
+    } else {
+      console.error(`No character at ${position} when looking up character name!`);
+      return "Unknown";
+    }
+  }
+}

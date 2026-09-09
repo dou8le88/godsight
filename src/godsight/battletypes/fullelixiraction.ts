@@ -13,7 +13,7 @@ export class FullElixirAction extends BattleAction {
     super();
   }
 
-  getDescription(): string {
+  getSimpleDescription(): string {
     return `The party used a Full Elixir!`;
   }
 

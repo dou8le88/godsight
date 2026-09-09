@@ -22,10 +22,10 @@ export class ChargedAttackAction extends BattleAction {
     super();
   }
 
-  getDescription(): string {
+  getSimpleDescription(): string {
     const damage = this.damageTotals.map(d => d["value"]).join("+");
 
-    return `${this.attackerPosition} made a charged attack against ${this.target} at position ${this.targetPosition}, and dealt ${damage} damage!`;
+    return `${this.attackerPosition} made a charged attack, ${this.name}, against ${this.target} at position ${this.targetPosition}, and dealt ${damage} damage!`;
   }
 
   getStats(): StatsUpdate {

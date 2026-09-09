@@ -16,7 +16,7 @@ export class ChainBurstAction extends BattleAction {
     super();
   }
 
-  getDescription(): string {
+  getSimpleDescription(): string {
     const damage = this.damageInstances.map(i => i["value"]).join("+");
 
     return `The party activated a chain burst, ${this.name}, dealing ${damage} damage!`;

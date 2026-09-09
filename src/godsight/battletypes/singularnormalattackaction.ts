@@ -19,7 +19,7 @@ export class SingularNormalAttackAction extends BattleAction {
     super();
   }
 
-  getDescription(): string {
+  getSimpleDescription(): string {
     const damage = this.damageInstances.map(d => d["value"]).join("+");
 
     return `${this.source} at position ${this.attackerPosition} made a normal attack, dealing ${damage} damage!`;

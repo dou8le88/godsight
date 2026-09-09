@@ -7,15 +7,13 @@ import { DamageScenarioData } from "./gbf/battletypes/scenariodata/damagescenari
 import { DeathScenarioData } from "./gbf/battletypes/scenariodata/deathscenariodata";
 import { FatedChainGaugeScenarioData } from "./gbf/battletypes/scenariodata/fatedchaingaugescenariodata";
 import { FormChangeScenarioData } from "./gbf/battletypes/scenariodata/formchangescenariodata";
-import { FullElixirScenarioData } from "./gbf/battletypes/scenariodata/fullelixirscenariodata";
 import { GenericScenarioData } from "./gbf/battletypes/scenariodata/genericscenariodata";
 import { HonorsGainedScenarioData } from "./gbf/battletypes/scenariodata/honorsgainedscenariodata";
-import { HPChangedScenarioData } from "./gbf/battletypes/scenariodata/hpchangedscenariodata";
-import { GameElementHelper, GameElementValue } from "./gbf/battletypes/scenariodata/mechanics/element";
+import { GameElementValue } from "./gbf/battletypes/scenariodata/mechanics/element";
 import { StatusType } from "./gbf/battletypes/scenariodata/mechanics/statustype";
 import { Actor } from "./gbf/battletypes/scenariodata/mechanics/actor";
 import { MessageScenarioData } from "./gbf/battletypes/scenariodata/messagescenariodata";
-import { MultihitDamageScenarioData, TotalDamageDealt } from "./gbf/battletypes/scenariodata/multihitdamagescenariodata";
+import { MultihitDamageScenarioData } from "./gbf/battletypes/scenariodata/multihitdamagescenariodata";
 import { NormalAttackDamage, NormalAttackScenarioData } from "./gbf/battletypes/scenariodata/normalattackscenariodata";
 import { ReplaceCharacterScenarioData } from "./gbf/battletypes/scenariodata/replacecharacterscenariodata";
 import { ScenarioCommand } from "./gbf/battletypes/scenariodata/scenariocommand";
@@ -23,7 +21,6 @@ import { HealingScenarioData } from "./gbf/battletypes/scenariodata/healingscena
 import { WindowEffectScenarioData } from "./gbf/battletypes/scenariodata/windoweffectscenariodata";
 import { BossData, StartData } from "./gbf/battletypes/startdata";
 import { AbilityAction } from "./godsight/battletypes/abilityaction";
-import { ActionType } from "./godsight/battletypes/actiontype";
 import { BattleAction } from "./godsight/battletypes/battleaction";
 import { GodsightBattleData } from "./godsight/battletypes/battledata";
 import { GodsightBossData } from "./godsight/battletypes/bossdata";
@@ -152,7 +149,14 @@ export class BattleScenarioParser {
 
         case ScenarioCommand.CA_METER_CHANGED:
           const meterChangeScenario = scenario as ChargeAttackMeterChangedScenarioData;
-          actions.push(this.handleMeterChangeScenario(meterChangeScenario, battleData, baseActionNumber + i));
+          const meterChangedAction = this.handleMeterChangeScenario(
+            meterChangeScenario,
+            battleData,
+            baseActionNumber + i
+          );
+          if (meterChangedAction.change != 0) {
+            actions.push(meterChangedAction);
+          }
           break;
 
         case ScenarioCommand.MESSAGE:
@@ -199,10 +203,16 @@ export class BattleScenarioParser {
             );
             if (firstNamedWindowSubaction) {
               abilityAction.name = firstNamedWindowSubaction.name;
-              // TODO: filter out subaction used for name?
+              abilityAction.subactions = abilityAction.subactions.filter(a => !(a instanceof WindowEffectAction));
             }
           }
-          actions.push(abilityAction);
+          if (!this.containsJapaneseRegex.test(abilityAction.name)) {
+            if (abilityAction.name != "") {
+              actions.push(abilityAction);
+            } else {
+              actions.push(...abilityAction.subactions);
+            }
+          }
           // Skip ahead past actions we already included as subactions.
           i += subactions.lastIndex;
           break;
@@ -265,22 +275,31 @@ export class BattleScenarioParser {
 
         case ScenarioCommand.DAMAGE_DEALT_MULTIHIT:
           const multihitDamageScenario = scenario as MultihitDamageScenarioData;
+          const instances = multihitDamageScenario["list"].flat(1).map(hit => {
+            return {
+              "element": hit["color"],
+              "receiverPosition": hit["pos"],
+              "value": hit["value"],
+              "targetHpAfterDamage": hit["hp"],
+              "critical": hit["critical"],
+              "guarded": hit["guard"],
+              "miss": hit["miss"],
+            };
+          });
+          const damagePerTarget: { [key: number]: number } = {};
+          instances.forEach(instance => {
+            if (!damagePerTarget[instance["receiverPosition"]]) {
+              damagePerTarget[instance["receiverPosition"]] = 0;
+            }
+            damagePerTarget[instance["receiverPosition"]] += instance["value"];
+          });
+
           const multihitDamageAction = new MultihitDamageAction(
             baseActionNumber + i,
             multihitDamageScenario["color"],
             multihitDamageScenario["to"],
-            multihitDamageScenario["list"].flat(1).map(hit => {
-              return {
-                "element": hit["color"],
-                "receiverPosition": hit["pos"],
-                "value": hit["value"],
-                "targetHpAfterDamage": hit["hp"],
-                "critical": hit["critical"],
-                "guarded": hit["guard"],
-                "miss": hit["miss"],
-              };
-            }),
-            multihitDamageScenario["total"].map(t => TotalDamageDealt.getTotal(t)),
+            instances,
+            Object.values(damagePerTarget),
           );
           actions.push(multihitDamageAction);
           break;
@@ -526,6 +545,9 @@ export class BattleScenarioParser {
           break;
 
         case ScenarioCommand.TURN_CHANGE:
+          if (stopOnMainAction) {
+            break baseLoop;
+          }
           const turnChangeScenario = scenario as TurnChangeScenarioData;
           const turnChangeAction = new TurnChangeAction(
             baseActionNumber + i,
@@ -627,7 +649,7 @@ export class BattleScenarioParser {
     meterChangeScenario: ChargeAttackMeterChangedScenarioData,
     battleData: GodsightBattleData,
     actionNumber: number,
-  ): BattleAction {
+  ): CAMeterChangedAction {
     const position = meterChangeScenario["pos"];
     const target = meterChangeScenario["to"];
     let newValue = meterChangeScenario["value"];

@@ -11,15 +11,15 @@ export class AbilityAction extends BattleAction {
   constructor(
     public actionNumber: number,
     public name: string,
-    public source: Actor,
+    public actor: Actor,
     public position: number,
     public subactions: BattleAction[],
   ) {
     super();
   }
 
-  getDescription(): string {
-    return `${this.source} at position ${this.position} activated ${this.name}!`;
+  getSimpleDescription(): string {
+    return `${this.actor} at position ${this.position} activated ${this.name}!`;
   }
 
   getStats(): StatsUpdate {
@@ -29,7 +29,7 @@ export class AbilityAction extends BattleAction {
       (prev, cur) => StatsUpdateHelper.concatUpdates(prev, cur),
       update,
     );
-    switch (this.source) {
+    switch (this.actor) {
       case Actor.PLAYER:
         // The subactions have no way to associate certain general stats with
         // a specific character, so we must do it here for now. TODO: fix.
@@ -52,7 +52,7 @@ export class AbilityAction extends BattleAction {
         // via subactions in this case.
         break;
       default:
-        console.error(`Got unknown source ${this.source} for AbilityAction`);
+        console.error(`Got unknown target ${this.actor} for AbilityAction`);
         break;
     }
 
@@ -65,7 +65,7 @@ export class AbilityAction extends BattleAction {
       return new AbilityAction(
         json["actionNumber"] as number,
         json["name"] as string,
-        json["source"] as Actor,
+        json["target"] as Actor,
         json["position"] as number,
         (json["subactions"] as Record<string, unknown>[]).map((action: any) => {
           return BattleActionParser.fromJSON(action);

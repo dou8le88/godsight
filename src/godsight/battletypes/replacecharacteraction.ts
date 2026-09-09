@@ -14,7 +14,7 @@ export class ReplaceCharacterAction extends BattleAction {
     super();
   }
 
-  getDescription(): string {
+  getSimpleDescription(): string {
     return `Character at position ${this.position} was replaced with ${this.newCharacter}!`;
   }
 

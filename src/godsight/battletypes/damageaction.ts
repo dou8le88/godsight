@@ -18,7 +18,7 @@ export class DamageAction extends BattleAction {
     super();
   }
 
-  getDescription(): string {
+  getSimpleDescription(): string {
     const damage = this.instances.map(i => i["value"]).join("+");
 
     return `${this.target} took ${damage} damage!`;

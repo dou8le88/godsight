@@ -17,7 +17,7 @@ export class CAMeterChangedAction extends BattleAction {
     super();
   }
 
-  getDescription(): string {
+  getSimpleDescription(): string {
     if (this.change > 0) {
       return `${this.target} at position ${this.position} gained ${this.change} meter! (total: ${this.newValue})`;
     } else {
