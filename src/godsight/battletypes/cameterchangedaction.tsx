@@ -6,6 +6,7 @@ import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { BattleActionHelper } from "./battleactionhelper";
 import { GodsightBossData } from "./bossdata";
 import { GodsightPartyFormationData } from "./partyformationdata";
+import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class CAMeterChangedAction extends BattleAction {
   public actionType: ActionType = ActionType.CA_METER_CHANGED;
@@ -63,13 +64,13 @@ export class CAMeterChangedAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.CA_METER_CHANGED) {
       return new CAMeterChangedAction(
-        json["actionNumber"] as number,
-        json["target"] as Actor,
-        json["position"] as number,
-        json["newValue"] as number,
-        json["change"] as number,
-        json["bossesAtTimeOfAction"] as GodsightBossData[],
-        json["formationAtTimeOfAction"] as GodsightPartyFormationData,
+        assertNotNullOrUndefined(json["actionNumber"] as number),
+        assertNotNullOrUndefined(json["target"] as Actor),
+        assertNotNullOrUndefined(json["position"] as number),
+        assertNotNullOrUndefined(json["newValue"] as number),
+        assertNotNullOrUndefined(json["change"] as number),
+        assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),
+        assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),
       );
     } else {
       console.error(`CAMeterChangedAction.fromJSON called on ${json}`);

@@ -4,6 +4,7 @@ import { BattleAction } from "./battleaction";
 import { GodsightBattleData } from "./battledata";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { GodsightPartyFormationData, PartyFormationHelper } from "./partyformationdata";
+import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class ReplaceCharacterAction extends BattleAction {
   public actionType: ActionType = ActionType.REPLACED_CHARACTER;
@@ -42,10 +43,10 @@ export class ReplaceCharacterAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.REPLACED_CHARACTER) {
       return new ReplaceCharacterAction(
-        json["actionNumber"] as number,
-        json["position"] as number,
-        json["newCharacter"] as number,
-        json["formationAtTimeOfAction"] as GodsightPartyFormationData,
+        assertNotNullOrUndefined(json["actionNumber"] as number),
+        assertNotNullOrUndefined(json["position"] as number),
+        assertNotNullOrUndefined(json["newCharacter"] as number),
+        assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),
       );
     } else {
       console.error(`ReplaceCharacterAction.fromJSON called on ${json}`);

@@ -3,6 +3,7 @@ import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { GodsightBattleData } from "./battledata";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
+import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class TurnChangeAction extends BattleAction {
   public actionType: ActionType = ActionType.TURN_CHANGE;
@@ -33,9 +34,9 @@ export class TurnChangeAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.TURN_CHANGE) {
       return new TurnChangeAction(
-        json["actionNumber"] as number,
-        json["currentTurn"] as number,
-        json["newTurn"] as number,
+        assertNotNullOrUndefined(json["actionNumber"] as number),
+        assertNotNullOrUndefined(json["currentTurn"] as number),
+        assertNotNullOrUndefined(json["newTurn"] as number),
       );
     } else {
       console.error(`TurnChangeAction.fromJSON called on ${json}`);

@@ -8,6 +8,7 @@ import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { BattleActionHelper } from "./battleactionhelper";
 import { GodsightBossData } from "./bossdata";
 import { GodsightPartyFormationData } from "./partyformationdata";
+import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class AbilityAction extends BattleAction {
   public actionType: ActionType = ActionType.ACTIVATED_ABILITY;
@@ -100,12 +101,12 @@ export class AbilityAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.ACTIVATED_ABILITY) {
       return new AbilityAction(
-        json["actionNumber"] as number,
-        json["name"] as string,
-        json["actor"] as Actor,
-        json["position"] as number,
-        json["bossesAtTimeOfAction"] as GodsightBossData[],
-        json["formationAtTimeOfAction"] as GodsightPartyFormationData,
+        assertNotNullOrUndefined(json["actionNumber"] as number),
+        assertNotNullOrUndefined(json["name"] as string),
+        assertNotNullOrUndefined(json["actor"] as Actor),
+        assertNotNullOrUndefined(json["position"] as number),
+        assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),
+        assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),
         (json["subactions"] as Record<string, unknown>[]).map((action: any) => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],

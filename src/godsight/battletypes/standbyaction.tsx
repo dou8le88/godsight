@@ -7,6 +7,7 @@ import { BattleActionHelper } from "./battleactionhelper";
 import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
 import { GodsightBossData } from "./bossdata";
 import { GodsightPartyFormationData } from "./partyformationdata";
+import { assertNotNull, assertNotNullOrUndefined, assertNotUndefined } from "../../util/assert";
 
 export class StandbyAction extends BattleAction {
   public actionType: ActionType = ActionType.STANDBY;
@@ -18,7 +19,7 @@ export class StandbyAction extends BattleAction {
     public standby: boolean,
     public bossesAtTimeOfAction: GodsightBossData[],
     public formationAtTimeOfAction: GodsightPartyFormationData,
-    public battleMessage?: string,
+    public battleMessage: string | null,
   ) {
     super();
   }
@@ -50,12 +51,12 @@ export class StandbyAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.STANDBY) {
       return new StandbyAction(
-        json["actionNumber"] as number,
-        json["position"] as number,
-        json["standby"] as boolean,
-        json["bossesAtTimeOfAction"] as GodsightBossData[],
-        json["formationAtTimeOfAction"] as GodsightPartyFormationData,
-        json["battleMessage"] as string | undefined,
+        assertNotNullOrUndefined(json["actionNumber"] as number),
+        assertNotNullOrUndefined(json["position"] as number),
+        assertNotNullOrUndefined(json["standby"] as boolean),
+        assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),
+        assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),
+        assertNotUndefined(json["battleMessage"] as string | null),
       );
     } else {
       console.error(`StandbyAction.fromJSON called on ${json}`);

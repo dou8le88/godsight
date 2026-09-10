@@ -9,6 +9,7 @@ import { JSX } from "react/jsx-runtime"
 import { BattleActionHelper } from "./battleactionhelper"
 import { GodsightBossData } from "./bossdata"
 import { GodsightPartyFormationData } from "./partyformationdata"
+import { assertNotNullOrUndefined } from "../../util/assert"
 
 export class BossSpecialAttackAction extends BattleAction {
   public actionType: ActionType = ActionType.BOSS_SPECIAL_ATTACK;
@@ -76,15 +77,15 @@ export class BossSpecialAttackAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.BOSS_SPECIAL_ATTACK) {
       return new BossSpecialAttackAction(
-        json["actionNumber"] as number,
-        json["attackName"] as string,
-        json["sourceName"] as string,
-        json["target"] as Actor,
-        json["count"] as number,
-        json["element"] as GameElementValue,
-        json["damageInstances"] as DamageInstance[],
-        json["bossesAtTimeOfAction"] as GodsightBossData[],
-        json["formationAtTimeOfAction"] as GodsightPartyFormationData,
+        assertNotNullOrUndefined(json["actionNumber"] as number),
+        assertNotNullOrUndefined(json["attackName"] as string),
+        assertNotNullOrUndefined(json["sourceName"] as string),
+        assertNotNullOrUndefined(json["target"] as Actor),
+        assertNotNullOrUndefined(json["count"] as number),
+        assertNotNullOrUndefined(json["element"] as GameElementValue),
+        assertNotNullOrUndefined(json["damageInstances"] as DamageInstance[]),
+        assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),
+        assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),
         json["subactions"].map((action: any) => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],

@@ -7,6 +7,7 @@ import { JSX } from "react/jsx-runtime";
 import { BattleActionHelper } from "./battleactionhelper";
 import { GodsightBossData } from "./bossdata";
 import { GodsightPartyFormationData } from "./partyformationdata";
+import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class ConditionChangeAction extends BattleAction {
   public actionType: ActionType = ActionType.CONDITION_CHANGED;
@@ -97,15 +98,15 @@ export class ConditionChangeAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.CONDITION_CHANGED) {
       return new ConditionChangeAction(
-        json["actionNumber"] as number,
-        json["target"] as Actor,
-        json["position"] as number,
-        json["missCount"] as number,
-        json["buffs"] as GodsightCondition[],
-        json["debuffs"] as GodsightCondition[],
-        json["unclassified"] as GodsightCondition[],
-        json["bossesAtTimeOfAction"] as GodsightBossData[],
-        json["formationAtTimeOfAction"] as GodsightPartyFormationData,
+        assertNotNullOrUndefined(json["actionNumber"] as number),
+        assertNotNullOrUndefined(json["target"] as Actor),
+        assertNotNullOrUndefined(json["position"] as number),
+        assertNotNullOrUndefined(json["missCount"] as number),
+        assertNotNullOrUndefined(json["buffs"] as GodsightCondition[]),
+        assertNotNullOrUndefined(json["debuffs"] as GodsightCondition[]),
+        assertNotNullOrUndefined(json["unclassified"] as GodsightCondition[]),
+        assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),
+        assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),
       );
     } else {
       console.error(`ConditionChangeAction.fromJSON called on ${json}`);

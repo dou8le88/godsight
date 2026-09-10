@@ -7,6 +7,7 @@ import { SingularNormalAttackAction } from "./singularnormalattackaction";
 import { BattleActionHelper } from "./battleactionhelper";
 import { GodsightBossData } from "./bossdata";
 import { GodsightPartyFormationData } from "./partyformationdata";
+import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class NormalAttackAction extends BattleAction {
   public actionType: ActionType = ActionType.NORMAL_ATTACK;
@@ -20,6 +21,7 @@ export class NormalAttackAction extends BattleAction {
     super();
   }
 
+  // #futureproof
   private attackCountWording: Record<number, string> = {
     0: "couldn't attack",
     1: "made a single attack",
@@ -77,9 +79,9 @@ export class NormalAttackAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.NORMAL_ATTACK) {
       return new NormalAttackAction(
-        json["actionNumber"] as number,
-        json["bossesAtTimeOfAction"] as GodsightBossData[],
-        json["formationAtTimeOfAction"] as GodsightPartyFormationData,
+        assertNotNullOrUndefined(json["actionNumber"] as number),
+        assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),
+        assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),
         json["subactions"].map((action: any) => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],

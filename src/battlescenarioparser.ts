@@ -642,7 +642,7 @@ export class BattleScenarioParser {
             break baseLoop;
           }
           const standbyScenario = scenario as StandbyScenarioData;
-          let battleMessage: string | undefined;
+          let battleMessage: string | null = null;
           const previousScenario = scenarioData[i - 1];
           if (previousScenario && previousScenario["cmd"] == ScenarioCommand._BATTLE_LOG) {
             if ((previousScenario as BattleLogScenarioData)["body"]) {

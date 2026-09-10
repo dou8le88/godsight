@@ -6,6 +6,7 @@ import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { BattleActionHelper } from "./battleactionhelper";
 import { GodsightBossData } from "./bossdata";
 import { GodsightPartyFormationData } from "./partyformationdata";
+import { assertNotNullOrUndefined, assertNotUndefined } from "../../util/assert";
 
 export class DeathAction extends BattleAction {
   public actionType: ActionType = ActionType.DEATH;
@@ -44,12 +45,12 @@ export class DeathAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.DEATH) {
       return new DeathAction(
-        json["actionNumber"] as number,
-        json["target"] as Actor,
-        json["position"] as number,
-        json["bossesAtTimeOfAction"] as GodsightBossData[],
-        json["formationAtTimeOfAction"] as GodsightPartyFormationData,
-        json["index"] as number | null,
+        assertNotNullOrUndefined(json["actionNumber"] as number),
+        assertNotNullOrUndefined(json["target"] as Actor),
+        assertNotNullOrUndefined(json["position"] as number),
+        assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),
+        assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),
+        assertNotUndefined(json["index"] as number | null),
       );
     } else {
       console.error(`DeathAction.fromJSON called on ${json}`);

@@ -7,6 +7,7 @@ import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { BattleActionHelper } from "./battleactionhelper";
 import { GodsightBossData } from "./bossdata";
 import { GodsightPartyFormationData } from "./partyformationdata";
+import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class HealingAction extends BattleAction {
   public actionType: ActionType = ActionType.HEAL;
@@ -56,11 +57,11 @@ export class HealingAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.HEAL) {
       return new HealingAction(
-        json["actionNumber"] as number,
-        json["target"] as Actor,
-        json["healingInstances"] as HealingInstance[],
-        json["bossesAtTimeOfAction"] as GodsightBossData[],
-        json["formationAtTimeOfAction"] as GodsightPartyFormationData,
+        assertNotNullOrUndefined(json["actionNumber"] as number),
+        assertNotNullOrUndefined(json["target"] as Actor),
+        assertNotNullOrUndefined(json["healingInstances"] as HealingInstance[]),
+        assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),
+        assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),
       );
     } else {
       console.error(`HealingAction.fromJSON called on ${json}`);

@@ -3,6 +3,7 @@ import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { GodsightBattleData } from "./battledata";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
+import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class WindowEffectAction extends BattleAction {
   public actionType: ActionType = ActionType.WINDOW_EFFECT;
@@ -32,8 +33,8 @@ export class WindowEffectAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.WINDOW_EFFECT) {
       return new WindowEffectAction(
-        json["actionNumber"] as number,
-        json["name"] as string,
+        assertNotNullOrUndefined(json["actionNumber"] as number),
+        assertNotNullOrUndefined(json["name"] as string),
       );
     } else {
       console.error(`WindowEffectAction.fromJSON called on ${json}`);

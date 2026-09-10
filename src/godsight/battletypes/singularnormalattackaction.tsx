@@ -9,6 +9,7 @@ import { JSX } from "react/jsx-runtime";
 import { BattleActionHelper } from "./battleactionhelper";
 import { GodsightBossData } from "./bossdata";
 import { GodsightPartyFormationData } from "./partyformationdata";
+import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class SingularNormalAttackAction extends BattleAction {
   public actionType: ActionType = ActionType.SINGULAR_NORMAL_ATTACK;
@@ -86,13 +87,13 @@ export class SingularNormalAttackAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.SINGULAR_NORMAL_ATTACK) {
       return new SingularNormalAttackAction(
-        json["actionNumber"] as number,
-        json["source"] as Actor,
-        json["attackerPosition"] as number,
-        json["element"] as GameElementValue,
-        json["damageInstances"] as DamageInstance[],
-        json["bossesAtTimeOfAction"] as GodsightBossData[],
-        json["formationAtTimeOfAction"] as GodsightPartyFormationData,
+        assertNotNullOrUndefined(json["actionNumber"] as number),
+        assertNotNullOrUndefined(json["source"] as Actor),
+        assertNotNullOrUndefined(json["attackerPosition"] as number),
+        assertNotNullOrUndefined(json["element"] as GameElementValue),
+        assertNotNullOrUndefined(json["damageInstances"] as DamageInstance[]),
+        assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),
+        assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),
       );
     } else {
       console.error(`SingularNormalAttackAction.fromJSON called on ${json}`);

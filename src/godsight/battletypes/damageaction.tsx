@@ -8,6 +8,7 @@ import { JSX } from "react/jsx-runtime";
 import { BattleActionHelper } from "./battleactionhelper";
 import { GodsightBossData } from "./bossdata";
 import { GodsightPartyFormationData } from "./partyformationdata";
+import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class DamageAction extends BattleAction {
   public actionType: ActionType = ActionType.DAMAGE_DEALT;
@@ -75,12 +76,12 @@ export class DamageAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.DAMAGE_DEALT) {
       return new DamageAction(
-        json["actionNumber"] as number,
-        json["element"] as GameElementValue,
-        json["target"] as Actor,
-        json["instances"] as DamageInstance[],
-        json["bossesAtTimeOfAction"] as GodsightBossData[],
-        json["formationAtTimeOfAction"] as GodsightPartyFormationData,
+        assertNotNullOrUndefined(json["actionNumber"] as number),
+        assertNotNullOrUndefined(json["element"] as GameElementValue),
+        assertNotNullOrUndefined(json["target"] as Actor),
+        assertNotNullOrUndefined(json["instances"] as DamageInstance[]),
+        assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),
+        assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),
       );
     } else {
       console.error(`DamageAction.fromJSON called on ${json}`);

@@ -8,6 +8,7 @@ import { JSX } from "react/jsx-runtime";
 import { BattleActionHelper } from "./battleactionhelper";
 import { GodsightBossData } from "./bossdata";
 import { GodsightPartyFormationData } from "./partyformationdata";
+import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class MultihitDamageAction extends BattleAction {
   public actionType: ActionType = ActionType.DAMAGE_DEALT_MULTIHIT;
@@ -75,12 +76,12 @@ export class MultihitDamageAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.DAMAGE_DEALT_MULTIHIT) {
       return new MultihitDamageAction(
-        json["actionNumber"] as number,
-        json["element"] as GameElementValue,
-        json["target"] as Actor,
-        json["hits"] as DamageInstance[],
-        json["bossesAtTimeOfAction"] as GodsightBossData[],
-        json["formationAtTimeOfAction"] as GodsightPartyFormationData,
+        assertNotNullOrUndefined(json["actionNumber"] as number),
+        assertNotNullOrUndefined(json["element"] as GameElementValue),
+        assertNotNullOrUndefined(json["target"] as Actor),
+        assertNotNullOrUndefined(json["hits"] as DamageInstance[]),
+        assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),
+        assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),
       );
     } else {
       console.error(`MultihitDamageAction.fromJSON called on ${json}`);

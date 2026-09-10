@@ -6,6 +6,7 @@ import { BattleActionHelper } from "./battleactionhelper";
 import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
 import { GodsightBossData } from "./bossdata";
 import { GodsightPartyFormationData } from "./partyformationdata";
+import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class OmenCancelAction extends BattleAction {
   public actionType: ActionType = ActionType.OMEN_CANCELLED;
@@ -42,10 +43,10 @@ export class OmenCancelAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.OMEN_CANCELLED) {
       return new OmenCancelAction(
-        json["actionNumber"] as number,
-        json["canceledBossPosition"] as number,
-        json["bossesAtTimeOfAction"] as GodsightBossData[],
-        json["formationAtTimeOfAction"] as GodsightPartyFormationData,
+        assertNotNullOrUndefined(json["actionNumber"] as number),
+        assertNotNullOrUndefined(json["canceledBossPosition"] as number),
+        assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),
+        assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),
       );
     } else {
       console.error(`OmenCancelAction.fromJSON called on ${json}`);

@@ -7,6 +7,7 @@ import { BattleActionHelper } from "./battleactionhelper";
 import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
 import { GodsightBossData } from "./bossdata";
 import { GodsightPartyFormationData } from "./partyformationdata";
+import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class ChainBurstAction extends BattleAction {
   public actionType: ActionType = ActionType.CHAIN_BURST;
@@ -52,12 +53,12 @@ export class ChainBurstAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.CHAIN_BURST) {
       return new ChainBurstAction(
-        json["actionNumber"] as number,
-        json["chainCount"] as number,
-        json["name"] as string,
-        json["damageInstances"] as DamageInstance[],
-        json["bossesAtTimeOfAction"] as GodsightBossData[],
-        json["formationAtTimeOfAction"] as GodsightPartyFormationData,
+        assertNotNullOrUndefined(json["actionNumber"] as number),
+        assertNotNullOrUndefined(json["chainCount"] as number),
+        assertNotNullOrUndefined(json["name"] as string),
+        assertNotNullOrUndefined(json["damageInstances"] as DamageInstance[]),
+        assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),
+        assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),
       );
     } else {
       console.error(`ChainBurstAction.fromJSON called on ${json}`);

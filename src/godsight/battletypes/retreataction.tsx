@@ -2,6 +2,7 @@ import { JSX } from "react/jsx-runtime";
 import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
+import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class RetreatAction extends BattleAction {
   public actionType: ActionType = ActionType.RETREAT;
@@ -29,7 +30,7 @@ export class RetreatAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.RETREAT) {
       return new RetreatAction(
-        json["actionNumber"] as number,
+        assertNotNullOrUndefined(json["actionNumber"] as number),
       );
     } else {
       console.error(`RetreatAction.fromJSON called on ${json}`);

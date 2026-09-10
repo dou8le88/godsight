@@ -9,6 +9,7 @@ import { BattleActionHelper } from "./battleactionhelper";
 import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
 import { GodsightBossData } from "./bossdata";
 import { GodsightPartyFormationData } from "./partyformationdata";
+import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class SummonAction extends BattleAction {
   public actionType: ActionType = ActionType.CALLED_SUMMON;
@@ -66,11 +67,11 @@ export class SummonAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.CALLED_SUMMON) {
       return new this(
-        json["actionNumber"] as number,
-        json["name"] as string,
-        json["damageInstances"] as DamageInstance[],
-        json["bossesAtTimeOfAction"] as GodsightBossData[],
-        json["formationAtTimeOfAction"] as GodsightPartyFormationData,
+        assertNotNullOrUndefined(json["actionNumber"] as number),
+        assertNotNullOrUndefined(json["name"] as string),
+        assertNotNullOrUndefined(json["damageInstances"] as DamageInstance[]),
+        assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),
+        assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),
         json["subactions"].map((action: any) => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],

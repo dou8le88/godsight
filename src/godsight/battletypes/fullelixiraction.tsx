@@ -3,6 +3,7 @@ import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { BattleActionParser } from "./battleactionparser";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
+import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class FullElixirAction extends BattleAction {
   public actionType: ActionType = ActionType.USED_FULL_ELIXIR;
@@ -42,7 +43,7 @@ export class FullElixirAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.USED_FULL_ELIXIR) {
       return new FullElixirAction(
-        json["actionNumber"] as number,
+        assertNotNullOrUndefined(json["actionNumber"] as number),
         json["subactions"].map((action: any) => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],
