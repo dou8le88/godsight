@@ -26,7 +26,7 @@ export default function GodsightPanel() {
 
   // raid/123456
   // raid_multi/123456
-  const battleIdRegex = /^raid(?:_multi)\/(\d+)/;
+  const battleIdRegex = /^raid(?:_multi)?\/(\d+)/;
 
   // Find out if we're inspecting a GBF page.
   const [onGbfPage, setOnGbfPage] = useState(false);
@@ -66,12 +66,19 @@ export default function GodsightPanel() {
       const godsightBattleData = battleScenarioParser.parseStartData(data);
       const raidId = godsightBattleData["raidId"];
 
+      const existingRaid = godsightStorage.battles[raidId];
+
+      if (existingRaid) {
+        // An existing raid means that the new battleData shouldn't have any actions in it.
+        godsightBattleData["turnData"] = existingRaid["turnData"];
+      }
+
       setSelectedBattle(String(raidId));
       storageManager.setBattleData(raidId, godsightBattleData);
     }
 
     function withActiveBattle(callback: (battleId: string, raid: GodsightBattleData) => any) {
-      chrome.devtools.inspectedWindow.eval("window.location.href", (url: string) => {
+      chrome.devtools.inspectedWindow.eval("window.location.hash", (url: string) => {
         const fragment = url.split("#").at(-1);
         const battleId = ((fragment || "").match(battleIdRegex) || []).at(-1);
 
@@ -79,6 +86,16 @@ export default function GodsightPanel() {
           const raid = godsightStorage["battles"][battleId];
           if (raid) {
             const raidCopy = structuredClone(raid);
+            Object.keys(raidCopy["turnData"]).forEach(turnNumber => {
+              raidCopy["turnData"][turnNumber]["turnActions"] = raidCopy["turnData"][turnNumber]["turnActions"].map(action => {
+                const rehydratedAction = BattleActionParser.fromJSON(action);
+                if (rehydratedAction) {
+                  return rehydratedAction;
+                } else {
+                  return action;
+                }
+              });
+            });
             callback(battleId, raidCopy);
           } else {
             console.error("Unable to record battle actions: no known active battle (refresh the battle while the Godsight panel is open)");
@@ -93,16 +110,6 @@ export default function GodsightPanel() {
       console.info(`Got battle data for ${endpoint}`);
 
       withActiveBattle((battleId, raid) => {
-        Object.keys(raid["turnData"]).forEach(turnNumber => {
-          raid["turnData"][turnNumber]["turnActions"] = raid["turnData"][turnNumber]["turnActions"].map(action => {
-            const rehydratedAction = BattleActionParser.fromJSON(action);
-            if (rehydratedAction) {
-              return rehydratedAction;
-            } else {
-              return action;
-            }
-          });
-        });
         const currentTurnNumber = raid["currentTurn"];
         let currentTurn = raid["turnData"][currentTurnNumber];
 
@@ -141,17 +148,8 @@ export default function GodsightPanel() {
     }
 
     function retryBattleHandler() {
-      // Since there's no response body to this, we just edit the currently-tracked battle.
-      withActiveBattle((battleId, raid) => {
-        raid["currentTurn"] = 1;
-        raid["battleStats"] = {
-          "generalStats": StatsUpdateHelper.getEmptyStats(),
-          "characterStats": {},
-        };
-        raid["turnData"] = {};
-
-        storageManager.setBattleData(Number(battleId), raid);
-      });
+      // This actually starts a new battle so we don't really need to do anything.
+      // TODO: maybe update the battle status of the previous battle.
     }
 
     async function onRequestFinishedListener(request: chrome.devtools.network.Request) {

@@ -134,6 +134,11 @@ export enum ScenarioCommand {
   // TODO: Charm, Can't Act, etc.
 
   /**
+   * Sometimes contains useful information about certain actions, such as attacking under the effects of Confusion.
+   * Not directly processed but instead used by other actions.
+   */
+  _BATTLE_LOG = "battlelog",
+  /**
    * Ignored command, do not use, exists for type completeness in the parser.
    */
   _TURN = "turn",
@@ -147,10 +152,6 @@ export enum ScenarioCommand {
    * we don't use it directly.
    */
   _SCREEN_EFFECT = "effect",
-  /**
-   * Ignored command, do not use, exists for type completeness in the parser.
-   */
-  _BATTLE_LOG = "battlelog",
   /**
    * Ignored command, do not use, exists for type completeness in the parser.
    */

@@ -1,8 +1,12 @@
+import { JSX } from "react/jsx-runtime";
 import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
 import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { HealingInstance } from "./healinginstance";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
+import { BattleActionHelper } from "./battleactionhelper";
+import { GodsightBossData } from "./bossdata";
+import { GodsightPartyFormationData } from "./partyformationdata";
 
 export class HealingAction extends BattleAction {
   public actionType: ActionType = ActionType.HEAL;
@@ -12,14 +16,23 @@ export class HealingAction extends BattleAction {
     public actionNumber: number,
     public target: Actor,
     public healingInstances: HealingInstance[],
+    public bossesAtTimeOfAction: GodsightBossData[],
+    public formationAtTimeOfAction: GodsightPartyFormationData,
   ) {
     super();
   }
 
-  getSimpleDescription(): string {
-    const healing = this.healingInstances.map(h => h["value"]).join("+");
+  getDescription(): JSX.Element {
+    const healingJsx = BattleActionHelper.getHealingInstanceJsx(
+      this.bossesAtTimeOfAction,
+      this.formationAtTimeOfAction,
+      this.target,
+      this.healingInstances,
+    );
 
-    return `${this.target} was healed for ${healing}!`;
+    return (
+      healingJsx
+    );
   }
 
   getStats(): StatsUpdate {
@@ -46,6 +59,8 @@ export class HealingAction extends BattleAction {
         json["actionNumber"] as number,
         json["target"] as Actor,
         json["healingInstances"] as HealingInstance[],
+        json["bossesAtTimeOfAction"] as GodsightBossData[],
+        json["formationAtTimeOfAction"] as GodsightPartyFormationData,
       );
     } else {
       console.error(`HealingAction.fromJSON called on ${json}`);

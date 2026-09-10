@@ -1,3 +1,4 @@
+import { JSX } from "react/jsx-runtime";
 import { ActionType } from "./actiontype";
 import { StatsUpdate } from "./stats";
 
@@ -8,7 +9,7 @@ export abstract class BattleAction {
 
   abstract getStats(): StatsUpdate;
 
-  abstract getSimpleDescription(): string;
+  abstract getDescription(): JSX.Element;
 
   static fromJSON(json: { [key: string]: any; }): BattleAction | undefined {
     throw new Error("BattleAction subclasses must implement a `static fromJSON` method!");

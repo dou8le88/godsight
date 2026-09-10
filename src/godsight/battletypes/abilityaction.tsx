@@ -1,25 +1,62 @@
+import { JSX } from "react/jsx-runtime";
 import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
 import { GameElementHelper } from "../../gbf/battletypes/scenariodata/mechanics/element";
 import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { BattleActionParser } from "./battleactionparser";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
+import { BattleActionHelper } from "./battleactionhelper";
+import { GodsightBossData } from "./bossdata";
+import { GodsightPartyFormationData } from "./partyformationdata";
 
 export class AbilityAction extends BattleAction {
   public actionType: ActionType = ActionType.ACTIVATED_ABILITY;
+  public overrideMessage: string = "";
 
   constructor(
     public actionNumber: number,
     public name: string,
     public actor: Actor,
     public position: number,
+    public bossesAtTimeOfAction: GodsightBossData[],
+    public formationAtTimeOfAction: GodsightPartyFormationData,
     public subactions: BattleAction[],
   ) {
     super();
   }
 
-  getSimpleDescription(): string {
-    return `${this.actor} at position ${this.position} activated ${this.name}!`;
+  getDescription(): JSX.Element {
+    if (this.overrideMessage) {
+      return (
+        <div className="action-description" >{this.overrideMessage}
+          {
+            this.subactions.map(subaction => (
+              subaction.getDescription()
+            ))
+          }
+        </div>
+      );
+    } else {
+      const actorName = BattleActionHelper.getActorName(
+        this.bossesAtTimeOfAction,
+        this.formationAtTimeOfAction,
+        this.actor,
+        this.position
+      );
+
+      return (
+        <>
+          <div className="action-description"> {actorName} activated {this.name}!
+            {
+              this.subactions.map(subaction => (
+                subaction.getDescription()
+              ))
+            }
+          </div>
+        </>
+      );
+    }
+
   }
 
   getStats(): StatsUpdate {
@@ -65,8 +102,10 @@ export class AbilityAction extends BattleAction {
       return new AbilityAction(
         json["actionNumber"] as number,
         json["name"] as string,
-        json["target"] as Actor,
+        json["actor"] as Actor,
         json["position"] as number,
+        json["bossesAtTimeOfAction"] as GodsightBossData[],
+        json["formationAtTimeOfAction"] as GodsightPartyFormationData,
         (json["subactions"] as Record<string, unknown>[]).map((action: any) => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],

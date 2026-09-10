@@ -55,6 +55,8 @@ import { OmenCancelScenarioData } from "./gbf/battletypes/scenariodata/omencance
 import { OmenCancelAction } from "./godsight/battletypes/omencancelaction";
 import { StandbyScenarioData } from "./gbf/battletypes/scenariodata/standbyscenariodata";
 import { StandbyAction } from "./godsight/battletypes/standbyaction";
+import { BattleLogScenarioData } from "./gbf/battletypes/scenariodata/battlelogscenariodata";
+import { RetreatAction } from "./godsight/battletypes/retreataction";
 
 export class BattleScenarioParser {
   constructor() {
@@ -137,6 +139,8 @@ export class BattleScenarioParser {
               }
               return damageInstance;
             }),
+            structuredClone(battleData["boss"]),
+            structuredClone(battleData["party"]),
             // Peek ahead at further scenarios to find out the consequences of this one, so we can associate them.
             subactions.actions,
           );
@@ -154,21 +158,27 @@ export class BattleScenarioParser {
             battleData,
             baseActionNumber + i
           );
-          if (meterChangedAction.change != 0) {
+          // handle not getting any bar (due to debuffs, already being at max, etc.)
+          // or diamondless enemies getting funny calcs.
+          if (meterChangedAction.change != 0 && meterChangedAction.change < 1000) {
             actions.push(meterChangedAction);
           }
           break;
 
         case ScenarioCommand.MESSAGE:
           const buffDebuffChangeScenario = scenario as MessageScenarioData;
-          const buffDebuffActions = this.handleMessageScenario(buffDebuffChangeScenario, baseActionNumber + i);
+          const buffDebuffActions = this.handleMessageScenario(
+            battleData,
+            buffDebuffChangeScenario,
+            baseActionNumber + i,
+          );
           actions.push(...buffDebuffActions);
           baseActionNumber += buffDebuffActions.length;
           break;
 
         case ScenarioCommand.DEATH:
           const deathScenario = scenario as DeathScenarioData;
-          actions.push(this.handleDeathScenario(deathScenario, baseActionNumber + i));
+          actions.push(this.handleDeathScenario(battleData, deathScenario, baseActionNumber + i));
           break;
 
         case ScenarioCommand.ABILITY: {
@@ -192,10 +202,13 @@ export class BattleScenarioParser {
             abilityScenario["name"],
             abilityScenario["to"],
             abilityScenario["pos"],
+            structuredClone(battleData["boss"]),
+            structuredClone(battleData["party"]),
             subactions.actions,
           );
-          // Fix some abilities activating without names (or with untranslated names) in the ability itself
-          // but the correct name shows up in subactions.
+          // Fix various ways that the Ability command can be supremely unhelpful.
+          // There are numerous scenarios where we have empty ability names and have
+          // to use surrounding commands as context to display something useful.
           if (!abilityAction.name || this.containsJapaneseRegex.test(abilityAction.name)) {
             const windowSubactions = abilityAction.subactions.filter(a => a instanceof WindowEffectAction) as WindowEffectAction[];
             const firstNamedWindowSubaction = windowSubactions.find(a =>
@@ -203,15 +216,28 @@ export class BattleScenarioParser {
             );
             if (firstNamedWindowSubaction) {
               abilityAction.name = firstNamedWindowSubaction.name;
-              abilityAction.subactions = abilityAction.subactions.filter(a => !(a instanceof WindowEffectAction));
             }
           }
+          abilityAction.subactions = abilityAction.subactions.filter(a => !(a instanceof WindowEffectAction));
           if (!this.containsJapaneseRegex.test(abilityAction.name)) {
             if (abilityAction.name != "") {
               actions.push(abilityAction);
             } else {
-              actions.push(...abilityAction.subactions);
+              const previousScenario = scenarioData[i - 1];
+              if (previousScenario && previousScenario["cmd"] == ScenarioCommand._BATTLE_LOG) {
+                const battleLogScenario = previousScenario as BattleLogScenarioData;
+                abilityAction.overrideMessage = battleLogScenario["body"];
+                actions.push(abilityAction);
+              } else {
+                // No known way (yet) to make sense of this Ability command, so just
+                // let the subactions be independent.
+                actions.push(...abilityAction.subactions);
+              }
             }
+          } else {
+            // No known way (yet) to make sense of this Ability command, so just
+            // let the subactions be independent.
+            actions.push(...abilityAction.subactions);
           }
           // Skip ahead past actions we already included as subactions.
           i += subactions.lastIndex;
@@ -234,12 +260,19 @@ export class BattleScenarioParser {
             baseActionNumber + i,
             position,
             newCharacter,
+            structuredClone(battleData["party"]),
           );
           actions.push(replaceCharacterAction);
-          // TODO: test logic with Tactical Relocation, assuming it's the same command,
-          // to verify that the parameters are named correctly.
-          // const currentCharacterAtPos = battleData["party"]["frontline"][position];
-          // battleData["party"]["frontline"][position] = newCharacter;
+
+          const entireFormation = battleData["party"]["frontline"].concat(battleData["party"]["backline"]);
+          const currentCharacterAtPos = entireFormation[position];
+          const oldPositionOfNewCharacter = entireFormation.findIndex(c => c == newCharacter);
+          entireFormation[position] = newCharacter;
+          entireFormation[oldPositionOfNewCharacter] = currentCharacterAtPos;
+          const newFrontline = entireFormation.slice(0, 4);
+          const newBackline = entireFormation.slice(4);
+          battleData["party"]["frontline"] = newFrontline;
+          battleData["party"]["backline"] = newBackline;
           break;
 
         case ScenarioCommand.WINDOW_EFFECT:
@@ -269,6 +302,8 @@ export class BattleScenarioParser {
                 "miss": l["miss"],
               };
             }),
+            structuredClone(battleData["boss"]),
+            structuredClone(battleData["party"]),
           );
           actions.push(damageAction);
           break;
@@ -299,7 +334,8 @@ export class BattleScenarioParser {
             multihitDamageScenario["color"],
             multihitDamageScenario["to"],
             instances,
-            Object.values(damagePerTarget),
+            structuredClone(battleData["boss"]),
+            structuredClone(battleData["party"]),
           );
           actions.push(multihitDamageAction);
           break;
@@ -316,6 +352,8 @@ export class BattleScenarioParser {
           );
           const normalAttackAction = new NormalAttackAction(
             baseActionNumber + i,
+            structuredClone(battleData["boss"]),
+            structuredClone(battleData["party"]),
             subactions.actions,
           );
           actions.push(normalAttackAction);
@@ -356,6 +394,8 @@ export class BattleScenarioParser {
                 "miss": damage["miss"],
               };
             }),
+            structuredClone(battleData["boss"]),
+            structuredClone(battleData["party"]),
           );
           actions.push(singularNormalAttackAction);
           break;
@@ -399,6 +439,8 @@ export class BattleScenarioParser {
                 "guarded": false,
               };
             }),
+            structuredClone(battleData["boss"]),
+            structuredClone(battleData["party"]),
             subactions.actions,
           );
           actions.push(chargedAttackAction);
@@ -438,7 +480,9 @@ export class BattleScenarioParser {
                 "value": h["value"],
                 "hpAfterHealing": h["hp"],
               };
-            })
+            }),
+            structuredClone(battleData["boss"]),
+            structuredClone(battleData["party"]),
           );
           actions.push(healingAction);
           break;
@@ -468,8 +512,17 @@ export class BattleScenarioParser {
                 "miss": 0,
               }
             }),
+            structuredClone(battleData["boss"]),
+            structuredClone(battleData["party"]),
             subactions.actions,
           );
+          // This occurs due to the fact that you can reskin summons. There are two summon commands,
+          // one to show the summon animation and one to show the actual damage.
+          const subsummonaction = summonAction.subactions.find(a => a instanceof SummonAction);
+          if (subsummonaction) {
+            summonAction.damageInstances = subsummonaction.damageInstances;
+            summonAction.subactions = subsummonaction.subactions;
+          }
           actions.push(summonAction);
           i += subactions.lastIndex;
           break;
@@ -484,6 +537,8 @@ export class BattleScenarioParser {
             chainBurstScenario["chain_num"],
             "Unknown",
             [],
+            structuredClone(battleData["boss"]),
+            structuredClone(battleData["party"]),
           );
           // A CHAIN_BURST command should be immediately followed by _SCREEN_EFFECT
           // with its name and a DAMAGE_DEALT or DAMAGE_DEALT_MULTIHIT command
@@ -535,6 +590,10 @@ export class BattleScenarioParser {
 
         case ScenarioCommand.RETREAT:
           battleData["battleProgressStatus"] = BattleProgressStatus.RETREATED;
+          const retreatAction = new RetreatAction(
+            baseActionNumber + i,
+          );
+          actions.push(retreatAction);
           break baseLoop;
 
         case ScenarioCommand.WON_BATTLE:
@@ -551,9 +610,10 @@ export class BattleScenarioParser {
           const turnChangeScenario = scenario as TurnChangeScenarioData;
           const turnChangeAction = new TurnChangeAction(
             baseActionNumber + i,
+            battleData["currentTurn"],
             turnChangeScenario["turn"],
           );
-          battleData["updateTurnTo"] = turnChangeAction.turn;
+          battleData["updateTurnTo"] = turnChangeAction.newTurn;
           actions.push(turnChangeAction);
           break;
 
@@ -569,6 +629,8 @@ export class BattleScenarioParser {
           const omenCancelAction = new OmenCancelAction(
             baseActionNumber + i,
             omenCancelScenario["pos"],
+            structuredClone(battleData["boss"]),
+            structuredClone(battleData["party"]),
           );
           actions.push(omenCancelAction);
           break;
@@ -583,17 +645,22 @@ export class BattleScenarioParser {
           let battleMessage: string | undefined;
           const previousScenario = scenarioData[i - 1];
           if (previousScenario && previousScenario["cmd"] == ScenarioCommand._BATTLE_LOG) {
-            if ((previousScenario as any)["body"]) {
-              battleMessage = (previousScenario as any)["body"];
+            if ((previousScenario as BattleLogScenarioData)["body"]) {
+              battleMessage = (previousScenario as BattleLogScenarioData)["body"];
             }
           }
           const standbyAction = new StandbyAction(
             baseActionNumber + i,
             standbyScenario["pos"],
             standbyScenario["standby"],
+            structuredClone(battleData["boss"]),
+            structuredClone(battleData["party"]),
             battleMessage,
           );
           actions.push(standbyAction);
+          break;
+
+        case ScenarioCommand._BATTLE_LOG:
           break;
 
         // All of these commands are recognized but ignored.
@@ -603,7 +670,6 @@ export class BattleScenarioParser {
         case ScenarioCommand._CONDITION:
         case ScenarioCommand._SCREEN_EFFECT:
         case ScenarioCommand._BGM:
-        case ScenarioCommand._BATTLE_LOG:
         case ScenarioCommand._MODE_CHANGE:
         case ScenarioCommand._WAIT:
         case ScenarioCommand._IMAGE_CHANGE:
@@ -622,11 +688,17 @@ export class BattleScenarioParser {
     };
   }
 
-  private handleDeathScenario(deathScenario: DeathScenarioData, actionNumber: number): BattleAction {
+  private handleDeathScenario(
+    battleData: GodsightBattleData,
+    deathScenario: DeathScenarioData,
+    actionNumber: number,
+  ): BattleAction {
     const action = new DeathAction(
       actionNumber,
       deathScenario["to"],
       deathScenario["pos"],
+      structuredClone(battleData["boss"]),
+      structuredClone(battleData["party"]),
       typeof deathScenario["index"] === "number" ? deathScenario["index"] : null,
     );
 
@@ -673,12 +745,18 @@ export class BattleScenarioParser {
       position,
       newValue,
       newValue - initialValue,
+      structuredClone(battleData["boss"]),
+      structuredClone(battleData["party"]),
     );
 
     return action;
   }
 
-  private handleMessageScenario(buffDebuffChangeScenario: MessageScenarioData, actionNumber: number): BattleAction[] {
+  private handleMessageScenario(
+    battleData: GodsightBattleData,
+    buffDebuffChangeScenario: MessageScenarioData,
+    actionNumber: number,
+  ): BattleAction[] {
     const actions: BattleAction[] = [];
 
     // Buffs and debuffs changed.
@@ -699,6 +777,8 @@ export class BattleScenarioParser {
           [],
           [],
           [],
+          structuredClone(battleData["boss"]),
+          structuredClone(battleData["party"]),
         );
       });
 
@@ -759,6 +839,8 @@ export class BattleScenarioParser {
           [],
           [],
           [],
+          structuredClone(battleData["boss"]),
+          structuredClone(battleData["party"]),
         );
       });
 
@@ -793,12 +875,14 @@ export class BattleScenarioParser {
               break;
           }
 
-          destination.push({
-            "name": change["text"],
-            "type": type,
-            "icon": change["status"],
-            "dispelled": ("dispel" in change && change["dispel"] == 1),
-          });
+          if (change["text"]) {
+            destination.push({
+              "name": change["text"],
+              "type": type,
+              "icon": change["status"],
+              "dispelled": ("dispel" in change && change["dispel"] == 1),
+            });
+          }
         });
       });
 

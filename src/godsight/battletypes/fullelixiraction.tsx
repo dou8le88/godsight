@@ -1,34 +1,35 @@
+import { JSX } from "react/jsx-runtime";
 import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { BattleActionParser } from "./battleactionparser";
-import { DamageInstance } from "./damageinstance";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
-export class SummonAction extends BattleAction {
-  public actionType: ActionType = ActionType.CALLED_SUMMON;
+export class FullElixirAction extends BattleAction {
+  public actionType: ActionType = ActionType.USED_FULL_ELIXIR;
 
   constructor(
     public actionNumber: number,
-    public name: string,
-    public damageInstances: DamageInstance[],
     public subactions: BattleAction[],
   ) {
     super();
   }
 
-  getSimpleDescription(): string {
-    const damage = this.damageInstances.map(d => d["value"]).join("+");
-
-    return `${this.name} was called, dealing ${damage} damage!`;
+  getDescription(): JSX.Element {
+    return (
+      <>
+        <div className="action-description">The party used a Full Elixir!
+          {
+            this.subactions.map(subaction => (
+              subaction.getDescription()
+            ))
+          }
+        </div>
+      </>
+    );
   }
 
   getStats(): StatsUpdate {
     const update = StatsUpdateHelper.getEmptyStatsUpdate();
-
-    this.damageInstances.forEach(instance => {
-      update["generalStats"]["otherDamage"][instance["element"]] += instance["value"];
-    });
-
     const subactionUpdates = this.subactions.map(action => action.getStats());
 
     return subactionUpdates.reduce(
@@ -37,19 +38,17 @@ export class SummonAction extends BattleAction {
     );
   }
 
-  static fromJSON(json: { [key: string]: any; }): SummonAction | undefined {
+  static fromJSON(json: { [key: string]: any; }): FullElixirAction | undefined {
     const actionType = json["actionType"];
-    if (actionType == ActionType.CALLED_SUMMON) {
-      return new SummonAction(
+    if (actionType == ActionType.USED_FULL_ELIXIR) {
+      return new FullElixirAction(
         json["actionNumber"] as number,
-        json["name"] as string,
-        json["damageInstances"] as DamageInstance[],
         json["subactions"].map((action: any) => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],
       );
     } else {
-      console.error(`SummonAction.fromJSON called on ${json}`);
+      console.error(`FullElixirAction.fromJSON called on ${json}`);
       return undefined;
     }
   }

@@ -1,5 +1,7 @@
+import { JSX } from "react/jsx-runtime";
 import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
+import { GodsightBattleData } from "./battledata";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
 export class TurnChangeAction extends BattleAction {
@@ -8,7 +10,8 @@ export class TurnChangeAction extends BattleAction {
 
   constructor(
     public actionNumber: number,
-    public turn: number,
+    public currentTurn: number,
+    public newTurn: number,
   ) {
     super();
   }
@@ -17,8 +20,13 @@ export class TurnChangeAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
-  getSimpleDescription(): string {
-    return `The turn counter became ${this.turn}!`;
+  getDescription(): JSX.Element {
+    return (
+      <>
+        <div className="action-description">The turn counter advanced by {this.newTurn - this.currentTurn}!
+        </div>
+      </>
+    );
   }
 
   static fromJSON(json: { [key: string]: any; }): TurnChangeAction | undefined {
@@ -26,7 +34,8 @@ export class TurnChangeAction extends BattleAction {
     if (actionType == ActionType.TURN_CHANGE) {
       return new TurnChangeAction(
         json["actionNumber"] as number,
-        json["turn"] as number,
+        json["currentTurn"] as number,
+        json["newTurn"] as number,
       );
     } else {
       console.error(`TurnChangeAction.fromJSON called on ${json}`);

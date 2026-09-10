@@ -1,7 +1,12 @@
+import { JSX } from "react/jsx-runtime";
 import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { DamageInstance } from "./damageinstance";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
+import { BattleActionHelper } from "./battleactionhelper";
+import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
+import { GodsightBossData } from "./bossdata";
+import { GodsightPartyFormationData } from "./partyformationdata";
 
 export class ChainBurstAction extends BattleAction {
   public actionType: ActionType = ActionType.CHAIN_BURST;
@@ -12,14 +17,22 @@ export class ChainBurstAction extends BattleAction {
     public chainCount: number,
     public name: string,
     public damageInstances: DamageInstance[],
+    public bossesAtTimeOfAction: GodsightBossData[],
+    public formationAtTimeOfAction: GodsightPartyFormationData,
   ) {
     super();
   }
 
-  getSimpleDescription(): string {
-    const damage = this.damageInstances.map(i => i["value"]).join("+");
+  getDescription(): JSX.Element {
+    const damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(this.bossesAtTimeOfAction, this.formationAtTimeOfAction, Actor.BOSS, this.damageInstances);
 
-    return `The party activated a chain burst, ${this.name}, dealing ${damage} damage!`;
+    return (
+      <>
+        <div className="action-description" > The party activated the chain burst {this.name} !
+          {damageInstanceJsx}
+        </div>
+      </>
+    );
   }
 
   getStats(): StatsUpdate {
@@ -43,6 +56,8 @@ export class ChainBurstAction extends BattleAction {
         json["chainCount"] as number,
         json["name"] as string,
         json["damageInstances"] as DamageInstance[],
+        json["bossesAtTimeOfAction"] as GodsightBossData[],
+        json["formationAtTimeOfAction"] as GodsightPartyFormationData,
       );
     } else {
       console.error(`ChainBurstAction.fromJSON called on ${json}`);

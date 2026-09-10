@@ -4,6 +4,11 @@ import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { DamageInstance } from "./damageinstance";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
+import { GodsightBattleData } from "./battledata";
+import { JSX } from "react/jsx-runtime";
+import { BattleActionHelper } from "./battleactionhelper";
+import { GodsightBossData } from "./bossdata";
+import { GodsightPartyFormationData } from "./partyformationdata";
 
 export class SingularNormalAttackAction extends BattleAction {
   public actionType: ActionType = ActionType.SINGULAR_NORMAL_ATTACK;
@@ -15,14 +20,32 @@ export class SingularNormalAttackAction extends BattleAction {
     public attackerPosition: number,
     public element: GameElementValue,
     public damageInstances: DamageInstance[],
+    public bossesAtTimeOfAction: GodsightBossData[],
+    public formationAtTimeOfAction: GodsightPartyFormationData,
   ) {
     super();
   }
 
-  getSimpleDescription(): string {
-    const damage = this.damageInstances.map(d => d["value"]).join("+");
+  getDescription(): JSX.Element {
+    let receiver: Actor = Actor.BOSS;
+    if (this.source == Actor.BOSS) {
+      receiver = Actor.PLAYER;
+    } else if (this.source == Actor.PLAYER) {
+      receiver = Actor.BOSS;
+    } else {
+      console.error(`Unknown normal attack source ${this.source}`);
+    }
 
-    return `${this.source} at position ${this.attackerPosition} made a normal attack, dealing ${damage} damage!`;
+    const damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(
+      this.bossesAtTimeOfAction,
+      this.formationAtTimeOfAction,
+      receiver,
+      this.damageInstances,
+    );
+
+    return (
+      damageInstanceJsx
+    );
   }
 
   getStats(): StatsUpdate {
@@ -68,6 +91,8 @@ export class SingularNormalAttackAction extends BattleAction {
         json["attackerPosition"] as number,
         json["element"] as GameElementValue,
         json["damageInstances"] as DamageInstance[],
+        json["bossesAtTimeOfAction"] as GodsightBossData[],
+        json["formationAtTimeOfAction"] as GodsightPartyFormationData,
       );
     } else {
       console.error(`SingularNormalAttackAction.fromJSON called on ${json}`);

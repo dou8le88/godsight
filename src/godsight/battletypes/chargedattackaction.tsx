@@ -5,6 +5,10 @@ import { BattleAction } from "./battleaction";
 import { DamageInstance } from "./damageinstance";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { BattleActionParser } from "./battleactionparser";
+import { JSX } from "react/jsx-runtime";
+import { BattleActionHelper } from "./battleactionhelper";
+import { GodsightBossData } from "./bossdata";
+import { GodsightPartyFormationData } from "./partyformationdata";
 
 export class ChargedAttackAction extends BattleAction {
   public actionType: ActionType = ActionType.CHARGED_ATTACK;
@@ -17,15 +21,38 @@ export class ChargedAttackAction extends BattleAction {
     public target: Actor,
     public element: GameElementValue, // TODO: remove deceptive elements on root since damage instances have their element given?
     public damageTotals: DamageInstance[],
+    public bossesAtTimeOfAction: GodsightBossData[],
+    public formationAtTimeOfAction: GodsightPartyFormationData,
     public subactions: BattleAction[],
   ) {
     super();
   }
 
-  getSimpleDescription(): string {
-    const damage = this.damageTotals.map(d => d["value"]).join("+");
+  getDescription(): JSX.Element {
+    const damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(
+      this.bossesAtTimeOfAction,
+      this.formationAtTimeOfAction,
+      this.target,
+      this.damageTotals,
+    );
 
-    return `${this.attackerPosition} made a charged attack, ${this.name}, against ${this.target} at position ${this.targetPosition}, and dealt ${damage} damage!`;
+    return (
+      <>
+        <div className="action-description">{BattleActionHelper.getActorName(
+          this.bossesAtTimeOfAction,
+          this.formationAtTimeOfAction,
+          Actor.PLAYER,
+          this.attackerPosition,
+        )} activated their charged attack, {this.name}!
+          {damageInstanceJsx}
+          {
+            this.subactions.map(subaction => (
+              subaction.getDescription()
+            ))
+          }
+        </div>
+      </>
+    );
   }
 
   getStats(): StatsUpdate {
@@ -63,6 +90,8 @@ export class ChargedAttackAction extends BattleAction {
         json["target"] as Actor,
         json["element"] as GameElementValue,
         json["damageTotals"] as DamageInstance[],
+        json["bossesAtTimeOfAction"] as GodsightBossData[],
+        json["formationAtTimeOfAction"] as GodsightPartyFormationData,
         json["subactions"].map((action: any) => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],

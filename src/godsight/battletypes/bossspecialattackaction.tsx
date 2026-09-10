@@ -5,6 +5,10 @@ import { BattleAction } from "./battleaction"
 import { DamageInstance } from "./damageinstance"
 import { StatsUpdate, StatsUpdateHelper } from "./stats"
 import { BattleActionParser } from "./battleactionparser"
+import { JSX } from "react/jsx-runtime"
+import { BattleActionHelper } from "./battleactionhelper"
+import { GodsightBossData } from "./bossdata"
+import { GodsightPartyFormationData } from "./partyformationdata"
 
 export class BossSpecialAttackAction extends BattleAction {
   public actionType: ActionType = ActionType.BOSS_SPECIAL_ATTACK;
@@ -17,13 +21,34 @@ export class BossSpecialAttackAction extends BattleAction {
     public count: number,
     public element: GameElementValue,
     public damageInstances: DamageInstance[],
+    public bossesAtTimeOfAction: GodsightBossData[],
+    public formationAtTimeOfAction: GodsightPartyFormationData,
     public subactions: BattleAction[],
   ) {
     super();
   }
 
-  getSimpleDescription(): string {
-    return `${this.sourceName} used ${this.attackName}!`;
+  getDescription(): JSX.Element {
+    let damageInstanceJsx = <></>;
+    if (this.damageInstances.length) {
+      damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(
+        this.bossesAtTimeOfAction,
+        this.formationAtTimeOfAction,
+        this.target,
+        this.damageInstances,
+      );
+    }
+
+    return (
+      <>
+        <div className="action-description">{this.sourceName} activated {this.attackName}!
+          {damageInstanceJsx}
+          {this.subactions.map(subaction => (
+            subaction.getDescription()
+          ))}
+        </div>
+      </>
+    );
   }
 
   getStats(): StatsUpdate {
@@ -58,6 +83,8 @@ export class BossSpecialAttackAction extends BattleAction {
         json["count"] as number,
         json["element"] as GameElementValue,
         json["damageInstances"] as DamageInstance[],
+        json["bossesAtTimeOfAction"] as GodsightBossData[],
+        json["formationAtTimeOfAction"] as GodsightPartyFormationData,
         json["subactions"].map((action: any) => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],

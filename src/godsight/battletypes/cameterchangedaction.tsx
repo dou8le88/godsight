@@ -1,7 +1,11 @@
+import { JSX } from "react/jsx-runtime";
 import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
 import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
+import { BattleActionHelper } from "./battleactionhelper";
+import { GodsightBossData } from "./bossdata";
+import { GodsightPartyFormationData } from "./partyformationdata";
 
 export class CAMeterChangedAction extends BattleAction {
   public actionType: ActionType = ActionType.CA_METER_CHANGED;
@@ -13,16 +17,42 @@ export class CAMeterChangedAction extends BattleAction {
     public position: number,
     public newValue: number,
     public change: number,
+    public bossesAtTimeOfAction: GodsightBossData[],
+    public formationAtTimeOfAction: GodsightPartyFormationData,
   ) {
     super();
   }
 
-  getSimpleDescription(): string {
+  getDescription(): JSX.Element {
+    let changeWord = "";
     if (this.change > 0) {
-      return `${this.target} at position ${this.position} gained ${this.change} meter! (total: ${this.newValue})`;
+      changeWord = "gained";
     } else {
-      return `${this.target} at position ${this.position} lost ${this.change} meter! (total: ${this.newValue})`;
+      changeWord = "lost";
     }
+
+    let meterWord = "meter";
+    if (this.target == Actor.BOSS) {
+      if (this.change > 1 || this.change < 1) {
+        meterWord = "charge diamonds";
+      } else {
+        meterWord = "charge diamond";
+      }
+    } else if (this.target == Actor.PLAYER) {
+      meterWord = "charge bar";
+    }
+
+    return (
+      <>
+        <div className="action-description">{BattleActionHelper.getActorName(
+          this.bossesAtTimeOfAction,
+          this.formationAtTimeOfAction,
+          this.target,
+          this.position,
+        )} {changeWord} {this.change} {meterWord}!
+        </div>
+      </>
+    );
   }
 
   getStats(): StatsUpdate {
@@ -38,6 +68,8 @@ export class CAMeterChangedAction extends BattleAction {
         json["position"] as number,
         json["newValue"] as number,
         json["change"] as number,
+        json["bossesAtTimeOfAction"] as GodsightBossData[],
+        json["formationAtTimeOfAction"] as GodsightPartyFormationData,
       );
     } else {
       console.error(`CAMeterChangedAction.fromJSON called on ${json}`);

@@ -35,19 +35,36 @@ export type GodsightPartyMemberData = {
 }
 
 export class PartyFormationHelper {
-  static getNameOfFrontlineCharacterInPosition(formation: GodsightPartyFormationData, position: string | number): string {
+  static getNameOfFrontlineCharacterInPosition(formation: GodsightPartyFormationData, position: number): string {
     const characterIndex = formation["frontline"][position];
-    if (characterIndex) {
-      const character = formation["members"][characterIndex];
-      if (character) {
-        return character["name"];
-      } else {
-        console.error(`No party member at ${characterIndex} when looking up character name!`);
-        return "Unknown2";
-      }
+    if (characterIndex !== undefined) {
+      return this.getNameOfCharacterAtPartyIndex(formation, characterIndex);
     } else {
       console.error(`No character at ${position} when looking up character name!`);
       return "Unknown";
+    }
+  }
+
+  static getNameOfCharacterInPosition(formation: GodsightPartyFormationData, position: number): string {
+    const entireFormation = formation["frontline"].concat(formation["backline"]);
+
+    const characterIndex = entireFormation[position];
+
+    if (characterIndex) {
+      return this.getNameOfCharacterAtPartyIndex(formation, characterIndex);
+    } else {
+      console.error(`No character at ${position} when looking up character name!`);
+      return "Unknown";
+    }
+  }
+
+  static getNameOfCharacterAtPartyIndex(formation: GodsightPartyFormationData, characterIndex: number): string {
+    const character = formation["members"][characterIndex];
+    if (character) {
+      return character["name"];
+    } else {
+      console.error(`No party member at ${characterIndex} when looking up character name!`);
+      return "Unknown2";
     }
   }
 }

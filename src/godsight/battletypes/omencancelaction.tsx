@@ -1,6 +1,11 @@
+import { JSX } from "react/jsx-runtime";
 import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
+import { BattleActionHelper } from "./battleactionhelper";
+import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
+import { GodsightBossData } from "./bossdata";
+import { GodsightPartyFormationData } from "./partyformationdata";
 
 export class OmenCancelAction extends BattleAction {
   public actionType: ActionType = ActionType.OMEN_CANCELLED;
@@ -9,6 +14,8 @@ export class OmenCancelAction extends BattleAction {
   constructor(
     public actionNumber: number,
     public canceledBossPosition: number,
+    public bossesAtTimeOfAction: GodsightBossData[],
+    public formationAtTimeOfAction: GodsightPartyFormationData,
   ) {
     super();
   }
@@ -17,8 +24,18 @@ export class OmenCancelAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
-  getSimpleDescription(): string {
-    return `${this.canceledBossPosition}'s omen was canceled!`;
+  getDescription(): JSX.Element {
+    return (
+      <>
+        <div className="action-description">{BattleActionHelper.getActorName(
+          this.bossesAtTimeOfAction,
+          this.formationAtTimeOfAction,
+          Actor.BOSS,
+          this.canceledBossPosition,
+        )}'s omen was canceled!
+        </div>
+      </>
+    )
   }
 
   static fromJSON(json: { [key: string]: any; }): OmenCancelAction | undefined {
@@ -27,6 +44,8 @@ export class OmenCancelAction extends BattleAction {
       return new OmenCancelAction(
         json["actionNumber"] as number,
         json["canceledBossPosition"] as number,
+        json["bossesAtTimeOfAction"] as GodsightBossData[],
+        json["formationAtTimeOfAction"] as GodsightPartyFormationData,
       );
     } else {
       console.error(`OmenCancelAction.fromJSON called on ${json}`);

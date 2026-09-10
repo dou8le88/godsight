@@ -1,5 +1,7 @@
+import { JSX } from "react/jsx-runtime";
 import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
+import { GodsightBattleData } from "./battledata";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 
 export class WindowEffectAction extends BattleAction {
@@ -13,8 +15,13 @@ export class WindowEffectAction extends BattleAction {
     super();
   }
 
-  getSimpleDescription(): string {
-    return `Window effect ${this.name} was activated!`;
+  getDescription(): JSX.Element {
+    return (
+      <>
+        <div className="action-description">The window effect {this.name} was activated!
+        </div>
+      </>
+    );
   }
 
   getStats(): StatsUpdate {
