@@ -13,6 +13,7 @@ import { GodsightBattleData } from "../godsight/battletypes/battledata";
 import { BattleProgressStatus } from "../godsight/battletypes/battleprogressstatus";
 import { BattleAction } from "../godsight/battletypes/battleaction";
 import { BattleActionParser } from "../godsight/battletypes/battleactionparser";
+import SearchHandler from "./search/searchhandler";
 
 export default function GodsightPanel() {
   const validHosts = [
@@ -254,6 +255,7 @@ export default function GodsightPanel() {
           )}
         </>
       )}
+      <SearchHandler />
     </>
   );
 }
