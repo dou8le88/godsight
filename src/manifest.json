@@ -1,6 +1,6 @@
 {
    "name": "Godsight",
-   "description": "A Granblue Fantasy theorycrafting extension.",
+   "description": "A Granblue Fantasy battle analysis extension.",
    "version": "1.0",
    "manifest_version": 3,
    "icons": {

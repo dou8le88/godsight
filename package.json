@@ -1,7 +1,7 @@
 {
   "name": "godsight",
   "version": "0.1.0",
-  "description": "A Granblue Fantasy theorycrafting extension.",
+  "description": "A Granblue Fantasy battle analysis extension.",
   "private": true,
   "scripts": {
     "build:dev": "webpack --config config/webpack.dev.js",
