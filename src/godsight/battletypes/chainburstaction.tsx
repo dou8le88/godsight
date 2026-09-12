@@ -28,21 +28,22 @@ export class ChainBurstAction extends BattleAction {
     const damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(this.bossesAtTimeOfAction, this.formationAtTimeOfAction, Actor.BOSS, this.damageInstances);
 
     return (
-      <>
-        <div className="action-description" > The party activated the chain burst {this.name} !
-          {damageInstanceJsx}
-        </div>
-      </>
+      <div key={this.actionNumber} className="action-description" > The party activated the chain burst {this.name} !
+        {damageInstanceJsx}
+      </div>
     );
   }
 
   getStats(): StatsUpdate {
-    const update = StatsUpdateHelper.getEmptyStatsUpdate();
+    const update = StatsUpdateHelper.getEmptyStatsUpdate(Object.keys(this.formationAtTimeOfAction["members"]));
 
     this.damageInstances.forEach(instance => {
       update["generalStats"]["otherDamage"][instance["element"]] += instance["value"];
+      // Chain burst is considered "MC's" damage by the game.
+      update["characterStats"][0]["otherDamage"][instance["element"]] += instance["value"];
       if (instance["value"] > 0) {
         update["generalStats"]["hitCount"] += 1;
+        update["characterStats"][0]["hitCount"] += 1;
       }
     });
 

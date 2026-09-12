@@ -41,9 +41,7 @@ export class StandbyAction extends BattleAction {
     }
 
     return (
-      <>
-        <div className="action-description">{fullMessage}</div>
-      </>
+      <div key={this.actionNumber} className="action-description">{fullMessage}</div>
     );
   }
 

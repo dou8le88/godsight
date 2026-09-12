@@ -32,21 +32,24 @@ export class HealingAction extends BattleAction {
     );
 
     return (
-      healingJsx
+      <span key={this.actionNumber}>
+        {healingJsx}
+      </span>
     );
   }
 
   getStats(): StatsUpdate {
-    const update = StatsUpdateHelper.getEmptyStatsUpdate();
+    const update = StatsUpdateHelper.getEmptyStatsUpdate(Object.keys(this.formationAtTimeOfAction["members"]));
 
     // Bosses can heal as well but we do not currently track that.
     if (this.target == Actor.PLAYER) {
       this.healingInstances.forEach(instance => {
-        if (!update["characterStats"][instance["receiverPosition"]]) {
-          update["characterStats"][instance["receiverPosition"]] = StatsUpdateHelper.getEmptyStats();
-        }
+        const receiverIndex = BattleActionHelper.getCharacterIndexAtPosition(
+          this.formationAtTimeOfAction,
+          instance["receiverPosition"],
+        );
         update["generalStats"]["healingReceived"] += instance["value"];
-        update["characterStats"][instance["receiverPosition"]]["healingReceived"] += instance["value"];
+        update["characterStats"][receiverIndex]["healingReceived"] += instance["value"];
       });
     }
 

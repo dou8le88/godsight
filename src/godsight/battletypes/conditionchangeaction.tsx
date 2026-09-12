@@ -44,17 +44,17 @@ export class ConditionChangeAction extends BattleAction {
     const gainedStatuses = allStatuses.filter(s => !s.dispelled);
     const dispelledStatuses = allStatuses.filter(s => s.dispelled);
 
-    const gainedStatusesJsx: JSX.Element[] | null = gainedStatuses.map((status, idx) => (
-      <>
-        <span key={idx} className="status-text">{status.name}</span> <img className="status-icon" src={BattleActionHelper.getStatusUrl(status.icon)} />
-      </>
-    )).reduce((prev: any, cur) => prev === null ? [cur] : [...prev, <>, </>, cur], null);
-
-    const dispelledStatusesJsx: JSX.Element[] | null = dispelledStatuses.map(status => (
-      <>
+    const gainedStatusesJsx: React.ReactNode[] | null = gainedStatuses.map((status, idx) => (
+      <span key={idx}>
         <span className="status-text">{status.name}</span> <img className="status-icon" src={BattleActionHelper.getStatusUrl(status.icon)} />
-      </>
-    )).reduce((prev: any, cur) => prev === null ? [cur] : [...prev, <>, </>, cur], null);
+      </span>
+    )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, ",", cur], null);
+
+    const dispelledStatusesJsx: React.ReactNode[] | null = dispelledStatuses.map((status, idx) => (
+      <span key={idx}>
+        <span className="status-text">{status.name}</span> <img className="status-icon" src={BattleActionHelper.getStatusUrl(status.icon)} />
+      </span>
+    )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, ",", cur], null);
 
     let finalGainedStatusJsx = <></>;
     if (gainedStatusesJsx) {
@@ -75,10 +75,8 @@ export class ConditionChangeAction extends BattleAction {
     }
 
     return (
-      <>
-        <div className="action-description">{finalDispelledStatusesJsx} {finalGainedStatusJsx}
-        </div>
-      </>
+      <div key={this.actionNumber} className="action-description">{finalDispelledStatusesJsx} {finalGainedStatusJsx}
+      </div>
     );
   }
 

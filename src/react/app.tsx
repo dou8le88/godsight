@@ -72,6 +72,7 @@ export default function GodsightPanel() {
       if (existingRaid) {
         // An existing raid means that the new battleData shouldn't have any actions in it.
         godsightBattleData["turnData"] = existingRaid["turnData"];
+        godsightBattleData["honors"] = existingRaid["honors"];
       }
 
       setSelectedBattle(String(raidId));
@@ -135,8 +136,29 @@ export default function GodsightPanel() {
         }
 
         const newActions = battleScenarioParser.parseScenarioData(data["scenario"], raid, currentActionNumber);
-        existingTurnActions.push(...newActions);
-        const newTurnData = battleScenarioParser.processTurnActionData(existingTurnActions);
+        const newTurnData = battleScenarioParser.processTurnActionData(newActions, raid["party"]);
+
+        // Merge previous actions and stats into the new stuff.
+        // First merge the new data into the raidwide data.
+        StatsUpdateHelper.mergeStats(newTurnData["turnStats"], raid["battleStats"]["generalStats"]);
+        Object.keys(newTurnData["characterCurrentTurnStats"]).forEach(characterIndex => {
+          StatsUpdateHelper.mergeStats(
+            newTurnData["characterCurrentTurnStats"][characterIndex],
+            raid["battleStats"]["characterStats"][characterIndex],
+          );
+        });
+
+        // Then merge the new turn stats into the existing turn stats
+        StatsUpdateHelper.mergeStats(currentTurn["turnStats"], newTurnData["turnStats"]);
+        Object.keys(currentTurn["characterCurrentTurnStats"]).forEach(characterIndex => {
+          StatsUpdateHelper.mergeStats(
+            currentTurn["characterCurrentTurnStats"][characterIndex],
+            newTurnData["characterCurrentTurnStats"][characterIndex],
+          );
+        });
+
+        // Then merge the old actions into the new ones.
+        newTurnData["turnActions"] = existingTurnActions.concat(newTurnData["turnActions"]);
         raid["turnData"][currentTurnNumber] = newTurnData;
 
         if ("updateTurnTo" in raid) {
@@ -202,6 +224,7 @@ export default function GodsightPanel() {
               // Misc configuration endpoints that don't contain battle info.
               case "setting":
               case "auto_setting":
+              case "special_skill_setting":
                 return;
               default:
                 if (endpoint && !isNaN(Number.parseInt(endpoint))) {
@@ -239,7 +262,10 @@ export default function GodsightPanel() {
       ) : (
         <>
           {selectedBattle ? (
-            <BattleTracker battleData={godsightStorage["battles"][selectedBattle]} />
+            <>
+              <BattleTracker battleData={godsightStorage["battles"][selectedBattle]} />
+              <SearchHandler />
+            </>
           ) : (
             <>
               {allBattles.length > 0 ? (
@@ -255,7 +281,6 @@ export default function GodsightPanel() {
           )}
         </>
       )}
-      <SearchHandler />
     </>
   );
 }

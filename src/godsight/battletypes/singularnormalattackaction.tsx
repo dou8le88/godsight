@@ -19,7 +19,6 @@ export class SingularNormalAttackAction extends BattleAction {
     public actionNumber: number,
     public source: Actor,
     public attackerPosition: number,
-    public element: GameElementValue,
     public damageInstances: DamageInstance[],
     public bossesAtTimeOfAction: GodsightBossData[],
     public formationAtTimeOfAction: GodsightPartyFormationData,
@@ -45,34 +44,38 @@ export class SingularNormalAttackAction extends BattleAction {
     );
 
     return (
-      damageInstanceJsx
+      <span key={this.actionNumber}>
+        {damageInstanceJsx}
+      </span>
     );
   }
 
   getStats(): StatsUpdate {
-    const update = StatsUpdateHelper.getEmptyStatsUpdate();
+    const update = StatsUpdateHelper.getEmptyStatsUpdate(Object.keys(this.formationAtTimeOfAction["members"]));
 
     switch (this.source) {
       case Actor.PLAYER:
         this.damageInstances.forEach(instance => {
-          if (!update["characterStats"][this.attackerPosition]) {
-            update["characterStats"][this.attackerPosition] = StatsUpdateHelper.getEmptyStats();
-          }
+          const attackerIndex = BattleActionHelper.getCharacterIndexAtPosition(
+            this.formationAtTimeOfAction,
+            this.attackerPosition,
+          );
           update["generalStats"]["normalAttackDamage"][instance["element"]] += instance["value"];
-          update["characterStats"][this.attackerPosition]["normalAttackDamage"][instance["element"]] += instance["value"];
+          update["characterStats"][attackerIndex]["normalAttackDamage"][instance["element"]] += instance["value"];
           if (instance["value"] > 0) {
             update["generalStats"]["hitCount"] += 1;
-            update["characterStats"][this.attackerPosition]["hitCount"] += 1;
+            update["characterStats"][attackerIndex]["hitCount"] += 1;
           }
         });
         break;
       case Actor.BOSS:
         this.damageInstances.forEach(instance => {
-          if (!update["characterStats"][instance["receiverPosition"]]) {
-            update["characterStats"][instance["receiverPosition"]] = StatsUpdateHelper.getEmptyStats();
-          }
+          const receiverIndex = BattleActionHelper.getCharacterIndexAtPosition(
+            this.formationAtTimeOfAction,
+            instance["receiverPosition"],
+          );
           update["generalStats"]["damageTaken"][instance["element"]] += instance["value"];
-          update["characterStats"][instance["receiverPosition"]]["damageTaken"][instance["element"]] += instance["value"];
+          update["characterStats"][receiverIndex]["damageTaken"][instance["element"]] += instance["value"];
         });
         break;
       default:
@@ -90,7 +93,6 @@ export class SingularNormalAttackAction extends BattleAction {
         assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["source"] as Actor),
         assertNotNullOrUndefined(json["attackerPosition"] as number),
-        assertNotNullOrUndefined(json["element"] as GameElementValue),
         assertNotNullOrUndefined(json["damageInstances"] as DamageInstance[]),
         assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),
         assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),

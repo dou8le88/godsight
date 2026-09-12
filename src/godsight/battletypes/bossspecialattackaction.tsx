@@ -20,7 +20,6 @@ export class BossSpecialAttackAction extends BattleAction {
     public sourceName: string,
     public target: Actor,
     public count: number,
-    public element: GameElementValue,
     public damageInstances: DamageInstance[],
     public bossesAtTimeOfAction: GodsightBossData[],
     public formationAtTimeOfAction: GodsightPartyFormationData,
@@ -41,29 +40,28 @@ export class BossSpecialAttackAction extends BattleAction {
     }
 
     return (
-      <>
-        <div className="action-description">{this.sourceName} activated {this.attackName}!
-          {damageInstanceJsx}
-          {this.subactions.map(subaction => (
-            subaction.getDescription()
-          ))}
-        </div>
-      </>
+      <div key={this.actionNumber} className="action-description">{this.sourceName} activated {this.attackName}!
+        {damageInstanceJsx}
+        {this.subactions.map(subaction => (
+          subaction.getDescription()
+        ))}
+      </div>
     );
   }
 
   getStats(): StatsUpdate {
-    const update = StatsUpdateHelper.getEmptyStatsUpdate();
+    const update = StatsUpdateHelper.getEmptyStatsUpdate(Object.keys(this.formationAtTimeOfAction["members"]));
     this.damageInstances.forEach(instance => {
       // Bosses can target themselves (e.g., with self-buff or stance-changey kinds of specials),
       // so ignore effects for the purposes of stats if they aren't targeting a player.
       if (this.target == Actor.PLAYER) {
         const damage = instance["value"];
         update["generalStats"]["damageTaken"][instance["element"]] += damage;
-        if (!update["characterStats"][instance["receiverPosition"]]) {
-          update["characterStats"][instance["receiverPosition"]] = StatsUpdateHelper.getEmptyStats();
-        }
-        update["characterStats"][instance["receiverPosition"]]["damageTaken"][instance["element"]] += damage;
+        const receiverIndex = BattleActionHelper.getCharacterIndexAtPosition(
+          this.formationAtTimeOfAction,
+          instance["receiverPosition"],
+        );
+        update["characterStats"][receiverIndex]["damageTaken"][instance["element"]] += damage;
       }
     });
     const subactionStatsUpdates = this.subactions.map(action => action.getStats());
@@ -82,7 +80,6 @@ export class BossSpecialAttackAction extends BattleAction {
         assertNotNullOrUndefined(json["sourceName"] as string),
         assertNotNullOrUndefined(json["target"] as Actor),
         assertNotNullOrUndefined(json["count"] as number),
-        assertNotNullOrUndefined(json["element"] as GameElementValue),
         assertNotNullOrUndefined(json["damageInstances"] as DamageInstance[]),
         assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),
         assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),

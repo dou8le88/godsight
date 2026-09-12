@@ -20,7 +20,6 @@ export class ChargedAttackAction extends BattleAction {
     public attackerPosition: number,
     public targetPosition: number,
     public target: Actor,
-    public element: GameElementValue, // TODO: remove deceptive elements on root since damage instances have their element given?
     public damageTotals: DamageInstance[],
     public bossesAtTimeOfAction: GodsightBossData[],
     public formationAtTimeOfAction: GodsightPartyFormationData,
@@ -38,35 +37,35 @@ export class ChargedAttackAction extends BattleAction {
     );
 
     return (
-      <>
-        <div className="action-description">{BattleActionHelper.getActorName(
-          this.bossesAtTimeOfAction,
-          this.formationAtTimeOfAction,
-          Actor.PLAYER,
-          this.attackerPosition,
-        )} activated their charged attack, {this.name}!
-          {damageInstanceJsx}
-          {
-            this.subactions.map(subaction => (
-              subaction.getDescription()
-            ))
-          }
-        </div>
-      </>
+      <div key={this.actionNumber} className="action-description">{BattleActionHelper.getActorName(
+        this.bossesAtTimeOfAction,
+        this.formationAtTimeOfAction,
+        Actor.PLAYER,
+        this.attackerPosition,
+      )} activated their charged attack, {this.name}!
+        {damageInstanceJsx}
+        {
+          this.subactions.map(subaction => (
+            subaction.getDescription()
+          ))
+        }
+      </div>
     );
   }
 
   getStats(): StatsUpdate {
-    const update = StatsUpdateHelper.getEmptyStatsUpdate();
+    const update = StatsUpdateHelper.getEmptyStatsUpdate(Object.keys(this.formationAtTimeOfAction["members"]));
     if (this.target == Actor.BOSS) {
       this.damageTotals.forEach(instance => {
         update["generalStats"]["chargedAttackDamage"][instance["element"]] += instance["value"];
-        if (!update["characterStats"][this.attackerPosition]) {
-          update["characterStats"][this.attackerPosition] = StatsUpdateHelper.getEmptyStats();
-        }
-        update["characterStats"][this.attackerPosition]["chargedAttackDamage"][instance["element"]] += instance["value"];
+        const attackerIndex = BattleActionHelper.getCharacterIndexAtPosition(
+          this.formationAtTimeOfAction,
+          this.attackerPosition,
+        );
+        update["characterStats"][attackerIndex]["chargedAttackDamage"][instance["element"]] += instance["value"];
         if (instance["value"] > 0) {
-          update["characterStats"][this.attackerPosition]["hitCount"] += 1;
+          update["generalStats"]["hitCount"] += 1;
+          update["characterStats"][attackerIndex]["hitCount"] += 1;
         }
       });
       const subactionStatsUpdates = this.subactions.map(action => action.getStats());
@@ -89,7 +88,6 @@ export class ChargedAttackAction extends BattleAction {
         assertNotNullOrUndefined(json["attackerPosition"] as number),
         assertNotNullOrUndefined(json["targetPosition"] as number),
         assertNotNullOrUndefined(json["target"] as Actor),
-        assertNotNullOrUndefined(json["element"] as GameElementValue),
         assertNotNullOrUndefined(json["damageTotals"] as DamageInstance[]),
         assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),
         assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),

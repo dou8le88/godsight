@@ -19,10 +19,8 @@ export class RetreatAction extends BattleAction {
   }
   getDescription(): JSX.Element {
     return (
-      <>
-        <div className="action-description">The party retreated!
-        </div>
-      </>
+      <div key={this.actionNumber} className="action-description">The party retreated!
+      </div>
     );
   }
 

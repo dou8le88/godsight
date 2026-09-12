@@ -22,16 +22,14 @@ export class ReplaceCharacterAction extends BattleAction {
   getDescription(): JSX.Element {
 
     return (
-      <>
-        <div className="action-description">{PartyFormationHelper.getNameOfCharacterInPosition(
-          this.formationAtTimeOfAction,
-          this.position,
-        )} was replaced by {PartyFormationHelper.getNameOfCharacterAtPartyIndex(
-          this.formationAtTimeOfAction,
-          this.newCharacter,
-        )}!
-        </div>
-      </>
+      <div key={this.actionNumber} className="action-description">{PartyFormationHelper.getNameOfCharacterInPosition(
+        this.formationAtTimeOfAction,
+        this.position,
+      )} was replaced by {PartyFormationHelper.getNameOfCharacterAtPartyIndex(
+        this.formationAtTimeOfAction,
+        this.newCharacter,
+      )}!
+      </div>
     );
   }
 

@@ -16,7 +16,6 @@ export class MultihitDamageAction extends BattleAction {
 
   constructor(
     public actionNumber: number,
-    public element: GameElementValue,
     public target: Actor,
     public hits: DamageInstance[],
     public bossesAtTimeOfAction: GodsightBossData[],
@@ -34,12 +33,14 @@ export class MultihitDamageAction extends BattleAction {
     );
 
     return (
-      damageInstanceJsx
+      <span key={this.actionNumber}>
+        {damageInstanceJsx}
+      </span>
     );
   }
 
   getStats(): StatsUpdate {
-    const update = StatsUpdateHelper.getEmptyStatsUpdate();
+    const update = StatsUpdateHelper.getEmptyStatsUpdate(Object.keys(this.formationAtTimeOfAction["members"]));
     switch (this.target) {
       case Actor.BOSS:
         // Since other commands all seem to directly associate damage dealt with the command, the only
@@ -60,10 +61,11 @@ export class MultihitDamageAction extends BattleAction {
         // Boss "skill damage" can occur in certain raids like Macutanmacar or Esoteric Mastery Trial.
         this.hits.forEach(instance => {
           update["generalStats"]["damageTaken"][instance["element"]] += instance["value"];
-          if (!update["characterStats"][instance["receiverPosition"]]) {
-            update["characterStats"][instance["receiverPosition"]] = StatsUpdateHelper.getEmptyStats();
-          }
-          update["characterStats"][instance["receiverPosition"]]["damageTaken"][instance["element"]] += instance["value"];
+          const receiverIndex = BattleActionHelper.getCharacterIndexAtPosition(
+            this.formationAtTimeOfAction,
+            instance["receiverPosition"],
+          );
+          update["characterStats"][receiverIndex]["damageTaken"][instance["element"]] += instance["value"];
         });
         break;
       default:
@@ -77,7 +79,6 @@ export class MultihitDamageAction extends BattleAction {
     if (actionType == ActionType.DAMAGE_DEALT_MULTIHIT) {
       return new MultihitDamageAction(
         assertNotNullOrUndefined(json["actionNumber"] as number),
-        assertNotNullOrUndefined(json["element"] as GameElementValue),
         assertNotNullOrUndefined(json["target"] as Actor),
         assertNotNullOrUndefined(json["hits"] as DamageInstance[]),
         assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),

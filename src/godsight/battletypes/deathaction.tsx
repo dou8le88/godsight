@@ -25,15 +25,13 @@ export class DeathAction extends BattleAction {
 
   getDescription(): JSX.Element {
     return (
-      <>
-        <div className="action-description">{BattleActionHelper.getActorName(
-          this.bossesAtTimeOfAction,
-          this.formationAtTimeOfAction,
-          this.target,
-          this.position,
-        )} was knocked out!
-        </div>
-      </>
+      <div key={this.actionNumber} className="action-description">{BattleActionHelper.getActorName(
+        this.bossesAtTimeOfAction,
+        this.formationAtTimeOfAction,
+        this.target,
+        this.position,
+      )} was knocked out!
+      </div>
     );
   }
 

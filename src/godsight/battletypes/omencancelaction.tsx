@@ -27,15 +27,13 @@ export class OmenCancelAction extends BattleAction {
 
   getDescription(): JSX.Element {
     return (
-      <>
-        <div className="action-description">{BattleActionHelper.getActorName(
-          this.bossesAtTimeOfAction,
-          this.formationAtTimeOfAction,
-          Actor.BOSS,
-          this.canceledBossPosition,
-        )}'s omen was canceled!
-        </div>
-      </>
+      <div key={this.actionNumber} className="action-description">{BattleActionHelper.getActorName(
+        this.bossesAtTimeOfAction,
+        this.formationAtTimeOfAction,
+        Actor.BOSS,
+        this.canceledBossPosition,
+      )}'s omen was canceled!
+      </div>
     )
   }
 

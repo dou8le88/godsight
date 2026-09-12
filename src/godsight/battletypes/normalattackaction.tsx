@@ -54,13 +54,11 @@ export class NormalAttackAction extends BattleAction {
     }
 
     return (
-      <>
-        <div className="action-description">{attacker} {attackWording}!
-          {this.subactions.map(subaction => (
-            subaction.getDescription()
-          ))}
-        </div>
-      </>
+      <div key={this.actionNumber} className="action-description">{attacker} {attackWording}!
+        {this.subactions.map(subaction => (
+          subaction.getDescription()
+        ))}
+      </div>
     );
   }
 

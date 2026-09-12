@@ -37,22 +37,27 @@ export class SummonAction extends BattleAction {
     }
 
     return (
-      <>
-        <div className="action-description">{BattleActionHelper.getMainCharacterName(this.formationAtTimeOfAction)} called {this.name}!
-          {damageInstanceJsx}
-          {this.subactions.map(subaction => (
-            subaction.getDescription()
-          ))}
-        </div>
-      </>
+      <div key={this.actionNumber} className="action-description">{BattleActionHelper.getMainCharacterName(this.formationAtTimeOfAction)} called {this.name}!
+        {damageInstanceJsx}
+        {this.subactions.map(subaction => (
+          subaction.getDescription()
+        ))}
+      </div>
     );
   }
 
   getStats(): StatsUpdate {
-    const update = StatsUpdateHelper.getEmptyStatsUpdate();
+    const update = StatsUpdateHelper.getEmptyStatsUpdate(Object.keys(this.formationAtTimeOfAction["members"]));
 
     this.damageInstances.forEach(instance => {
       update["generalStats"]["otherDamage"][instance["element"]] += instance["value"];
+      // The game considers summon damage to belong to MC
+      update["characterStats"][0]["otherDamage"][instance["element"]] += instance["value"];
+
+      if (instance["value"] > 0) {
+        update["generalStats"]["hitCount"] += 1;
+        update["characterStats"][0]["hitCount"] += 1;
+      }
     });
 
     const subactionUpdates = this.subactions.map(action => action.getStats());

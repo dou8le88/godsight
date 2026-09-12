@@ -29,7 +29,7 @@ export class AbilityAction extends BattleAction {
   getDescription(): JSX.Element {
     if (this.overrideMessage) {
       return (
-        <div className="action-description" >{this.overrideMessage}
+        <div key={this.actionNumber} className="action-description" >{this.overrideMessage}
           {
             this.subactions.map(subaction => (
               subaction.getDescription()
@@ -46,22 +46,20 @@ export class AbilityAction extends BattleAction {
       );
 
       return (
-        <>
-          <div className="action-description"> {actorName} activated {this.name}!
-            {
-              this.subactions.map(subaction => (
-                subaction.getDescription()
-              ))
-            }
-          </div>
-        </>
+        <div className="action-description"> {actorName} activated {this.name}!
+          {
+            this.subactions.map(subaction => (
+              subaction.getDescription()
+            ))
+          }
+        </div>
       );
     }
 
   }
 
   getStats(): StatsUpdate {
-    const update = StatsUpdateHelper.getEmptyStatsUpdate();
+    const update = StatsUpdateHelper.getEmptyStatsUpdate(Object.keys(this.formationAtTimeOfAction["members"]));
     const subactionStatsUpdates = this.subactions.map(action => action.getStats());
     const allUpdates = subactionStatsUpdates.reduce(
       (prev, cur) => StatsUpdateHelper.concatUpdates(prev, cur),
@@ -74,14 +72,18 @@ export class AbilityAction extends BattleAction {
         const subactionHitCount = allUpdates["generalStats"]["hitCount"];
         const subactionDebuffs = allUpdates["generalStats"]["debuffsInflictedCount"];
         const subactionSkillDamage = allUpdates["generalStats"]["skillDamage"];
+        const subactionNormalAttackDamage = allUpdates["generalStats"]["normalAttackDamage"];
 
-        if (!allUpdates["characterStats"][this.position]) {
-          allUpdates["characterStats"][this.position] = StatsUpdateHelper.getEmptyStats();
-        }
-        allUpdates["characterStats"][this.position]["hitCount"] += subactionHitCount;
-        allUpdates["characterStats"][this.position]["debuffsInflictedCount"] += subactionDebuffs;
+        const characterIndex = BattleActionHelper.getCharacterIndexAtPosition(
+          this.formationAtTimeOfAction,
+          this.position
+        );
+
+        allUpdates["characterStats"][characterIndex]["hitCount"] += subactionHitCount;
+        allUpdates["characterStats"][characterIndex]["debuffsInflictedCount"] += subactionDebuffs;
         GameElementHelper.getAllElements().forEach(element => {
-          allUpdates["characterStats"][this.position]["skillDamage"][element] += subactionSkillDamage[element];
+          allUpdates["characterStats"][characterIndex]["skillDamage"][element] += subactionSkillDamage[element];
+          allUpdates["characterStats"][characterIndex]["normalAttackDamage"][element] += subactionNormalAttackDamage[element];
         });
         break;
       case Actor.BOSS:

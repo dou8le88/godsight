@@ -9,7 +9,7 @@ import { FatedChainGaugeScenarioData } from "./gbf/battletypes/scenariodata/fate
 import { FormChangeScenarioData } from "./gbf/battletypes/scenariodata/formchangescenariodata";
 import { GenericScenarioData } from "./gbf/battletypes/scenariodata/genericscenariodata";
 import { HonorsGainedScenarioData } from "./gbf/battletypes/scenariodata/honorsgainedscenariodata";
-import { GameElementValue } from "./gbf/battletypes/scenariodata/mechanics/element";
+import { GameElement, GameElementValue } from "./gbf/battletypes/scenariodata/mechanics/element";
 import { StatusType } from "./gbf/battletypes/scenariodata/mechanics/statustype";
 import { Actor } from "./gbf/battletypes/scenariodata/mechanics/actor";
 import { MessageScenarioData } from "./gbf/battletypes/scenariodata/messagescenariodata";
@@ -19,7 +19,7 @@ import { ReplaceCharacterScenarioData } from "./gbf/battletypes/scenariodata/rep
 import { ScenarioCommand } from "./gbf/battletypes/scenariodata/scenariocommand";
 import { HealingScenarioData } from "./gbf/battletypes/scenariodata/healingscenariodata";
 import { WindowEffectScenarioData } from "./gbf/battletypes/scenariodata/windoweffectscenariodata";
-import { BossData, StartData } from "./gbf/battletypes/startdata";
+import { BossData, PartyFormationData, StartData } from "./gbf/battletypes/startdata";
 import { AbilityAction } from "./godsight/battletypes/abilityaction";
 import { BattleAction } from "./godsight/battletypes/battleaction";
 import { GodsightBattleData } from "./godsight/battletypes/battledata";
@@ -57,6 +57,8 @@ import { StandbyScenarioData } from "./gbf/battletypes/scenariodata/standbyscena
 import { StandbyAction } from "./godsight/battletypes/standbyaction";
 import { BattleLogScenarioData } from "./gbf/battletypes/scenariodata/battlelogscenariodata";
 import { RetreatAction } from "./godsight/battletypes/retreataction";
+import { BattleStats } from "./godsight/battletypes/battlestats";
+import { GodsightPartyFormationData } from "./godsight/battletypes/partyformationdata";
 
 export class BattleScenarioParser {
   constructor() {
@@ -126,10 +128,9 @@ export class BattleScenarioParser {
             battleData["boss"][bossSpecialAttackScenario["pos"]]["name"],
             bossSpecialAttackScenario["target"],
             bossSpecialAttackScenario["count"],
-            bossSpecialAttackScenario["attr"],
             bossSpecialAttackScenario["list"].flatMap(l => l["damage"]).map(instance => {
               const damageInstance: DamageInstance = {
-                "element": instance["attr"],
+                "element": "attr" in instance && instance["attr"] !== "" ? instance["attr"] : GameElement.NULL_PLAIN,
                 "receiverPosition": instance["pos"],
                 "value": instance["value"],
                 "targetHpAfterDamage": instance["hp"],
@@ -288,13 +289,12 @@ export class BattleScenarioParser {
           const damageDealtScenario = scenario as DamageScenarioData;
           const damageAction = new DamageAction(
             baseActionNumber + i,
-            damageDealtScenario["color"],
             damageDealtScenario["to"],
             damageDealtScenario["list"].map(l => {
               return {
                 "receiverPosition": l["pos"],
                 "currentHit": l["attack_num"],
-                "element": l["color"],
+                "element": "color" in l && l["color"] !== "" ? l["color"] : GameElement.NULL_PLAIN,
                 "value": l["value"],
                 "targetHpAfterDamage": l["hp"],
                 "critical": l["critical"],
@@ -312,7 +312,7 @@ export class BattleScenarioParser {
           const multihitDamageScenario = scenario as MultihitDamageScenarioData;
           const instances = multihitDamageScenario["list"].flat(1).map(hit => {
             return {
-              "element": hit["color"],
+              "element": "color" in hit && hit["color"] !== "" ? hit["color"] : GameElement.NULL_PLAIN,
               "receiverPosition": hit["pos"],
               "value": hit["value"],
               "targetHpAfterDamage": hit["hp"],
@@ -331,7 +331,6 @@ export class BattleScenarioParser {
 
           const multihitDamageAction = new MultihitDamageAction(
             baseActionNumber + i,
-            multihitDamageScenario["color"],
             multihitDamageScenario["to"],
             instances,
             structuredClone(battleData["boss"]),
@@ -382,10 +381,9 @@ export class BattleScenarioParser {
             baseActionNumber + i,
             singularNormalAttackScenario["from"],
             singularNormalAttackScenario["pos"],
-            singularNormalAttackScenario["color"],
             damageArray.map(damage => {
               return {
-                "element": damage["color"],
+                "element": "color" in damage && damage["color"] !== "" ? damage["color"] : GameElement.NULL_PLAIN,
                 "receiverPosition": damage["pos"],
                 "value": damage["value"],
                 "targetHpAfterDamage": damage["hp"],
@@ -426,11 +424,10 @@ export class BattleScenarioParser {
             chargedAttackScenario["pos"],
             chargedAttackScenario["to"],
             chargedAttackScenario["target"],
-            chargedAttackScenario["attr"],
             chargedAttackScenario["total"].map(damage => {
               const damageTotal = ChargedAttackDamageInstance.getTotal(damage);
               return {
-                "element": damage["attr"],
+                "element": "attr" in damage && damage["attr"] !== "" ? damage["attr"] : GameElement.NULL_PLAIN,
                 "value": damageTotal,
                 "critical": wasCriticalHit.get(damage["attr"])!,
                 "receiverPosition": damage["pos"],
@@ -501,7 +498,7 @@ export class BattleScenarioParser {
             summonScenario["list"].flatMap(l => l["damage"]).map(damage => {
               return {
                 "receiverPosition": damage["pos"],
-                "element": damage["color"],
+                "element": "color" in damage && damage["color"] !== "" ? damage["color"] : GameElement.NULL_PLAIN,
                 "value": damage["value"],
                 "targetHpAfterDamage": damage["hp"],
                 "critical": damage["critical"],
@@ -556,7 +553,7 @@ export class BattleScenarioParser {
             const damageScenario = chainBurstDamageScenario as DamageScenarioData;
             chainBurstAction.damageInstances = damageScenario["list"].map(d => {
               return {
-                "element": d["color"],
+                "element": "color" in d && d["color"] !== "" ? d["color"] : GameElement.NULL_PLAIN,
                 "receiverPosition": d["pos"],
                 "value": d["value"],
                 "targetHpAfterDamage": d["hp"],
@@ -571,7 +568,7 @@ export class BattleScenarioParser {
             const multihitDamageScenario = chainBurstDamageScenario as MultihitDamageScenarioData;
             chainBurstAction.damageInstances = multihitDamageScenario["list"].flat(1).map(d => {
               return {
-                "element": d["color"],
+                "element": "color" in d && d["color"] !== "" ? d["color"] : GameElement.NULL_PLAIN,
                 "receiverPosition": d["pos"],
                 "value": d["value"],
                 "targetHpAfterDamage": d["hp"],
@@ -895,6 +892,36 @@ export class BattleScenarioParser {
   }
 
   public parseStartData(startData: StartData): GodsightBattleData {
+    const party = {
+      "partyMemberCount": startData["player"]["number"],
+      "frontline": startData["formation"].map(idx => Number(idx)),
+      "backline": startData["back_formation"].map(idx => Number(idx)),
+      "members": startData["player"]["param"].map(character => {
+        return {
+          "name": character["name"],
+          "characterId": String(character["setting_id"]),
+          "isMC": Boolean(character["leader"]),
+          /**
+           * Portrait filename to be used in the URL.
+           */
+          "portraitImageId": character["pid_image"],
+          "hpMax": character["hpmax"],
+          "hp": character["hp"],
+          "meter": character["recast"],
+          "meterMax": Number.parseInt(character["recastmax"]),
+          "element": character["attr"],
+          "weaponProficiency": character["weapon"],
+          "alive": Boolean(character["alive"]),
+          "buffCount": (character["condition"]["buff"] || []).length,
+          "debuffCount": (character["condition"]["debuff"] || []).length,
+          "canBeResurrected": character["resurrection_availble_flag"], // sic
+          "isGuarding": Boolean(Number.parseInt(character["is_guard_status"])),
+          "canGuard": !Boolean(Number.parseInt(character["is_guard_unavailable"])),
+          "isVanished": Boolean(character["is_vanished"]),
+        };
+      }),
+    };
+
     const battleData: GodsightBattleData = {
       "raidId": startData["raid_id"],
       "questId": startData["quest_id"],
@@ -905,7 +932,7 @@ export class BattleScenarioParser {
        * We only receive commands that tell us about increases to this value and not the current value.
        */
       "honors": 0,
-      "battleStats": StatsUpdateHelper.getEmptyStatsUpdate(),
+      "battleStats": StatsUpdateHelper.getEmptyStatsUpdate(Object.keys(party["members"])),
       "fatedChainGauge": Number(startData["chain_burst_gauge"] || 0),
       "battleProgressStatus": BattleProgressStatus.ACTIVE,
       /**
@@ -914,35 +941,7 @@ export class BattleScenarioParser {
        */
       "expirationTime": Date.now() + (startData["timer"] * 1000),
       "lastUpdated": Date.now(),
-      "party": {
-        "partyMemberCount": startData["player"]["number"],
-        "frontline": startData["formation"].map(idx => Number(idx)),
-        "backline": startData["back_formation"].map(idx => Number(idx)),
-        "members": startData["player"]["param"].map(character => {
-          return {
-            "name": character["name"],
-            "characterId": String(character["setting_id"]),
-            "isMC": Boolean(character["leader"]),
-            /**
-             * Portrait filename to be used in the URL.
-             */
-            "portraitImageId": character["pid_image"],
-            "hpMax": character["hpmax"],
-            "hp": character["hp"],
-            "meter": character["recast"],
-            "meterMax": Number.parseInt(character["recastmax"]),
-            "element": character["attr"],
-            "weaponProficiency": character["weapon"],
-            "alive": Boolean(character["alive"]),
-            "buffCount": (character["condition"]["buff"] || []).length,
-            "debuffCount": (character["condition"]["debuff"] || []).length,
-            "canBeResurrected": character["resurrection_availble_flag"], // sic
-            "isGuarding": Boolean(Number.parseInt(character["is_guard_status"])),
-            "canGuard": !Boolean(Number.parseInt(character["is_guard_unavailable"])),
-            "isVanished": Boolean(character["is_vanished"]),
-          };
-        }),
-      },
+      "party": party,
       "boss": startData["boss"]["param"].map((b) => this.getBossData(b)),
       "turnData": {},
     };
@@ -952,14 +951,14 @@ export class BattleScenarioParser {
     // so if we have a non-empty scenario, our convention is that those entries belong to turn 0.
     if (startData["scenario"].length) {
       const actions = this.parseScenarioData(startData["scenario"], battleData, 0);
-      battleData["turnData"][0] = this.processTurnActionData(actions);
+      battleData["turnData"][0] = this.processTurnActionData(actions, party);
     }
 
     return battleData;
   }
 
-  public processTurnActionData(battleActions: BattleAction[]): TurnData {
-    const baseStats = StatsUpdateHelper.getEmptyStatsUpdate();
+  public processTurnActionData(battleActions: BattleAction[], party: GodsightPartyFormationData): TurnData {
+    const baseStats = StatsUpdateHelper.getEmptyStatsUpdate(Object.keys(party["members"]));
     const statUpdates = battleActions.map(action => action.getStats());
     const totalStats = statUpdates.reduce(
       (prev, cur) => StatsUpdateHelper.concatUpdates(prev, cur),

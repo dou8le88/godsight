@@ -17,15 +17,13 @@ export class FullElixirAction extends BattleAction {
 
   getDescription(): JSX.Element {
     return (
-      <>
-        <div className="action-description">The party used a Full Elixir!
-          {
-            this.subactions.map(subaction => (
-              subaction.getDescription()
-            ))
-          }
-        </div>
-      </>
+      <div key={this.actionNumber} className="action-description">The party used a Full Elixir!
+        {
+          this.subactions.map(subaction => (
+            subaction.getDescription()
+          ))
+        }
+      </div>
     );
   }
 

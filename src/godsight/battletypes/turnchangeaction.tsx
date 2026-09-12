@@ -23,10 +23,8 @@ export class TurnChangeAction extends BattleAction {
 
   getDescription(): JSX.Element {
     return (
-      <>
-        <div className="action-description">The turn counter advanced by {this.newTurn - this.currentTurn}!
-        </div>
-      </>
+      <div key={this.actionNumber} className="action-description">The turn counter advanced by {this.newTurn - this.currentTurn}!
+      </div>
     );
   }
 

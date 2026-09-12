@@ -23,6 +23,12 @@ export class BattleActionHelper {
     return actorName;
   }
 
+  static getCharacterIndexAtPosition(formation: GodsightPartyFormationData, position: number): number {
+    const entireFormation = formation["frontline"].concat(formation["backline"]);
+
+    return entireFormation[position];
+  }
+
   // matching elements in styles.css
   private static elementToColorMap: Record<GameElementValue, string> = {
     "": "white", // plain
@@ -46,19 +52,19 @@ export class BattleActionHelper {
     return (
       <>
         {Object.keys(damageInstancesByPosition).map(position => (
-          <div className="action-description">{this.getActorName(bossData, formation, receiver, (Number(position)))} took {damageInstancesByPosition[position].map((instance, idx) => (
-            <span key={idx} className={`element ${GameElementHelper.getPrettyElementName(instance["element"])}`}>{instance["value"]}</span>
-          )).reduce((prev: JSX.Element[] | null, cur) => prev === null ? [cur] : [...prev, <> + </>, cur], null)
+          <div key={position} className="action-description">{this.getActorName(bossData, formation, receiver, (Number(position)))} took {damageInstancesByPosition[position].map((instance, idx) => (
+            <span key={idx} className={`element ${GameElementHelper.getPrettyElementName(instance["element"])}`}>{instance["value"].toLocaleString()}</span>
+          )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, " + ", cur], null)
           } damage! {damageInstancesByPosition[position].length > 1 ?
             <>
               {damageInstancesByPosition[position]
                 .every(i => i["element"] == damageInstancesByPosition[position][0]["element"]) ?
                 <>
-                  (Total: <span className={`element ${GameElementHelper.getPrettyElementName(damageInstancesByPosition[position][0]["element"])}`}>{damageInstancesByPosition[position].reduce((prev, cur) => prev + cur["value"], 0)}</span>)&nbsp;
+                  (Total: <span className={`element ${GameElementHelper.getPrettyElementName(damageInstancesByPosition[position][0]["element"])}`}>{damageInstancesByPosition[position].reduce((prev, cur) => prev + cur["value"], 0).toLocaleString()}</span>)&nbsp;
                 </>
                 :
                 <>
-                  (Total: {damageInstancesByPosition[position].reduce((prev, cur) => prev + cur["value"], 0)})&nbsp;
+                  (Total: {damageInstancesByPosition[position].reduce((prev, cur) => prev + cur["value"], 0).toLocaleString()})&nbsp;
                 </>
               }
 
@@ -97,12 +103,12 @@ export class BattleActionHelper {
     return (
       <>
         {Object.keys(healingInstancesByPosition).map(position => (
-          <div className="action-description">{this.getActorName(bossData, formation, receiver, (Number(position)))} healed for {healingInstancesByPosition[position].map((instance, idx) => (
-            <span key={idx} className={`element Heal`}>{instance["value"]}</span>
-          )).reduce((prev: JSX.Element[] | null, cur) => prev === null ? [cur] : [...prev, <> + </>, cur], null)
-          } {healingInstancesByPosition[position].length > 1 ?
+          <div key={position} className="action-description">{this.getActorName(bossData, formation, receiver, (Number(position)))} healed for {healingInstancesByPosition[position].map((instance, idx) => (
+            <span key={idx} className={`element Heal`}>{instance["value"].toLocaleString()}</span>
+          )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, " + ", cur], null)
+          }! {healingInstancesByPosition[position].length > 1 ?
             <>
-              (Total: {healingInstancesByPosition[position].reduce((prev, cur) => prev + cur["value"], 0)})
+              (Total: {healingInstancesByPosition[position].reduce((prev, cur) => prev + cur["value"], 0).toLocaleString()})
             </> :
             <></>
             }

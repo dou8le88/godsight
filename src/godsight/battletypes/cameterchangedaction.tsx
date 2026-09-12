@@ -44,15 +44,13 @@ export class CAMeterChangedAction extends BattleAction {
     }
 
     return (
-      <>
-        <div className="action-description">{BattleActionHelper.getActorName(
-          this.bossesAtTimeOfAction,
-          this.formationAtTimeOfAction,
-          this.target,
-          this.position,
-        )} {changeWord} {this.change} {meterWord}!
-        </div>
-      </>
+      <div key={this.actionNumber} className="action-description">{BattleActionHelper.getActorName(
+        this.bossesAtTimeOfAction,
+        this.formationAtTimeOfAction,
+        this.target,
+        this.position,
+      )} {changeWord} {this.change} {meterWord}!
+      </div>
     );
   }
 

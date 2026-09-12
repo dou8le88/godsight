@@ -14,12 +14,6 @@ export type Stats = {
 export type DamageByElement = { [key: string | number]: number };
 
 export type StatsUpdate = {
-  // TODO: basically everything is using position for character stats,
-  // but that will become wrong as soon as the party formation changes.
-  // Need to make this use either "player"-array indices or
-  // character IDs or something, then provide a way to map current positions to those
-  // for the various actions that collect these stats.
-  // Actions will probably need an independent copy of the lineup at the time of the action.
   "characterStats": { [key: string | number]: Stats },
   "generalStats": Stats,
 }
@@ -48,9 +42,17 @@ export class StatsUpdateHelper {
     };
   }
 
-  static getEmptyStatsUpdate(): StatsUpdate {
+  static getEmptyStatsUpdate(characterIndexes?: (number | string)[]): StatsUpdate {
+    const characterStats: { [key: string | number]: Stats } = {};
+
+    if (characterIndexes) {
+      characterIndexes.forEach(index => {
+        characterStats[index] = this.getEmptyStats();
+      });
+    }
+
     return {
-      "characterStats": {},
+      "characterStats": characterStats,
       "generalStats": this.getEmptyStats(),
     }
   }
@@ -98,7 +100,6 @@ export class StatsUpdateHelper {
     GameElementHelper.getAllElements().forEach(element => {
       into["normalAttackDamage"][element] += other["normalAttackDamage"][element];
       into["skillDamage"][element] += other["skillDamage"][element];
-      into["chargedAttackDamage"][element] += other["chargedAttackDamage"][element];
       into["chargedAttackDamage"][element] += other["chargedAttackDamage"][element];
       into["otherDamage"][element] += other["otherDamage"][element];
       into["damageTaken"][element] += other["damageTaken"][element];

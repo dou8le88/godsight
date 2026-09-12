@@ -18,10 +18,8 @@ export class WindowEffectAction extends BattleAction {
 
   getDescription(): JSX.Element {
     return (
-      <>
-        <div className="action-description">The window effect {this.name} was activated!
-        </div>
-      </>
+      <div key={this.actionNumber} className="action-description">The window effect {this.name} was activated!
+      </div>
     );
   }
 
