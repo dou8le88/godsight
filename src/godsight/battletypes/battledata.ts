@@ -3,6 +3,7 @@ import { BattleProgressStatus } from "./battleprogressstatus";
 import { GodsightBossData } from "./bossdata";
 import { GodsightPartyFormationData } from "./partyformationdata";
 import { TurnData } from "./turndata";
+import { GodsightSummonData } from "./summondata";
 
 export type GodsightBattleData = {
   "raidId": number,

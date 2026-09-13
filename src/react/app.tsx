@@ -100,7 +100,7 @@ export default function GodsightPanel() {
             });
             callback(battleId, raidCopy);
           } else {
-            console.error("Unable to record battle actions: no known active battle (refresh the battle while the Godsight panel is open)");
+            console.warn("Unable to record battle actions: no known active battle (refresh the battle while the Godsight panel is open)");
           }
         } else {
           console.error("Couldn't determine the active battle.");
@@ -135,7 +135,7 @@ export default function GodsightPanel() {
           currentActionNumber = lastAction["actionNumber"] + 1;
         }
 
-        const newActions = battleScenarioParser.parseScenarioData(data["scenario"], raid, currentActionNumber);
+        const newActions = battleScenarioParser.parseScenarioData(data["scenario"], data, raid, currentActionNumber);
         const newTurnData = battleScenarioParser.processTurnActionData(newActions, raid["party"]);
 
         // Merge previous actions and stats into the new stuff.

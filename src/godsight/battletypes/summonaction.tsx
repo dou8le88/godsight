@@ -10,9 +10,12 @@ import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
 import { GodsightBossData } from "./bossdata";
 import { GodsightPartyFormationData } from "./partyformationdata";
 import { assertNotNullOrUndefined } from "../../util/assert";
+import { GodsightSummonData } from "./summondata";
 
 export class SummonAction extends BattleAction {
+  private hitCountRegex = /(\d+)-hit/g;
   public actionType: ActionType = ActionType.CALLED_SUMMON;
+
 
   constructor(
     public actionNumber: number,
@@ -21,6 +24,7 @@ export class SummonAction extends BattleAction {
     public bossesAtTimeOfAction: GodsightBossData[],
     public formationAtTimeOfAction: GodsightPartyFormationData,
     public subactions: BattleAction[],
+    public trueSummonHitCount: number | undefined,
   ) {
     super();
   }
@@ -33,6 +37,7 @@ export class SummonAction extends BattleAction {
         this.formationAtTimeOfAction,
         Actor.BOSS,
         this.damageInstances,
+        this.trueSummonHitCount,
       );
     }
 
@@ -60,6 +65,12 @@ export class SummonAction extends BattleAction {
       }
     });
 
+    const maybeHitCountOverride = this.trueSummonHitCount;
+    if (maybeHitCountOverride !== undefined) {
+      update["generalStats"]["hitCount"] = maybeHitCountOverride;
+      update["characterStats"][0]["hitCount"] = maybeHitCountOverride;
+    }
+
     const subactionUpdates = this.subactions.map(action => action.getStats());
 
     return subactionUpdates.reduce(
@@ -80,6 +91,7 @@ export class SummonAction extends BattleAction {
         json["subactions"].map((action: any) => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],
+        json["trueSummonHitCount"] as number | undefined,
       );
     } else {
       console.error(`this.fromJSON called on ${json}`);

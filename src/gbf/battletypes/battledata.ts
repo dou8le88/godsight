@@ -36,6 +36,12 @@ export type BattleStatus = {
   "ability": PartyAbilityStatus,
   // "lyria_pos": number,
   "group_gauge": GroupGaugeStatus,
+  "summon": SummonData[],
+}
+
+export type SummonData = {
+  "skill": string,
+  "comment": string,
 }
 
 export type GranblueBattleData = {

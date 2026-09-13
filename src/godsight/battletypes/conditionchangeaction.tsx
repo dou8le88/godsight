@@ -48,13 +48,13 @@ export class ConditionChangeAction extends BattleAction {
       <span key={idx}>
         <span className="status-text">{status.name}</span> <img className="status-icon" src={BattleActionHelper.getStatusUrl(status.icon)} />
       </span>
-    )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, ",", cur], null);
+    )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, ", ", cur], null);
 
     const dispelledStatusesJsx: React.ReactNode[] | null = dispelledStatuses.map((status, idx) => (
       <span key={idx}>
         <span className="status-text">{status.name}</span> <img className="status-icon" src={BattleActionHelper.getStatusUrl(status.icon)} />
       </span>
-    )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, ",", cur], null);
+    )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, ", ", cur], null);
 
     let finalGainedStatusJsx = <></>;
     if (gainedStatusesJsx) {

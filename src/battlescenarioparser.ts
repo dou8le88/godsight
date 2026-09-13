@@ -59,6 +59,7 @@ import { BattleLogScenarioData } from "./gbf/battletypes/scenariodata/battlelogs
 import { RetreatAction } from "./godsight/battletypes/retreataction";
 import { BattleStats } from "./godsight/battletypes/battlestats";
 import { GodsightPartyFormationData } from "./godsight/battletypes/partyformationdata";
+import { GranblueBattleData } from "./gbf/battletypes/battledata";
 
 export class BattleScenarioParser {
   constructor() {
@@ -74,24 +75,27 @@ export class BattleScenarioParser {
    */
   public parseScenarioData(
     scenarioData: GenericScenarioData[],
+    gbfBattleData: GranblueBattleData,
     battleData: GodsightBattleData,
     baseActionNumber: number,
   ): BattleAction[] {
-    return this._parseScenarioData(scenarioData, battleData, baseActionNumber).actions;
+    return this._parseScenarioData(scenarioData, gbfBattleData, battleData, baseActionNumber).actions;
   }
 
   private containsJapaneseRegex = /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u;
+  private summonHitCountRegex = /(\d+)-hit/g;
 
   /**
    * Parses game battle scenario data.
    * @param scenarioData The data to process
-   * @param battleData Main info about the battle, such as boss and party member status.
+   * @param godsightBattleData Main info about the battle, such as boss and party member status.
    * @param stopOnMainAction Used when calling the method recursively to stop when a "separate" action is reached while processing subactions.
    * @returns a list of actions and the last index processed in the array.
    */
   private _parseScenarioData(
     scenarioData: GenericScenarioData[],
-    battleData: GodsightBattleData,
+    gbfBattleData: GranblueBattleData,
+    godsightBattleData: GodsightBattleData,
     baseActionNumber: number,
     stopOnMainAction?: boolean
   ): { actions: BattleAction[], lastIndex: number } {
@@ -103,12 +107,12 @@ export class BattleScenarioParser {
 
         case ScenarioCommand.BOSS_STATUS:
           // Updates battle data rather than recording an action.
-          this.handleBossStatusScenario(scenario as BossStatusScenarioData, battleData);
+          this.handleBossStatusScenario(scenario as BossStatusScenarioData, godsightBattleData);
           break;
 
         case ScenarioCommand.FORM_CHANGE:
           // Updates battle data rather than recording an action.
-          this.handleFormChangeScenario(scenario as FormChangeScenarioData, battleData);
+          this.handleFormChangeScenario(scenario as FormChangeScenarioData, godsightBattleData);
           break;
 
         case ScenarioCommand.BOSS_SPECIAL_ATTACK: {
@@ -118,14 +122,15 @@ export class BattleScenarioParser {
           const bossSpecialAttackScenario = scenario as BossSpecialAttackScenarioData;
           const subactions = this._parseScenarioData(
             scenarioData.slice(i + 1),
-            battleData,
+            gbfBattleData,
+            godsightBattleData,
             baseActionNumber + i + 1,
             true,
           );
           const bossSpecialAttackAction = new BossSpecialAttackAction(
             baseActionNumber + i,
             bossSpecialAttackScenario["name"],
-            battleData["boss"][bossSpecialAttackScenario["pos"]]["name"],
+            godsightBattleData["boss"][bossSpecialAttackScenario["pos"]]["name"],
             bossSpecialAttackScenario["target"],
             bossSpecialAttackScenario["count"],
             bossSpecialAttackScenario["list"].flatMap(l => l["damage"]).map(instance => {
@@ -140,8 +145,8 @@ export class BattleScenarioParser {
               }
               return damageInstance;
             }),
-            structuredClone(battleData["boss"]),
-            structuredClone(battleData["party"]),
+            structuredClone(godsightBattleData["boss"]),
+            structuredClone(godsightBattleData["party"]),
             // Peek ahead at further scenarios to find out the consequences of this one, so we can associate them.
             subactions.actions,
           );
@@ -156,7 +161,7 @@ export class BattleScenarioParser {
           const meterChangeScenario = scenario as ChargeAttackMeterChangedScenarioData;
           const meterChangedAction = this.handleMeterChangeScenario(
             meterChangeScenario,
-            battleData,
+            godsightBattleData,
             baseActionNumber + i
           );
           // handle not getting any bar (due to debuffs, already being at max, etc.)
@@ -169,7 +174,7 @@ export class BattleScenarioParser {
         case ScenarioCommand.MESSAGE:
           const buffDebuffChangeScenario = scenario as MessageScenarioData;
           const buffDebuffActions = this.handleMessageScenario(
-            battleData,
+            godsightBattleData,
             buffDebuffChangeScenario,
             baseActionNumber + i,
           );
@@ -179,7 +184,7 @@ export class BattleScenarioParser {
 
         case ScenarioCommand.DEATH:
           const deathScenario = scenario as DeathScenarioData;
-          actions.push(this.handleDeathScenario(battleData, deathScenario, baseActionNumber + i));
+          actions.push(this.handleDeathScenario(godsightBattleData, deathScenario, baseActionNumber + i));
           break;
 
         case ScenarioCommand.ABILITY: {
@@ -189,7 +194,8 @@ export class BattleScenarioParser {
           const abilityScenario = scenario as AbilityScenarioData;
           const subactions = this._parseScenarioData(
             scenarioData.slice(i + 1),
-            battleData,
+            gbfBattleData,
+            godsightBattleData,
             baseActionNumber + i + 1,
             true,
           );
@@ -203,8 +209,8 @@ export class BattleScenarioParser {
             abilityScenario["name"],
             abilityScenario["to"],
             abilityScenario["pos"],
-            structuredClone(battleData["boss"]),
-            structuredClone(battleData["party"]),
+            structuredClone(godsightBattleData["boss"]),
+            structuredClone(godsightBattleData["party"]),
             subactions.actions,
           );
           // Fix various ways that the Ability command can be supremely unhelpful.
@@ -247,7 +253,7 @@ export class BattleScenarioParser {
 
         case ScenarioCommand.HONORS_GAINED:
           const honorsGainedScenario = scenario as HonorsGainedScenarioData;
-          battleData["honors"] += honorsGainedScenario["amount"];
+          godsightBattleData["honors"] += honorsGainedScenario["amount"];
           break;
 
         case ScenarioCommand.REPLACE_CHARACTER:
@@ -261,19 +267,19 @@ export class BattleScenarioParser {
             baseActionNumber + i,
             position,
             newCharacter,
-            structuredClone(battleData["party"]),
+            structuredClone(godsightBattleData["party"]),
           );
           actions.push(replaceCharacterAction);
 
-          const entireFormation = battleData["party"]["frontline"].concat(battleData["party"]["backline"]);
+          const entireFormation = godsightBattleData["party"]["frontline"].concat(godsightBattleData["party"]["backline"]);
           const currentCharacterAtPos = entireFormation[position];
           const oldPositionOfNewCharacter = entireFormation.findIndex(c => c == newCharacter);
           entireFormation[position] = newCharacter;
           entireFormation[oldPositionOfNewCharacter] = currentCharacterAtPos;
           const newFrontline = entireFormation.slice(0, 4);
           const newBackline = entireFormation.slice(4);
-          battleData["party"]["frontline"] = newFrontline;
-          battleData["party"]["backline"] = newBackline;
+          godsightBattleData["party"]["frontline"] = newFrontline;
+          godsightBattleData["party"]["backline"] = newBackline;
           break;
 
         case ScenarioCommand.WINDOW_EFFECT:
@@ -302,8 +308,8 @@ export class BattleScenarioParser {
                 "miss": l["miss"],
               };
             }),
-            structuredClone(battleData["boss"]),
-            structuredClone(battleData["party"]),
+            structuredClone(godsightBattleData["boss"]),
+            structuredClone(godsightBattleData["party"]),
           );
           actions.push(damageAction);
           break;
@@ -333,8 +339,8 @@ export class BattleScenarioParser {
             baseActionNumber + i,
             multihitDamageScenario["to"],
             instances,
-            structuredClone(battleData["boss"]),
-            structuredClone(battleData["party"]),
+            structuredClone(godsightBattleData["boss"]),
+            structuredClone(godsightBattleData["party"]),
           );
           actions.push(multihitDamageAction);
           break;
@@ -345,14 +351,15 @@ export class BattleScenarioParser {
           }
           const subactions = this._parseScenarioData(
             scenarioData.slice(i + 1),
-            battleData,
+            gbfBattleData,
+            godsightBattleData,
             baseActionNumber + i + 1,
             true,
           );
           const normalAttackAction = new NormalAttackAction(
             baseActionNumber + i,
-            structuredClone(battleData["boss"]),
-            structuredClone(battleData["party"]),
+            structuredClone(godsightBattleData["boss"]),
+            structuredClone(godsightBattleData["party"]),
             subactions.actions,
           );
           actions.push(normalAttackAction);
@@ -392,8 +399,8 @@ export class BattleScenarioParser {
                 "miss": damage["miss"],
               };
             }),
-            structuredClone(battleData["boss"]),
-            structuredClone(battleData["party"]),
+            structuredClone(godsightBattleData["boss"]),
+            structuredClone(godsightBattleData["party"]),
           );
           actions.push(singularNormalAttackAction);
           break;
@@ -414,7 +421,8 @@ export class BattleScenarioParser {
           const hpAfterDamage = allSplitChargedAttackDamage.at(-1)!["hp"];
           const subactions = this._parseScenarioData(
             scenarioData.slice(i + 1),
-            battleData,
+            gbfBattleData,
+            godsightBattleData,
             baseActionNumber + i + 1,
             true,
           );
@@ -436,8 +444,8 @@ export class BattleScenarioParser {
                 "guarded": false,
               };
             }),
-            structuredClone(battleData["boss"]),
-            structuredClone(battleData["party"]),
+            structuredClone(godsightBattleData["boss"]),
+            structuredClone(godsightBattleData["party"]),
             subactions.actions,
           );
           actions.push(chargedAttackAction);
@@ -447,7 +455,7 @@ export class BattleScenarioParser {
 
         case ScenarioCommand.FATED_CHAIN_GAUGE_CHANGE:
           const fatedChainGaugeScenario = scenario as FatedChainGaugeScenarioData;
-          battleData["fatedChainGauge"] = fatedChainGaugeScenario["value"];
+          godsightBattleData["fatedChainGauge"] = fatedChainGaugeScenario["value"];
           break;
 
         case ScenarioCommand.FULL_ELIXIR: {
@@ -455,7 +463,8 @@ export class BattleScenarioParser {
           // so all subsequent commands like increasing character meter and reviving are subactions.
           const subactions = this._parseScenarioData(
             scenarioData.slice(i + 1),
-            battleData,
+            gbfBattleData,
+            godsightBattleData,
             baseActionNumber + i + 1,
           );
           const fullElixirAction = new FullElixirAction(
@@ -478,8 +487,8 @@ export class BattleScenarioParser {
                 "hpAfterHealing": h["hp"],
               };
             }),
-            structuredClone(battleData["boss"]),
-            structuredClone(battleData["party"]),
+            structuredClone(godsightBattleData["boss"]),
+            structuredClone(godsightBattleData["party"]),
           );
           actions.push(healingAction);
           break;
@@ -488,10 +497,24 @@ export class BattleScenarioParser {
           const summonScenario = scenario as SummonScenarioData;
           const subactions = this._parseScenarioData(
             scenarioData.slice(i + 1),
-            battleData,
+            gbfBattleData,
+            godsightBattleData,
             baseActionNumber + i + 1,
-            true,
           );
+          let trueSummonHitCount: number | undefined;
+          if (summonScenario["name"]) {
+            const currentSummon = gbfBattleData["status"]["summon"].find(summon =>
+              summon["skill"] == summonScenario["name"]
+            );
+            if (currentSummon) {
+              const matchResult = currentSummon["comment"].match(this.summonHitCountRegex);
+              if (matchResult) {
+                trueSummonHitCount = parseInt(matchResult.at(-1)!);;
+              }
+            } else {
+              console.error(`Unable to find summon matching ${name}!`);
+            }
+          }
           const summonAction = new SummonAction(
             baseActionNumber + i,
             summonScenario["name"],
@@ -509,9 +532,11 @@ export class BattleScenarioParser {
                 "miss": 0,
               }
             }),
-            structuredClone(battleData["boss"]),
-            structuredClone(battleData["party"]),
+            structuredClone(godsightBattleData["boss"]),
+            structuredClone(godsightBattleData["party"]),
             subactions.actions,
+            trueSummonHitCount,
+
           );
           // This occurs due to the fact that you can reskin summons. There are two summon commands,
           // one to show the summon animation and one to show the actual damage.
@@ -534,8 +559,8 @@ export class BattleScenarioParser {
             chainBurstScenario["chain_num"],
             "Unknown",
             [],
-            structuredClone(battleData["boss"]),
-            structuredClone(battleData["party"]),
+            structuredClone(godsightBattleData["boss"]),
+            structuredClone(godsightBattleData["party"]),
           );
           // A CHAIN_BURST command should be immediately followed by _SCREEN_EFFECT
           // with its name and a DAMAGE_DEALT or DAMAGE_DEALT_MULTIHIT command
@@ -586,7 +611,7 @@ export class BattleScenarioParser {
           break;
 
         case ScenarioCommand.RETREAT:
-          battleData["battleProgressStatus"] = BattleProgressStatus.RETREATED;
+          godsightBattleData["battleProgressStatus"] = BattleProgressStatus.RETREATED;
           const retreatAction = new RetreatAction(
             baseActionNumber + i,
           );
@@ -596,7 +621,7 @@ export class BattleScenarioParser {
         case ScenarioCommand.WON_BATTLE:
           const wonBattleScenario = scenario as WonBattleScenarioData;
           if (wonBattleScenario["is_last_raid"]) {
-            battleData["battleProgressStatus"] = BattleProgressStatus.WON;
+            godsightBattleData["battleProgressStatus"] = BattleProgressStatus.WON;
           }
           break;
 
@@ -607,10 +632,10 @@ export class BattleScenarioParser {
           const turnChangeScenario = scenario as TurnChangeScenarioData;
           const turnChangeAction = new TurnChangeAction(
             baseActionNumber + i,
-            battleData["currentTurn"],
+            godsightBattleData["currentTurn"],
             turnChangeScenario["turn"],
           );
-          battleData["updateTurnTo"] = turnChangeAction.newTurn;
+          godsightBattleData["updateTurnTo"] = turnChangeAction.newTurn;
           actions.push(turnChangeAction);
           break;
 
@@ -626,8 +651,8 @@ export class BattleScenarioParser {
           const omenCancelAction = new OmenCancelAction(
             baseActionNumber + i,
             omenCancelScenario["pos"],
-            structuredClone(battleData["boss"]),
-            structuredClone(battleData["party"]),
+            structuredClone(godsightBattleData["boss"]),
+            structuredClone(godsightBattleData["party"]),
           );
           actions.push(omenCancelAction);
           break;
@@ -650,8 +675,8 @@ export class BattleScenarioParser {
             baseActionNumber + i,
             standbyScenario["pos"],
             standbyScenario["standby"],
-            structuredClone(battleData["boss"]),
-            structuredClone(battleData["party"]),
+            structuredClone(godsightBattleData["boss"]),
+            structuredClone(godsightBattleData["party"]),
             battleMessage,
           );
           actions.push(standbyAction);
@@ -818,7 +843,11 @@ export class BattleScenarioParser {
       });
 
       Object.keys(allBossConditionActions).forEach(pos => {
-        actions.push(allBossConditionActions[pos]);
+        if (allBossConditionActions[pos].buffs.length ||
+          allBossConditionActions[pos].debuffs.length ||
+          allBossConditionActions[pos].unclassified.length) {
+          actions.push(allBossConditionActions[pos]);
+        }
       });
     }
     if (playerChanges) {
@@ -884,7 +913,11 @@ export class BattleScenarioParser {
       });
 
       Object.keys(allPlayerConditionActions).forEach(pos => {
-        actions.push(allPlayerConditionActions[pos]);
+        if (allPlayerConditionActions[pos].buffs.length ||
+          allPlayerConditionActions[pos].debuffs.length ||
+          allPlayerConditionActions[pos].unclassified.length) {
+          actions.push(allPlayerConditionActions[pos]);
+        }
       });
     }
 
@@ -950,7 +983,7 @@ export class BattleScenarioParser {
     // It's empty when loading into a raid in the middle of some arbitrary turn,
     // so if we have a non-empty scenario, our convention is that those entries belong to turn 0.
     if (startData["scenario"].length) {
-      const actions = this.parseScenarioData(startData["scenario"], battleData, 0);
+      const actions = this.parseScenarioData(startData["scenario"], startData, battleData, 0);
       battleData["turnData"][0] = this.processTurnActionData(actions, party);
     }
 

@@ -203,7 +203,8 @@ html {
         width: 350px;
         height: 100px;
         margin-top: 20px;
-        justify-content: space-around;
+        justify-content: center;
+        column-gap: 5px;
 
         /*
          * Cloning a lot of Granblue's CSS here to imitate the UI.

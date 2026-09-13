@@ -47,6 +47,7 @@ export class BattleActionHelper {
     formation: GodsightPartyFormationData,
     receiver: Actor,
     damageInstances: DamageInstance[],
+    maybeHitCountOverride?: number,
   ): JSX.Element {
     const damageInstancesByPosition = this.getDamageInstancesGroupedByPosition(damageInstances);
     return (
@@ -55,7 +56,7 @@ export class BattleActionHelper {
           <div key={position} className="action-description">{this.getActorName(bossData, formation, receiver, (Number(position)))} took {damageInstancesByPosition[position].map((instance, idx) => (
             <span key={idx} className={`element ${GameElementHelper.getPrettyElementName(instance["element"])}`}>{instance["value"].toLocaleString()}</span>
           )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, " + ", cur], null)
-          } damage! {damageInstancesByPosition[position].length > 1 ?
+          } damage! {damageInstancesByPosition[position].length > 1 || (maybeHitCountOverride !== undefined && maybeHitCountOverride > 1) ?
             <>
               {damageInstancesByPosition[position]
                 .every(i => i["element"] == damageInstancesByPosition[position][0]["element"]) ?
@@ -68,7 +69,7 @@ export class BattleActionHelper {
                 </>
               }
 
-              (Hits: {damageInstancesByPosition[position].filter(i => i["value"] > 0).length})
+              (Hits: {maybeHitCountOverride ? maybeHitCountOverride : damageInstancesByPosition[position].filter(i => i["value"] > 0).length})
             </> :
             <>
             </>

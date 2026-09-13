@@ -52,7 +52,7 @@ export type StartData = GranblueBattleData & {
    * Battle refreshes will show an empty scenario.
    */
   "scenario": GenericScenarioData[],
-  "status": BattleStatus,
+  "status"?: BattleStatus,
   "chain_burst_gauge"?: string;
 }
 
