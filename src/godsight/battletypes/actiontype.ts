@@ -29,6 +29,7 @@ export enum ActionType {
   DAMAGE_DEALT_MULTIHIT = "damage_dealt_multihit",
   HEAL = "heal",
   REPLACED_CHARACTER = "replaced_character",
+  RESURRECTED = "resurrected",
   RETREAT = "retreat",
   STANDBY = "standby",
   TURN_CHANGE = "turn_change",

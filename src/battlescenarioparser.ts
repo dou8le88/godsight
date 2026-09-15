@@ -58,8 +58,12 @@ import { StandbyAction } from "./godsight/battletypes/standbyaction";
 import { BattleLogScenarioData } from "./gbf/battletypes/scenariodata/battlelogscenariodata";
 import { RetreatAction } from "./godsight/battletypes/retreataction";
 import { BattleStats } from "./godsight/battletypes/battlestats";
-import { GodsightPartyFormationData } from "./godsight/battletypes/partyformationdata";
+import { GodsightPartyFormationData, PartyFormationHelper } from "./godsight/battletypes/partyformationdata";
 import { GranblueBattleData } from "./gbf/battletypes/battledata";
+import { BattleActionHelper } from "./godsight/battletypes/battleactionhelper";
+import { HealingInstance } from "./godsight/battletypes/healinginstance";
+import { ResurrectionScenarioData } from "./gbf/battletypes/scenariodata/resurrectionscenariodata";
+import { ResurrectedAction } from "./godsight/battletypes/resurrectedaction";
 
 export class BattleScenarioParser {
   constructor() {
@@ -132,21 +136,31 @@ export class BattleScenarioParser {
             bossSpecialAttackScenario["name"],
             godsightBattleData["boss"][bossSpecialAttackScenario["pos"]]["name"],
             bossSpecialAttackScenario["target"],
-            bossSpecialAttackScenario["count"],
+            godsightBattleData["party"]["partyMemberCount"],
             bossSpecialAttackScenario["list"].flatMap(l => l["damage"]).map(instance => {
+              const receiverIndex = bossSpecialAttackScenario["target"] == Actor.PLAYER ?
+                BattleActionHelper.getCharacterIndexAtPosition(
+                  godsightBattleData["party"],
+                  instance["pos"],
+                ) : instance["pos"];
+              const receiverName = BattleActionHelper.getActorName(
+                godsightBattleData["boss"],
+                godsightBattleData["party"],
+                bossSpecialAttackScenario["target"],
+                instance["pos"],
+              );
               const damageInstance: DamageInstance = {
                 "element": "attr" in instance && instance["attr"] !== "" ? instance["attr"] : GameElement.NULL_PLAIN,
-                "receiverPosition": instance["pos"],
+                "receiverIndex": receiverIndex,
+                "receiverName": receiverName,
                 "value": instance["value"],
-                "targetHpAfterDamage": instance["hp"],
+                "receiverHpAfterDamage": instance["hp"],
                 "critical": instance["critical"],
                 "miss": instance["miss"],
                 "guarded": instance["guard"],
-              }
+              };
               return damageInstance;
             }),
-            structuredClone(godsightBattleData["boss"]),
-            structuredClone(godsightBattleData["party"]),
             // Peek ahead at further scenarios to find out the consequences of this one, so we can associate them.
             subactions.actions,
           );
@@ -204,13 +218,24 @@ export class BattleScenarioParser {
             // The real ability command should happen next so just break and continue the loop.
             break;
           }
+          const sourceName = BattleActionHelper.getActorName(
+            godsightBattleData["boss"],
+            godsightBattleData["party"],
+            abilityScenario["to"],
+            abilityScenario["pos"],
+          );
+          const sourceIndex = BattleActionHelper.getActorIndex(
+            godsightBattleData["party"],
+            abilityScenario["to"],
+            abilityScenario["pos"],
+          );
           const abilityAction = new AbilityAction(
             baseActionNumber + i,
             abilityScenario["name"],
             abilityScenario["to"],
-            abilityScenario["pos"],
-            structuredClone(godsightBattleData["boss"]),
-            structuredClone(godsightBattleData["party"]),
+            sourceName,
+            sourceIndex,
+            godsightBattleData["party"]["partyMemberCount"],
             subactions.actions,
           );
           // Fix various ways that the Ability command can be supremely unhelpful.
@@ -263,17 +288,22 @@ export class BattleScenarioParser {
           const replaceCharacterScenario = scenario as ReplaceCharacterScenarioData;
           const position = replaceCharacterScenario["pos"];
           const newCharacter = Number(replaceCharacterScenario["npc"]);
-          const replaceCharacterAction = new ReplaceCharacterAction(
-            baseActionNumber + i,
-            position,
-            newCharacter,
-            structuredClone(godsightBattleData["party"]),
-          );
-          actions.push(replaceCharacterAction);
-
           const entireFormation = godsightBattleData["party"]["frontline"].concat(godsightBattleData["party"]["backline"]);
           const currentCharacterAtPos = entireFormation[position];
           const oldPositionOfNewCharacter = entireFormation.findIndex(c => c == newCharacter);
+          const replaceCharacterAction = new ReplaceCharacterAction(
+            baseActionNumber + i,
+            PartyFormationHelper.getNameOfCharacterInPosition(
+              godsightBattleData["party"],
+              position,
+            ),
+            PartyFormationHelper.getNameOfCharacterInPosition(
+              godsightBattleData["party"],
+              oldPositionOfNewCharacter,
+            ),
+          );
+          actions.push(replaceCharacterAction);
+
           entireFormation[position] = newCharacter;
           entireFormation[oldPositionOfNewCharacter] = currentCharacterAtPos;
           const newFrontline = entireFormation.slice(0, 4);
@@ -296,51 +326,65 @@ export class BattleScenarioParser {
           const damageAction = new DamageAction(
             baseActionNumber + i,
             damageDealtScenario["to"],
+            godsightBattleData["party"]["partyMemberCount"],
             damageDealtScenario["list"].map(l => {
+              const receiverIndex = damageDealtScenario["to"] == Actor.PLAYER ?
+                BattleActionHelper.getCharacterIndexAtPosition(
+                  godsightBattleData["party"],
+                  l["pos"],
+                ) : l["pos"];
+              const receiverName = BattleActionHelper.getActorName(
+                godsightBattleData["boss"],
+                godsightBattleData["party"],
+                damageDealtScenario["to"],
+                l["pos"],
+              );
               return {
-                "receiverPosition": l["pos"],
+                "receiverIndex": receiverIndex,
+                "receiverName": receiverName,
                 "currentHit": l["attack_num"],
                 "element": "color" in l && l["color"] !== "" ? l["color"] : GameElement.NULL_PLAIN,
                 "value": l["value"],
-                "targetHpAfterDamage": l["hp"],
+                "receiverHpAfterDamage": l["hp"],
                 "critical": l["critical"],
                 "guarded": l["guard"],
                 "miss": l["miss"],
               };
             }),
-            structuredClone(godsightBattleData["boss"]),
-            structuredClone(godsightBattleData["party"]),
           );
           actions.push(damageAction);
           break;
 
         case ScenarioCommand.DAMAGE_DEALT_MULTIHIT:
           const multihitDamageScenario = scenario as MultihitDamageScenarioData;
-          const instances = multihitDamageScenario["list"].flat(1).map(hit => {
+          const instances: DamageInstance[] = multihitDamageScenario["list"].flat(1).map(hit => {
+            const receiverIndex = multihitDamageScenario["to"] == Actor.PLAYER ?
+              BattleActionHelper.getCharacterIndexAtPosition(
+                godsightBattleData["party"],
+                hit["pos"],
+              ) : hit["pos"];
+            const receiverName = BattleActionHelper.getActorName(
+              godsightBattleData["boss"],
+              godsightBattleData["party"],
+              multihitDamageScenario["to"],
+              hit["pos"],
+            );
             return {
               "element": "color" in hit && hit["color"] !== "" ? hit["color"] : GameElement.NULL_PLAIN,
-              "receiverPosition": hit["pos"],
+              "receiverIndex": receiverIndex,
+              "receiverName": receiverName,
               "value": hit["value"],
-              "targetHpAfterDamage": hit["hp"],
+              "receiverHpAfterDamage": hit["hp"],
               "critical": hit["critical"],
               "guarded": hit["guard"],
               "miss": hit["miss"],
             };
           });
-          const damagePerTarget: { [key: number]: number } = {};
-          instances.forEach(instance => {
-            if (!damagePerTarget[instance["receiverPosition"]]) {
-              damagePerTarget[instance["receiverPosition"]] = 0;
-            }
-            damagePerTarget[instance["receiverPosition"]] += instance["value"];
-          });
-
           const multihitDamageAction = new MultihitDamageAction(
             baseActionNumber + i,
             multihitDamageScenario["to"],
+            godsightBattleData["party"]["partyMemberCount"],
             instances,
-            structuredClone(godsightBattleData["boss"]),
-            structuredClone(godsightBattleData["party"]),
           );
           actions.push(multihitDamageAction);
           break;
@@ -356,10 +400,15 @@ export class BattleScenarioParser {
             baseActionNumber + i + 1,
             true,
           );
+          const firstNormalAttack = subactions.actions.filter(a => a instanceof SingularNormalAttackAction);
+          const attackerName = firstNormalAttack.length ?
+            firstNormalAttack[0].source == Actor.PLAYER ?
+              godsightBattleData["party"]["members"][firstNormalAttack[0].attackerIndex]["name"] :
+              godsightBattleData["boss"][firstNormalAttack[0].attackerIndex]["name"] :
+            "Unknown";
           const normalAttackAction = new NormalAttackAction(
             baseActionNumber + i,
-            structuredClone(godsightBattleData["boss"]),
-            structuredClone(godsightBattleData["party"]),
+            attackerName,
             subactions.actions,
           );
           actions.push(normalAttackAction);
@@ -384,23 +433,40 @@ export class BattleScenarioParser {
           } else {
             damageArray = Object.keys(sourceDamageInstances).map(key => sourceDamageInstances[key]).flat(1);
           }
+          const attackerIndex = singularNormalAttackScenario["from"] == Actor.PLAYER ?
+            BattleActionHelper.getCharacterIndexAtPosition(
+              godsightBattleData["party"],
+              singularNormalAttackScenario["pos"],
+            ) : singularNormalAttackScenario["pos"];
           const singularNormalAttackAction = new SingularNormalAttackAction(
             baseActionNumber + i,
             singularNormalAttackScenario["from"],
-            singularNormalAttackScenario["pos"],
+            attackerIndex,
+            godsightBattleData["party"]["partyMemberCount"],
             damageArray.map(damage => {
+              const receiverIndex = singularNormalAttackScenario["from"] == Actor.PLAYER ?
+                BattleActionHelper.getCharacterIndexAtPosition(
+                  godsightBattleData["party"],
+                  damage["pos"],
+                ) :
+                damage["pos"];
+              const receiverName = BattleActionHelper.getActorName(
+                godsightBattleData["boss"],
+                godsightBattleData["party"],
+                singularNormalAttackScenario["from"] == Actor.PLAYER ? Actor.BOSS : Actor.PLAYER,
+                damage["pos"],
+              );
               return {
                 "element": "color" in damage && damage["color"] !== "" ? damage["color"] : GameElement.NULL_PLAIN,
-                "receiverPosition": damage["pos"],
+                "receiverIndex": receiverIndex,
+                "receiverName": receiverName,
                 "value": damage["value"],
-                "targetHpAfterDamage": damage["hp"],
+                "receiverHpAfterDamage": damage["hp"],
                 "critical": damage["critical"],
                 "guarded": damage["guard"],
                 "miss": damage["miss"],
               };
             }),
-            structuredClone(godsightBattleData["boss"]),
-            structuredClone(godsightBattleData["party"]),
           );
           actions.push(singularNormalAttackAction);
           break;
@@ -426,26 +492,45 @@ export class BattleScenarioParser {
             baseActionNumber + i + 1,
             true,
           );
+          const attackerIndex = BattleActionHelper.getCharacterIndexAtPosition(
+            godsightBattleData["party"],
+            chargedAttackScenario["pos"],
+          );
+          const attackerName = BattleActionHelper.getActorName(
+            godsightBattleData["boss"],
+            godsightBattleData["party"],
+            Actor.PLAYER,
+            chargedAttackScenario["pos"],
+          );
+
           const chargedAttackAction = new ChargedAttackAction(
             baseActionNumber + i,
             chargedAttackScenario["name"],
-            chargedAttackScenario["pos"],
-            chargedAttackScenario["to"],
+            attackerIndex,
+            attackerName,
             chargedAttackScenario["target"],
+            godsightBattleData["party"]["partyMemberCount"],
             chargedAttackScenario["total"].map(damage => {
               const damageTotal = ChargedAttackDamageInstance.getTotal(damage);
+              const receiverIndex = damage["pos"];
+              damage["pos"];
+              const receiverName = BattleActionHelper.getActorName(
+                godsightBattleData["boss"],
+                godsightBattleData["party"],
+                chargedAttackScenario["target"],
+                damage["pos"],
+              );
               return {
                 "element": "attr" in damage && damage["attr"] !== "" ? damage["attr"] : GameElement.NULL_PLAIN,
                 "value": damageTotal,
                 "critical": wasCriticalHit.get(damage["attr"])!,
-                "receiverPosition": damage["pos"],
-                "targetHpAfterDamage": hpAfterDamage,
+                "receiverIndex": receiverIndex,
+                "receiverName": receiverName,
+                "receiverHpAfterDamage": hpAfterDamage,
                 "miss": damageTotal > 0 ? 0 : 2,
                 "guarded": false,
               };
             }),
-            structuredClone(godsightBattleData["boss"]),
-            structuredClone(godsightBattleData["party"]),
             subactions.actions,
           );
           actions.push(chargedAttackAction);
@@ -480,15 +565,27 @@ export class BattleScenarioParser {
           const healingAction = new HealingAction(
             baseActionNumber + i,
             healingScenario["to"],
+            godsightBattleData["party"]["partyMemberCount"],
             healingScenario["list"].map(h => {
+              const receiverIndex = healingScenario["to"] == Actor.PLAYER ?
+                BattleActionHelper.getCharacterIndexAtPosition(
+                  godsightBattleData["party"],
+                  h["pos"],
+                ) :
+                h["pos"];
+              const receiverName = BattleActionHelper.getActorName(
+                godsightBattleData["boss"],
+                godsightBattleData["party"],
+                healingScenario["to"],
+                h["pos"],
+              );
               return {
-                "receiverPosition": h["pos"],
+                "receiverIndex": receiverIndex,
+                "receiverName": receiverName,
                 "value": h["value"],
                 "hpAfterHealing": h["hp"],
               };
             }),
-            structuredClone(godsightBattleData["boss"]),
-            structuredClone(godsightBattleData["party"]),
           );
           actions.push(healingAction);
           break;
@@ -518,22 +615,30 @@ export class BattleScenarioParser {
           const summonAction = new SummonAction(
             baseActionNumber + i,
             summonScenario["name"],
+            BattleActionHelper.getMainCharacterName(godsightBattleData["party"]),
+            godsightBattleData["party"]["partyMemberCount"],
             summonScenario["list"].flatMap(l => l["damage"]).map(damage => {
+              const receiverIndex = damage["pos"];
+              const receiverName = BattleActionHelper.getActorName(
+                godsightBattleData["boss"],
+                godsightBattleData["party"],
+                Actor.BOSS,
+                damage["pos"],
+              );
               return {
-                "receiverPosition": damage["pos"],
+                "receiverIndex": receiverIndex,
+                "receiverName": receiverName,
                 "element": "color" in damage && damage["color"] !== "" ? damage["color"] : GameElement.NULL_PLAIN,
                 "value": damage["value"],
-                "targetHpAfterDamage": damage["hp"],
+                "receiverHpAfterDamage": damage["hp"],
                 "critical": damage["critical"],
                 "guarded": damage["guard"],
                 // TODO: test this.
                 // I feel like it should be possible for summons to miss vs e.g. Siete unchallenged
                 // but maybe that just shows up as damage = 0.
                 "miss": 0,
-              }
+              } as DamageInstance;
             }),
-            structuredClone(godsightBattleData["boss"]),
-            structuredClone(godsightBattleData["party"]),
             subactions.actions,
             trueSummonHitCount,
 
@@ -558,9 +663,8 @@ export class BattleScenarioParser {
             baseActionNumber + i,
             chainBurstScenario["chain_num"],
             "Unknown",
+            godsightBattleData["party"]["partyMemberCount"],
             [],
-            structuredClone(godsightBattleData["boss"]),
-            structuredClone(godsightBattleData["party"]),
           );
           // A CHAIN_BURST command should be immediately followed by _SCREEN_EFFECT
           // with its name and a DAMAGE_DEALT or DAMAGE_DEALT_MULTIHIT command
@@ -577,11 +681,19 @@ export class BattleScenarioParser {
           if (chainBurstDamageScenario["cmd"] == ScenarioCommand.DAMAGE_DEALT) {
             const damageScenario = chainBurstDamageScenario as DamageScenarioData;
             chainBurstAction.damageInstances = damageScenario["list"].map(d => {
+              const receiverIndex = d["pos"];
+              const receiverName = BattleActionHelper.getActorName(
+                godsightBattleData["boss"],
+                godsightBattleData["party"],
+                Actor.BOSS,
+                d["pos"],
+              );
               return {
                 "element": "color" in d && d["color"] !== "" ? d["color"] : GameElement.NULL_PLAIN,
-                "receiverPosition": d["pos"],
+                "receiverIndex": receiverIndex,
+                "receiverName": receiverName,
                 "value": d["value"],
-                "targetHpAfterDamage": d["hp"],
+                "receiverHpAfterDamage": d["hp"],
                 "critical": d["critical"],
                 "miss": d["miss"],
                 "guarded": d["guard"],
@@ -592,11 +704,19 @@ export class BattleScenarioParser {
           } else if (chainBurstDamageScenario["cmd"] == ScenarioCommand.DAMAGE_DEALT_MULTIHIT) {
             const multihitDamageScenario = chainBurstDamageScenario as MultihitDamageScenarioData;
             chainBurstAction.damageInstances = multihitDamageScenario["list"].flat(1).map(d => {
+              const receiverIndex = d["pos"];
+              const receiverName = BattleActionHelper.getActorName(
+                godsightBattleData["boss"],
+                godsightBattleData["party"],
+                Actor.BOSS,
+                d["pos"],
+              );
               return {
                 "element": "color" in d && d["color"] !== "" ? d["color"] : GameElement.NULL_PLAIN,
-                "receiverPosition": d["pos"],
+                "receiverIndex": receiverIndex,
+                "receiverName": receiverName,
                 "value": d["value"],
-                "targetHpAfterDamage": d["hp"],
+                "receiverHpAfterDamage": d["hp"],
                 "critical": d["critical"],
                 "miss": d["miss"],
                 "guarded": d["guard"],
@@ -650,9 +770,7 @@ export class BattleScenarioParser {
           const omenCancelScenario = scenario as OmenCancelScenarioData;
           const omenCancelAction = new OmenCancelAction(
             baseActionNumber + i,
-            omenCancelScenario["pos"],
-            structuredClone(godsightBattleData["boss"]),
-            structuredClone(godsightBattleData["party"]),
+            godsightBattleData["boss"][omenCancelScenario["pos"]]["name"],
           );
           actions.push(omenCancelAction);
           break;
@@ -673,13 +791,36 @@ export class BattleScenarioParser {
           }
           const standbyAction = new StandbyAction(
             baseActionNumber + i,
-            standbyScenario["pos"],
+            BattleActionHelper.getActorName(
+              godsightBattleData["boss"],
+              godsightBattleData["party"],
+              Actor.PLAYER,
+              standbyScenario["pos"],
+            ),
             standbyScenario["standby"],
-            structuredClone(godsightBattleData["boss"]),
-            structuredClone(godsightBattleData["party"]),
             battleMessage,
           );
           actions.push(standbyAction);
+          break;
+
+        case ScenarioCommand.RESURRECTION:
+          const resurrectionScenario = scenario as ResurrectionScenarioData;
+          const resurrectedAction = new ResurrectedAction(
+            baseActionNumber + i,
+            BattleActionHelper.getActorName(
+              godsightBattleData["boss"],
+              godsightBattleData["party"],
+              Actor.PLAYER,
+              resurrectionScenario["pos"],
+            ),
+            resurrectionScenario["name"],
+          );
+          // TODO: handle party formation changes due to resurrection.
+          actions.push(resurrectedAction);
+          break;
+
+        // TODO: what is this
+        case ScenarioCommand.RESURRECTION_AVAILABLE:
           break;
 
         case ScenarioCommand._BATTLE_LOG:
@@ -696,6 +837,8 @@ export class BattleScenarioParser {
         case ScenarioCommand._WAIT:
         case ScenarioCommand._IMAGE_CHANGE:
         case ScenarioCommand._DROP:
+        case ScenarioCommand._GROUP_GAUGE:
+        case ScenarioCommand._UNIQUE_GAUGE:
         case undefined:
           break;
         default:
@@ -718,9 +861,12 @@ export class BattleScenarioParser {
     const action = new DeathAction(
       actionNumber,
       deathScenario["to"],
-      deathScenario["pos"],
-      structuredClone(battleData["boss"]),
-      structuredClone(battleData["party"]),
+      BattleActionHelper.getActorName(
+        battleData["boss"],
+        battleData["party"],
+        deathScenario["to"],
+        deathScenario["pos"],
+      ),
       typeof deathScenario["index"] === "number" ? deathScenario["index"] : null,
     );
 
@@ -764,11 +910,14 @@ export class BattleScenarioParser {
     const action = new CAMeterChangedAction(
       actionNumber,
       target,
-      position,
+      BattleActionHelper.getActorName(
+        battleData["boss"],
+        battleData["party"],
+        meterChangeScenario["to"],
+        meterChangeScenario["pos"],
+      ),
       newValue,
       newValue - initialValue,
-      structuredClone(battleData["boss"]),
-      structuredClone(battleData["party"]),
     );
 
     return action;
@@ -794,13 +943,16 @@ export class BattleScenarioParser {
         allBossConditionActions[pos] = new ConditionChangeAction(
           actionNumber++,
           Actor.BOSS,
-          Number(pos),
+          BattleActionHelper.getActorName(
+            battleData["boss"],
+            battleData["party"],
+            Actor.BOSS,
+            pos,
+          ),
           0,
           [],
           [],
           [],
-          structuredClone(battleData["boss"]),
-          structuredClone(battleData["party"]),
         );
       });
 
@@ -860,13 +1012,16 @@ export class BattleScenarioParser {
         allPlayerConditionActions[pos] = new ConditionChangeAction(
           actionNumber++,
           Actor.PLAYER,
-          Number(pos),
+          BattleActionHelper.getActorName(
+            battleData["boss"],
+            battleData["party"],
+            Actor.PLAYER,
+            Number(pos),
+          ),
           0,
           [],
           [],
           [],
-          structuredClone(battleData["boss"]),
-          structuredClone(battleData["party"]),
         );
       });
 
@@ -965,7 +1120,7 @@ export class BattleScenarioParser {
        * We only receive commands that tell us about increases to this value and not the current value.
        */
       "honors": 0,
-      "battleStats": StatsUpdateHelper.getEmptyStatsUpdate(Object.keys(party["members"])),
+      "battleStats": StatsUpdateHelper.getEmptyStatsUpdate(party["partyMemberCount"]),
       "fatedChainGauge": Number(startData["chain_burst_gauge"] || 0),
       "battleProgressStatus": BattleProgressStatus.ACTIVE,
       /**
@@ -991,7 +1146,7 @@ export class BattleScenarioParser {
   }
 
   public processTurnActionData(battleActions: BattleAction[], party: GodsightPartyFormationData): TurnData {
-    const baseStats = StatsUpdateHelper.getEmptyStatsUpdate(Object.keys(party["members"]));
+    const baseStats = StatsUpdateHelper.getEmptyStatsUpdate(party["partyMemberCount"]);
     const statUpdates = battleActions.map(action => action.getStats());
     const totalStats = statUpdates.reduce(
       (prev, cur) => StatsUpdateHelper.concatUpdates(prev, cur),

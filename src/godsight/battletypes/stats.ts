@@ -42,10 +42,12 @@ export class StatsUpdateHelper {
     };
   }
 
-  static getEmptyStatsUpdate(characterIndexes?: (number | string)[]): StatsUpdate {
+  static getEmptyStatsUpdate(partySize?: number): StatsUpdate {
     const characterStats: { [key: string | number]: Stats } = {};
 
-    if (characterIndexes) {
+
+    if (partySize) {
+      const characterIndexes = Array.from({ length: partySize }, (_, index) => index)
       characterIndexes.forEach(index => {
         characterStats[index] = this.getEmptyStats();
       });

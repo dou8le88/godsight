@@ -1,4 +1,3 @@
-import { GameElementValue } from "../../gbf/battletypes/scenariodata/mechanics/element";
 import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
 import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
@@ -7,8 +6,6 @@ import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { BattleActionParser } from "./battleactionparser";
 import { JSX } from "react/jsx-runtime";
 import { BattleActionHelper } from "./battleactionhelper";
-import { GodsightBossData } from "./bossdata";
-import { GodsightPartyFormationData } from "./partyformationdata";
 import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class ChargedAttackAction extends BattleAction {
@@ -17,12 +14,11 @@ export class ChargedAttackAction extends BattleAction {
   constructor(
     public actionNumber: number,
     public name: string,
-    public attackerPosition: number,
-    public targetPosition: number,
+    public attackerIndex: number,
+    public attackerName: string,
     public target: Actor,
+    public partySize: number,
     public damageTotals: DamageInstance[],
-    public bossesAtTimeOfAction: GodsightBossData[],
-    public formationAtTimeOfAction: GodsightPartyFormationData,
     public subactions: BattleAction[],
   ) {
     super();
@@ -30,19 +26,11 @@ export class ChargedAttackAction extends BattleAction {
 
   getDescription(): JSX.Element {
     const damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(
-      this.bossesAtTimeOfAction,
-      this.formationAtTimeOfAction,
-      this.target,
       this.damageTotals,
     );
 
     return (
-      <div key={this.actionNumber} className="action-description">{BattleActionHelper.getActorName(
-        this.bossesAtTimeOfAction,
-        this.formationAtTimeOfAction,
-        Actor.PLAYER,
-        this.attackerPosition,
-      )} activated their charged attack, {this.name}!
+      <div key={this.actionNumber} className="action-description">{this.attackerName} activated their charged attack, {this.name}!
         {damageInstanceJsx}
         {
           this.subactions.map(subaction => (
@@ -54,18 +42,14 @@ export class ChargedAttackAction extends BattleAction {
   }
 
   getStats(): StatsUpdate {
-    const update = StatsUpdateHelper.getEmptyStatsUpdate(Object.keys(this.formationAtTimeOfAction["members"]));
+    const update = StatsUpdateHelper.getEmptyStatsUpdate(this.partySize);
     if (this.target == Actor.BOSS) {
       this.damageTotals.forEach(instance => {
         update["generalStats"]["chargedAttackDamage"][instance["element"]] += instance["value"];
-        const attackerIndex = BattleActionHelper.getCharacterIndexAtPosition(
-          this.formationAtTimeOfAction,
-          this.attackerPosition,
-        );
-        update["characterStats"][attackerIndex]["chargedAttackDamage"][instance["element"]] += instance["value"];
+        update["characterStats"][this.attackerIndex]["chargedAttackDamage"][instance["element"]] += instance["value"];
         if (instance["value"] > 0) {
           update["generalStats"]["hitCount"] += 1;
-          update["characterStats"][attackerIndex]["hitCount"] += 1;
+          update["characterStats"][this.attackerIndex]["hitCount"] += 1;
         }
       });
       const subactionStatsUpdates = this.subactions.map(action => action.getStats());
@@ -85,12 +69,11 @@ export class ChargedAttackAction extends BattleAction {
       return new ChargedAttackAction(
         assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["name"] as string),
-        assertNotNullOrUndefined(json["attackerPosition"] as number),
-        assertNotNullOrUndefined(json["targetPosition"] as number),
+        assertNotNullOrUndefined(json["attackerIndex"] as number),
+        assertNotNullOrUndefined(json["attackerName"] as string),
         assertNotNullOrUndefined(json["target"] as Actor),
+        assertNotNullOrUndefined(json["partySize"] as number),
         assertNotNullOrUndefined(json["damageTotals"] as DamageInstance[]),
-        assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),
-        assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),
         json["subactions"].map((action: any) => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],

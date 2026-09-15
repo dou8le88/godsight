@@ -14,6 +14,7 @@ import { MultihitDamageAction } from "./multihitdamageaction";
 import { NormalAttackAction } from "./normalattackaction";
 import { OmenCancelAction } from "./omencancelaction";
 import { ReplaceCharacterAction } from "./replacecharacteraction";
+import { ResurrectedAction } from "./resurrectedaction";
 import { RetreatAction } from "./retreataction";
 import { SingularNormalAttackAction } from "./singularnormalattackaction";
 import { StandbyAction } from "./standbyaction";
@@ -85,6 +86,9 @@ export class BattleActionParser {
 
         case ActionType.RETREAT:
           return RetreatAction.fromJSON(json);
+
+        case ActionType.RESURRECTED:
+          return ResurrectedAction.fromJSON(json);
 
         default:
           console.error(`Unknown action type ${actionType}!`);

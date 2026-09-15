@@ -1,4 +1,3 @@
-import { GameElementValue } from "../../gbf/battletypes/scenariodata/mechanics/element"
 import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor"
 import { ActionType } from "./actiontype"
 import { BattleAction } from "./battleaction"
@@ -7,8 +6,6 @@ import { StatsUpdate, StatsUpdateHelper } from "./stats"
 import { BattleActionParser } from "./battleactionparser"
 import { JSX } from "react/jsx-runtime"
 import { BattleActionHelper } from "./battleactionhelper"
-import { GodsightBossData } from "./bossdata"
-import { GodsightPartyFormationData } from "./partyformationdata"
 import { assertNotNullOrUndefined } from "../../util/assert"
 
 export class BossSpecialAttackAction extends BattleAction {
@@ -19,10 +16,8 @@ export class BossSpecialAttackAction extends BattleAction {
     public attackName: string,
     public sourceName: string,
     public target: Actor,
-    public count: number,
+    public partySize: number,
     public damageInstances: DamageInstance[],
-    public bossesAtTimeOfAction: GodsightBossData[],
-    public formationAtTimeOfAction: GodsightPartyFormationData,
     public subactions: BattleAction[],
   ) {
     super();
@@ -32,9 +27,6 @@ export class BossSpecialAttackAction extends BattleAction {
     let damageInstanceJsx = <></>;
     if (this.damageInstances.length) {
       damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(
-        this.bossesAtTimeOfAction,
-        this.formationAtTimeOfAction,
-        this.target,
         this.damageInstances,
       );
     }
@@ -50,18 +42,14 @@ export class BossSpecialAttackAction extends BattleAction {
   }
 
   getStats(): StatsUpdate {
-    const update = StatsUpdateHelper.getEmptyStatsUpdate(Object.keys(this.formationAtTimeOfAction["members"]));
+    const update = StatsUpdateHelper.getEmptyStatsUpdate(this.partySize);
     this.damageInstances.forEach(instance => {
       // Bosses can target themselves (e.g., with self-buff or stance-changey kinds of specials),
       // so ignore effects for the purposes of stats if they aren't targeting a player.
       if (this.target == Actor.PLAYER) {
         const damage = instance["value"];
         update["generalStats"]["damageTaken"][instance["element"]] += damage;
-        const receiverIndex = BattleActionHelper.getCharacterIndexAtPosition(
-          this.formationAtTimeOfAction,
-          instance["receiverPosition"],
-        );
-        update["characterStats"][receiverIndex]["damageTaken"][instance["element"]] += damage;
+        update["characterStats"][instance["receiverIndex"]]["damageTaken"][instance["element"]] += damage;
       }
     });
     const subactionStatsUpdates = this.subactions.map(action => action.getStats());
@@ -79,10 +67,8 @@ export class BossSpecialAttackAction extends BattleAction {
         assertNotNullOrUndefined(json["attackName"] as string),
         assertNotNullOrUndefined(json["sourceName"] as string),
         assertNotNullOrUndefined(json["target"] as Actor),
-        assertNotNullOrUndefined(json["count"] as number),
+        assertNotNullOrUndefined(json["partySize"] as number),
         assertNotNullOrUndefined(json["damageInstances"] as DamageInstance[]),
-        assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),
-        assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),
         json["subactions"].map((action: any) => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],

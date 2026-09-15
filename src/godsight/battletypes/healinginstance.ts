@@ -1,5 +1,6 @@
 export type HealingInstance = {
-  "receiverPosition": number,
+  "receiverName": string,
+  "receiverIndex": number,
   "value": number,
   "hpAfterHealing": number,
 }

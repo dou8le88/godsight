@@ -5,9 +5,6 @@ import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { BattleActionParser } from "./battleactionparser";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
-import { BattleActionHelper } from "./battleactionhelper";
-import { GodsightBossData } from "./bossdata";
-import { GodsightPartyFormationData } from "./partyformationdata";
 import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class AbilityAction extends BattleAction {
@@ -18,9 +15,9 @@ export class AbilityAction extends BattleAction {
     public actionNumber: number,
     public name: string,
     public actor: Actor,
-    public position: number,
-    public bossesAtTimeOfAction: GodsightBossData[],
-    public formationAtTimeOfAction: GodsightPartyFormationData,
+    public sourceName: string,
+    public sourceIndex: number,
+    public partySize: number,
     public subactions: BattleAction[],
   ) {
     super();
@@ -38,15 +35,8 @@ export class AbilityAction extends BattleAction {
         </div>
       );
     } else {
-      const actorName = BattleActionHelper.getActorName(
-        this.bossesAtTimeOfAction,
-        this.formationAtTimeOfAction,
-        this.actor,
-        this.position
-      );
-
       return (
-        <div className="action-description"> {actorName} activated {this.name}!
+        <div className="action-description"> {this.sourceName} activated {this.name}!
           {
             this.subactions.map(subaction => (
               subaction.getDescription()
@@ -59,7 +49,7 @@ export class AbilityAction extends BattleAction {
   }
 
   getStats(): StatsUpdate {
-    const update = StatsUpdateHelper.getEmptyStatsUpdate(Object.keys(this.formationAtTimeOfAction["members"]));
+    const update = StatsUpdateHelper.getEmptyStatsUpdate(this.partySize);
     const subactionStatsUpdates = this.subactions.map(action => action.getStats());
     const allUpdates = subactionStatsUpdates.reduce(
       (prev, cur) => StatsUpdateHelper.concatUpdates(prev, cur),
@@ -74,16 +64,11 @@ export class AbilityAction extends BattleAction {
         const subactionSkillDamage = allUpdates["generalStats"]["skillDamage"];
         const subactionNormalAttackDamage = allUpdates["generalStats"]["normalAttackDamage"];
 
-        const characterIndex = BattleActionHelper.getCharacterIndexAtPosition(
-          this.formationAtTimeOfAction,
-          this.position
-        );
-
-        allUpdates["characterStats"][characterIndex]["hitCount"] += subactionHitCount;
-        allUpdates["characterStats"][characterIndex]["debuffsInflictedCount"] += subactionDebuffs;
+        allUpdates["characterStats"][this.sourceIndex]["hitCount"] += subactionHitCount;
+        allUpdates["characterStats"][this.sourceIndex]["debuffsInflictedCount"] += subactionDebuffs;
         GameElementHelper.getAllElements().forEach(element => {
-          allUpdates["characterStats"][characterIndex]["skillDamage"][element] += subactionSkillDamage[element];
-          allUpdates["characterStats"][characterIndex]["normalAttackDamage"][element] += subactionNormalAttackDamage[element];
+          allUpdates["characterStats"][this.sourceIndex]["skillDamage"][element] += subactionSkillDamage[element];
+          allUpdates["characterStats"][this.sourceIndex]["normalAttackDamage"][element] += subactionNormalAttackDamage[element];
         });
         break;
       case Actor.BOSS:
@@ -106,9 +91,9 @@ export class AbilityAction extends BattleAction {
         assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["name"] as string),
         assertNotNullOrUndefined(json["actor"] as Actor),
-        assertNotNullOrUndefined(json["position"] as number),
-        assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),
-        assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),
+        assertNotNullOrUndefined(json["sourceName"] as string),
+        assertNotNullOrUndefined(json["sourceIndex"] as number),
+        assertNotNullOrUndefined(json["partySize"] as number),
         (json["subactions"] as Record<string, unknown>[]).map((action: any) => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],

@@ -131,6 +131,8 @@ export enum ScenarioCommand {
    */
   RESURRECTION_AVAILABLE = "resurrection_available",
 
+  RESURRECTION = "resurrection",
+
   // TODO: Charm, Can't Act, etc.
 
   /**
@@ -181,4 +183,14 @@ export enum ScenarioCommand {
    * Ignored command, do not use, exists for type completeness in the parser.
    */
   _DROP = "drop",
+  /**
+ * Increased the team gauge, think this is just in Versusia.
+ * Ignored command, do not use, exists for type completeness in the parser.
+ */
+  _GROUP_GAUGE = "group_gauge",
+  /**
+* All special boss fight gauges like Seofon's, Versusia's, Agastia's, etc.
+* Ignored command, do not use, exists for type completeness in the parser.
+*/
+  _UNIQUE_GAUGE = "unique_gauge",
 }

@@ -225,6 +225,8 @@ export default function GodsightPanel() {
               case "setting":
               case "auto_setting":
               case "special_skill_setting":
+              case "vote_abort.json":
+              case "showed_vote_result.json":
                 return;
               default:
                 if (endpoint && !isNaN(Number.parseInt(endpoint))) {

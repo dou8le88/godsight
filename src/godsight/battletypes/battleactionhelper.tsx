@@ -23,6 +23,10 @@ export class BattleActionHelper {
     return actorName;
   }
 
+  static getActorIndex(formation: GodsightPartyFormationData, actor: Actor, position: number): number {
+    return actor == Actor.PLAYER ? this.getCharacterIndexAtPosition(formation, position) : position;
+  }
+
   static getCharacterIndexAtPosition(formation: GodsightPartyFormationData, position: number): number {
     const entireFormation = formation["frontline"].concat(formation["backline"]);
 
@@ -43,33 +47,30 @@ export class BattleActionHelper {
   };
 
   static getDamageInstanceJsx(
-    bossData: GodsightBossData[],
-    formation: GodsightPartyFormationData,
-    receiver: Actor,
     damageInstances: DamageInstance[],
     maybeHitCountOverride?: number,
   ): JSX.Element {
-    const damageInstancesByPosition = this.getDamageInstancesGroupedByPosition(damageInstances);
+    const damageInstancesByRecipient = this.getDamageInstancesGroupedByRecipient(damageInstances);
     return (
       <>
-        {Object.keys(damageInstancesByPosition).map(position => (
-          <div key={position} className="action-description">{this.getActorName(bossData, formation, receiver, (Number(position)))} took {damageInstancesByPosition[position].map((instance, idx) => (
+        {Object.keys(damageInstancesByRecipient).map(recipient => (
+          <div key={recipient} className="action-description">{recipient} took {damageInstancesByRecipient[recipient].map((instance, idx) => (
             <span key={idx} className={`element ${GameElementHelper.getPrettyElementName(instance["element"])}`}>{instance["value"].toLocaleString()}</span>
           )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, " + ", cur], null)
-          } damage! {damageInstancesByPosition[position].length > 1 || (maybeHitCountOverride !== undefined && maybeHitCountOverride > 1) ?
+          } damage! {damageInstancesByRecipient[recipient].length > 1 || (maybeHitCountOverride !== undefined && maybeHitCountOverride > 1) ?
             <>
-              {damageInstancesByPosition[position]
-                .every(i => i["element"] == damageInstancesByPosition[position][0]["element"]) ?
+              {damageInstancesByRecipient[recipient]
+                .every(i => i["element"] == damageInstancesByRecipient[recipient][0]["element"]) ?
                 <>
-                  (Total: <span className={`element ${GameElementHelper.getPrettyElementName(damageInstancesByPosition[position][0]["element"])}`}>{damageInstancesByPosition[position].reduce((prev, cur) => prev + cur["value"], 0).toLocaleString()}</span>)&nbsp;
+                  (Total: <span className={`element ${GameElementHelper.getPrettyElementName(damageInstancesByRecipient[recipient][0]["element"])}`}>{damageInstancesByRecipient[recipient].reduce((prev, cur) => prev + cur["value"], 0).toLocaleString()}</span>)&nbsp;
                 </>
                 :
                 <>
-                  (Total: {damageInstancesByPosition[position].reduce((prev, cur) => prev + cur["value"], 0).toLocaleString()})&nbsp;
+                  (Total: {damageInstancesByRecipient[recipient].reduce((prev, cur) => prev + cur["value"], 0).toLocaleString()})&nbsp;
                 </>
               }
 
-              (Hits: {maybeHitCountOverride ? maybeHitCountOverride : damageInstancesByPosition[position].filter(i => i["value"] > 0).length})
+              (Hits: {maybeHitCountOverride ? maybeHitCountOverride : damageInstancesByRecipient[recipient].filter(i => i["value"] > 0).length})
             </> :
             <>
             </>
@@ -80,36 +81,33 @@ export class BattleActionHelper {
     );
   }
 
-  static getDamageInstancesGroupedByPosition(
+  static getDamageInstancesGroupedByRecipient(
     allInstances: DamageInstance[],
-  ): Record<string | number, DamageInstance[]> {
-    const damageInstancesByPosition: Record<string | number, DamageInstance[]> = {};
+  ): Record<string, DamageInstance[]> {
+    const damageInstancesByPosition: Record<string, DamageInstance[]> = {};
     allInstances.forEach(instance => {
-      if (!damageInstancesByPosition[instance["receiverPosition"]]) {
-        damageInstancesByPosition[instance["receiverPosition"]] = [];
+      if (!damageInstancesByPosition[instance["receiverName"]]) {
+        damageInstancesByPosition[instance["receiverName"]] = [];
       }
-      damageInstancesByPosition[instance["receiverPosition"]].push(instance);
+      damageInstancesByPosition[instance["receiverName"]].push(instance);
     });
 
     return damageInstancesByPosition;
   }
 
   static getHealingInstanceJsx(
-    bossData: GodsightBossData[],
-    formation: GodsightPartyFormationData,
-    receiver: Actor,
     healingInstances: HealingInstance[],
   ): JSX.Element {
-    const healingInstancesByPosition = this.getHealingInstancesGroupedByPosition(healingInstances);
+    const healingInstancesByRecipient = this.getHealingInstancesGroupedByRecipient(healingInstances);
     return (
       <>
-        {Object.keys(healingInstancesByPosition).map(position => (
-          <div key={position} className="action-description">{this.getActorName(bossData, formation, receiver, (Number(position)))} healed for {healingInstancesByPosition[position].map((instance, idx) => (
+        {Object.keys(healingInstancesByRecipient).map(recipient => (
+          <div key={recipient} className="action-description">{recipient} healed for {healingInstancesByRecipient[recipient].map((instance, idx) => (
             <span key={idx} className={`element Heal`}>{instance["value"].toLocaleString()}</span>
           )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, " + ", cur], null)
-          }! {healingInstancesByPosition[position].length > 1 ?
+          }! {healingInstancesByRecipient[recipient].length > 1 ?
             <>
-              (Total: {healingInstancesByPosition[position].reduce((prev, cur) => prev + cur["value"], 0).toLocaleString()})
+              (Total: {healingInstancesByRecipient[recipient].reduce((prev, cur) => prev + cur["value"], 0).toLocaleString()})
             </> :
             <></>
             }
@@ -119,18 +117,18 @@ export class BattleActionHelper {
     );
   }
 
-  static getHealingInstancesGroupedByPosition(
+  static getHealingInstancesGroupedByRecipient(
     allInstances: HealingInstance[],
-  ): Record<string | number, HealingInstance[]> {
-    const healingInstancesByPosition: Record<string | number, HealingInstance[]> = {};
+  ): Record<string, HealingInstance[]> {
+    const healingInstancesByRecipient: Record<string, HealingInstance[]> = {};
     allInstances.forEach(instance => {
-      if (!healingInstancesByPosition[instance["receiverPosition"]]) {
-        healingInstancesByPosition[instance["receiverPosition"]] = [];
+      if (!healingInstancesByRecipient[instance["receiverName"]]) {
+        healingInstancesByRecipient[instance["receiverName"]] = [];
       }
-      healingInstancesByPosition[instance["receiverPosition"]].push(instance);
+      healingInstancesByRecipient[instance["receiverName"]].push(instance);
     });
 
-    return healingInstancesByPosition;
+    return healingInstancesByRecipient;
   }
 
   static getMainCharacterName(formation: GodsightPartyFormationData): string {

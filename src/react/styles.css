@@ -226,8 +226,9 @@ html {
                     content: "";
                     display: block;
                     position: absolute;
-                    right: -10px;
+                    right: -8px;
                     bottom: 5px;
+                    cursor: default;
                 }
             }
 

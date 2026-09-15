@@ -2,27 +2,20 @@ import { JSX } from "react/jsx-runtime";
 import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { BattleActionParser } from "./battleactionparser";
-import { GodsightBattleData } from "./battledata";
 import { DamageInstance } from "./damageinstance";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { BattleActionHelper } from "./battleactionhelper";
-import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
-import { GodsightBossData } from "./bossdata";
-import { GodsightPartyFormationData } from "./partyformationdata";
 import { assertNotNullOrUndefined } from "../../util/assert";
-import { GodsightSummonData } from "./summondata";
 
 export class SummonAction extends BattleAction {
-  private hitCountRegex = /(\d+)-hit/g;
   public actionType: ActionType = ActionType.CALLED_SUMMON;
-
 
   constructor(
     public actionNumber: number,
-    public name: string,
+    public summonCallName: string,
+    public mainCharacterName: string,
+    public partySize: number,
     public damageInstances: DamageInstance[],
-    public bossesAtTimeOfAction: GodsightBossData[],
-    public formationAtTimeOfAction: GodsightPartyFormationData,
     public subactions: BattleAction[],
     public trueSummonHitCount: number | undefined,
   ) {
@@ -33,16 +26,13 @@ export class SummonAction extends BattleAction {
     let damageInstanceJsx = <></>;
     if (this.damageInstances.length) {
       damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(
-        this.bossesAtTimeOfAction,
-        this.formationAtTimeOfAction,
-        Actor.BOSS,
         this.damageInstances,
         this.trueSummonHitCount,
       );
     }
 
     return (
-      <div key={this.actionNumber} className="action-description">{BattleActionHelper.getMainCharacterName(this.formationAtTimeOfAction)} called {this.name}!
+      <div key={this.actionNumber} className="action-description">{this.mainCharacterName} called {this.summonCallName}!
         {damageInstanceJsx}
         {this.subactions.map(subaction => (
           subaction.getDescription()
@@ -52,7 +42,7 @@ export class SummonAction extends BattleAction {
   }
 
   getStats(): StatsUpdate {
-    const update = StatsUpdateHelper.getEmptyStatsUpdate(Object.keys(this.formationAtTimeOfAction["members"]));
+    const update = StatsUpdateHelper.getEmptyStatsUpdate(this.partySize);
 
     this.damageInstances.forEach(instance => {
       update["generalStats"]["otherDamage"][instance["element"]] += instance["value"];
@@ -84,10 +74,10 @@ export class SummonAction extends BattleAction {
     if (actionType == ActionType.CALLED_SUMMON) {
       return new this(
         assertNotNullOrUndefined(json["actionNumber"] as number),
-        assertNotNullOrUndefined(json["name"] as string),
+        assertNotNullOrUndefined(json["summonCallName"] as string),
+        assertNotNullOrUndefined(json["mainCharacterName"] as string),
+        assertNotNullOrUndefined(json["partySize"] as number),
         assertNotNullOrUndefined(json["damageInstances"] as DamageInstance[]),
-        assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),
-        assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),
         json["subactions"].map((action: any) => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],

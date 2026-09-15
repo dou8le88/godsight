@@ -2,10 +2,6 @@ import { JSX } from "react/jsx-runtime";
 import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
-import { BattleActionHelper } from "./battleactionhelper";
-import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
-import { GodsightBossData } from "./bossdata";
-import { GodsightPartyFormationData } from "./partyformationdata";
 import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class OmenCancelAction extends BattleAction {
@@ -14,9 +10,7 @@ export class OmenCancelAction extends BattleAction {
 
   constructor(
     public actionNumber: number,
-    public canceledBossPosition: number,
-    public bossesAtTimeOfAction: GodsightBossData[],
-    public formationAtTimeOfAction: GodsightPartyFormationData,
+    public bossName: string,
   ) {
     super();
   }
@@ -27,12 +21,7 @@ export class OmenCancelAction extends BattleAction {
 
   getDescription(): JSX.Element {
     return (
-      <div key={this.actionNumber} className="action-description">{BattleActionHelper.getActorName(
-        this.bossesAtTimeOfAction,
-        this.formationAtTimeOfAction,
-        Actor.BOSS,
-        this.canceledBossPosition,
-      )}'s omen was canceled!
+      <div key={this.actionNumber} className="action-description">{this.bossName}'s omen was canceled!
       </div>
     )
   }
@@ -42,9 +31,7 @@ export class OmenCancelAction extends BattleAction {
     if (actionType == ActionType.OMEN_CANCELLED) {
       return new OmenCancelAction(
         assertNotNullOrUndefined(json["actionNumber"] as number),
-        assertNotNullOrUndefined(json["canceledBossPosition"] as number),
-        assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),
-        assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),
+        assertNotNullOrUndefined(json["bossName"] as string),
       );
     } else {
       console.error(`OmenCancelAction.fromJSON called on ${json}`);

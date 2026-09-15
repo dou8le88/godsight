@@ -4,9 +4,6 @@ import { BattleAction } from "./battleaction";
 import { DamageInstance } from "./damageinstance";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { BattleActionHelper } from "./battleactionhelper";
-import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
-import { GodsightBossData } from "./bossdata";
-import { GodsightPartyFormationData } from "./partyformationdata";
 import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class ChainBurstAction extends BattleAction {
@@ -17,25 +14,24 @@ export class ChainBurstAction extends BattleAction {
     public actionNumber: number,
     public chainCount: number,
     public name: string,
+    public partySize: number,
     public damageInstances: DamageInstance[],
-    public bossesAtTimeOfAction: GodsightBossData[],
-    public formationAtTimeOfAction: GodsightPartyFormationData,
   ) {
     super();
   }
 
   getDescription(): JSX.Element {
-    const damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(this.bossesAtTimeOfAction, this.formationAtTimeOfAction, Actor.BOSS, this.damageInstances);
+    const damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(this.damageInstances);
 
     return (
-      <div key={this.actionNumber} className="action-description" > The party activated the chain burst {this.name} !
+      <div key={this.actionNumber} className="action-description" > The party activated the chain burst {this.name}!
         {damageInstanceJsx}
       </div>
     );
   }
 
   getStats(): StatsUpdate {
-    const update = StatsUpdateHelper.getEmptyStatsUpdate(Object.keys(this.formationAtTimeOfAction["members"]));
+    const update = StatsUpdateHelper.getEmptyStatsUpdate(this.partySize);
 
     this.damageInstances.forEach(instance => {
       update["generalStats"]["otherDamage"][instance["element"]] += instance["value"];
@@ -57,9 +53,8 @@ export class ChainBurstAction extends BattleAction {
         assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["chainCount"] as number),
         assertNotNullOrUndefined(json["name"] as string),
+        assertNotNullOrUndefined(json["partySize"] as number),
         assertNotNullOrUndefined(json["damageInstances"] as DamageInstance[]),
-        assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),
-        assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),
       );
     } else {
       console.error(`ChainBurstAction.fromJSON called on ${json}`);

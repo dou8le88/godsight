@@ -4,9 +4,6 @@ import { BattleAction } from "./battleaction";
 import { BattleActionParser } from "./battleactionparser";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { SingularNormalAttackAction } from "./singularnormalattackaction";
-import { BattleActionHelper } from "./battleactionhelper";
-import { GodsightBossData } from "./bossdata";
-import { GodsightPartyFormationData } from "./partyformationdata";
 import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class NormalAttackAction extends BattleAction {
@@ -14,8 +11,7 @@ export class NormalAttackAction extends BattleAction {
 
   constructor(
     public actionNumber: number,
-    public bossesAtTimeOfAction: GodsightBossData[],
-    public formationAtTimeOfAction: GodsightPartyFormationData,
+    public attackerName: string,
     public subactions: BattleAction[],
   ) {
     super();
@@ -39,22 +35,10 @@ export class NormalAttackAction extends BattleAction {
   getDescription(): JSX.Element {
     const attacks = this.subactions.filter(a => a instanceof SingularNormalAttackAction);
     const attackCount = attacks.length;
-
     const attackWording = (this.attackCountWording[attackCount] || "made unknown attacks!");
 
-    let attacker = "Unknown";
-    const firstAttack = attacks[0] as unknown as SingularNormalAttackAction | undefined;
-    if (firstAttack) {
-      attacker = BattleActionHelper.getActorName(
-        this.bossesAtTimeOfAction,
-        this.formationAtTimeOfAction,
-        firstAttack.source,
-        firstAttack.attackerPosition,
-      );
-    }
-
     return (
-      <div key={this.actionNumber} className="action-description">{attacker} {attackWording}!
+      <div key={this.actionNumber} className="action-description">{this.attackerName} {attackWording}!
         {this.subactions.map(subaction => (
           subaction.getDescription()
         ))}
@@ -78,8 +62,7 @@ export class NormalAttackAction extends BattleAction {
     if (actionType == ActionType.NORMAL_ATTACK) {
       return new NormalAttackAction(
         assertNotNullOrUndefined(json["actionNumber"] as number),
-        assertNotNullOrUndefined(json["bossesAtTimeOfAction"] as GodsightBossData[]),
-        assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),
+        assertNotNullOrUndefined(json["attackerName"] as string),
         json["subactions"].map((action: any) => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],

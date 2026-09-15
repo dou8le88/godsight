@@ -1,9 +1,7 @@
 import { JSX } from "react/jsx-runtime";
 import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
-import { GodsightBattleData } from "./battledata";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
-import { GodsightPartyFormationData, PartyFormationHelper } from "./partyformationdata";
 import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class ReplaceCharacterAction extends BattleAction {
@@ -12,9 +10,8 @@ export class ReplaceCharacterAction extends BattleAction {
 
   constructor(
     public actionNumber: number,
-    public position: number,
-    public newCharacter: number,
-    public formationAtTimeOfAction: GodsightPartyFormationData,
+    public characterName: string,
+    public replacementCharacterName: string,
   ) {
     super();
   }
@@ -22,13 +19,9 @@ export class ReplaceCharacterAction extends BattleAction {
   getDescription(): JSX.Element {
 
     return (
-      <div key={this.actionNumber} className="action-description">{PartyFormationHelper.getNameOfCharacterInPosition(
-        this.formationAtTimeOfAction,
-        this.position,
-      )} was replaced by {PartyFormationHelper.getNameOfCharacterAtPartyIndex(
-        this.formationAtTimeOfAction,
-        this.newCharacter,
-      )}!
+      <div key={this.actionNumber} className="action-description">{this.characterName} was replaced by {
+        this.replacementCharacterName
+      }!
       </div>
     );
   }
@@ -42,9 +35,8 @@ export class ReplaceCharacterAction extends BattleAction {
     if (actionType == ActionType.REPLACED_CHARACTER) {
       return new ReplaceCharacterAction(
         assertNotNullOrUndefined(json["actionNumber"] as number),
-        assertNotNullOrUndefined(json["position"] as number),
-        assertNotNullOrUndefined(json["newCharacter"] as number),
-        assertNotNullOrUndefined(json["formationAtTimeOfAction"] as GodsightPartyFormationData),
+        assertNotNullOrUndefined(json["characterName"] as string),
+        assertNotNullOrUndefined(json["replacementCharacterName"] as string),
       );
     } else {
       console.error(`ReplaceCharacterAction.fromJSON called on ${json}`);

@@ -2,9 +2,10 @@ import { GameElementValue } from "../../gbf/battletypes/scenariodata/mechanics/e
 
 export type DamageInstance = {
   "element": GameElementValue,
-  "receiverPosition": number,
+  "receiverName": string,
+  "receiverIndex": number,
   "value": number,
-  "targetHpAfterDamage": number,
+  "receiverHpAfterDamage": number,
   "critical": boolean,
   "miss": number,
   "guarded": boolean
