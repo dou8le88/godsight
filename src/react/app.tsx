@@ -87,7 +87,7 @@ export default function GodsightPanel() {
             const raidCopy = structuredClone(raid);
             Object.keys(raidCopy["turnData"]).forEach(turnNumber => {
               raidCopy["turnData"][turnNumber]["turnActions"] = raidCopy["turnData"][turnNumber]["turnActions"].map(action => {
-                const rehydratedAction = BattleActionParser.fromJSON(action);
+                const rehydratedAction = BattleActionParser.fromJSON(action as unknown as Record<string, unknown>);
                 if (rehydratedAction) {
                   return rehydratedAction;
                 } else {
@@ -245,14 +245,21 @@ export default function GodsightPanel() {
     };
   }, [onGbfPage, godsightStorage]);
 
-  const allBattles = Object.keys(godsightStorage["battles"]);
+  const allBattles = Object.keys(godsightStorage["battles"]).map(battleId => {
+    return godsightStorage["battles"][battleId];
+  }).sort((a, b) => {
+    return b["lastUpdated"] - a["lastUpdated"];
+  });
   const [selectedBattle, setSelectedBattle] = useState<string | undefined>(undefined);
 
   const manifest = chrome.runtime.getManifest();
   return (
     <>
       <div className="version-header">
-        <a href="https://github.com/dou8le88/godsight" target="_blank" rel="noopener noreferrer">
+        {selectedBattle ? (
+          <nav><a className="nav-link" onClick={() => setSelectedBattle(undefined)}>&lt; Back to Raids</a></nav>
+        ) : <></>}
+        <a className="github-link" href="https://github.com/dou8le88/godsight" target="_blank" rel="noopener noreferrer">
           Godsight version {manifest["version"]}
         </a>
       </div>
@@ -270,7 +277,7 @@ export default function GodsightPanel() {
               {allBattles.length > 0 ? (
                 <>
                   {allBattles.map(battle =>
-                    <BattleSummary key={battle} battleData={godsightStorage["battles"][battle]} onClick={() => setSelectedBattle(battle)} deleteEntry={() => storageManager.deleteBattle(battle)} />
+                    <BattleSummary key={battle["raidId"]} battleData={battle} onClick={() => setSelectedBattle(String(battle["raidId"]))} deleteEntry={() => storageManager.deleteBattle(battle["raidId"])} />
                   )}
                 </>
               ) : (
