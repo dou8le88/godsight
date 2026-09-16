@@ -72,7 +72,7 @@ export class ConditionChangeAction extends BattleAction {
   getStats(): StatsUpdate {
     const update = StatsUpdateHelper.getEmptyStatsUpdate();
     if (this.target == Actor.BOSS) {
-      update["generalStats"]["debuffsInflictedCount"] += this.debuffs.filter.length;
+      update["generalStats"]["debuffsInflictedCount"] += this.debuffs.length;
       // TODO: figure out a way of associating the debuffs with a specific character.
       // May not be consistently possible.
       return update;

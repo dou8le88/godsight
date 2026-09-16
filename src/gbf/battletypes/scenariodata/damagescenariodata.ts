@@ -9,4 +9,5 @@ export interface DamageScenarioData extends GenericScenarioData {
   "color": GameElementValue,
   "to": Actor,
   "list": SkillOrDebuffDamageInstance[],
+  "turn_end"?: boolean,
 }

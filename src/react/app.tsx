@@ -222,6 +222,7 @@ export default function GodsightPanel() {
               case "setting":
               case "auto_setting":
               case "special_skill_setting":
+              case "user_battle_log":
               case "vote_abort.json":
               case "showed_vote_result.json":
                 return;

@@ -8,6 +8,7 @@ export interface Stats {
   "skillDamage": DamageByElement,
   "chargedAttackDamage": DamageByElement,
   "otherDamage": DamageByElement,
+  "dotDamage": number,
   "damageTaken": DamageByElement,
 }
 
@@ -38,6 +39,7 @@ export class StatsUpdateHelper {
       "skillDamage": this.getEmptyElementValues(),
       "chargedAttackDamage": this.getEmptyElementValues(),
       "otherDamage": this.getEmptyElementValues(),
+      "dotDamage": 0,
       "damageTaken": this.getEmptyElementValues(),
     };
   }
@@ -98,6 +100,7 @@ export class StatsUpdateHelper {
     into["hitCount"] += other["hitCount"];
     into["debuffsInflictedCount"] += other["debuffsInflictedCount"];
     into["healingReceived"] += other["healingReceived"];
+    into["dotDamage"] += other["dotDamage"];
 
     GameElementHelper.getAllElements().forEach(element => {
       into["normalAttackDamage"][element] += other["normalAttackDamage"][element];

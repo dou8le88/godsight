@@ -6,6 +6,7 @@ import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { JSX } from "react/jsx-runtime";
 import { BattleActionHelper } from "./battleactionhelper";
 import { assertNotNullOrUndefined } from "../../util/assert";
+import { GameElement } from "../../gbf/battletypes/scenariodata/mechanics/element";
 
 export class DamageAction extends BattleAction {
   public actionType: ActionType = ActionType.DAMAGE_DEALT;
@@ -15,6 +16,7 @@ export class DamageAction extends BattleAction {
     public actionNumber: number,
     public target: Actor,
     public partySize: number,
+    public endOfTurnDamage: boolean,
     public instances: DamageInstance[],
   ) {
     super();
@@ -40,13 +42,13 @@ export class DamageAction extends BattleAction {
         // time DamageAction comes up seems to be with skill damage.
         // Currently we have no way to associate a source character with this damage and have to do it in AbilityAction. TODO: fix that.
         this.instances.forEach(instance => {
-          // Boss-targeted DamageActions are always skill damage *ONLY BECAUSE*
-          // other damage types directly associate their damage with their commands.
-          // Chain Bursts appear to be the only exception, but we handle those commands specially
-          // so we never end up with a DamageAction for a chain burst damage instance.
-          update["generalStats"]["skillDamage"][instance["element"]] += instance["value"];
-          if (instance["value"] > 0) {
-            update["generalStats"]["hitCount"] += 1;
+          if (this.endOfTurnDamage) {
+            update["generalStats"]["dotDamage"] += instance["value"];
+          } else {
+            update["generalStats"]["skillDamage"][instance["element"]] += instance["value"];
+            if (instance["value"] > 0) {
+              update["generalStats"]["hitCount"] += 1;
+            }
           }
         });
         break;
@@ -70,6 +72,7 @@ export class DamageAction extends BattleAction {
         assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["target"] as Actor),
         assertNotNullOrUndefined(json["partySize"] as number),
+        assertNotNullOrUndefined(json["endOfTurnDamage"] as boolean),
         assertNotNullOrUndefined(json["instances"] as DamageInstance[]),
       );
     } else {

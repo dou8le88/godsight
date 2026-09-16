@@ -331,6 +331,7 @@ export class BattleScenarioParser {
             baseActionNumber + i,
             damageDealtScenario["to"],
             godsightBattleData["party"]["partyMemberCount"],
+            damageDealtScenario["turn_end"] !== undefined ? damageDealtScenario["turn_end"] : false,
             damageDealtScenario["list"].map(l => {
               const receiverIndex = damageDealtScenario["to"] == Actor.PLAYER ?
                 BattleActionHelper.getCharacterIndexAtPosition(

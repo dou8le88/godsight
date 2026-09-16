@@ -23,7 +23,13 @@ export default function Turn({ turnData, turnNumber }: { turnData: TurnData, tur
   const hitCount = turnStats["hitCount"];
   const debuffs = turnStats["debuffsInflictedCount"];
 
-  const totalDamage = totalNormalAttackDamage + totalChargedAttackDamage + totalSkillDamage + totalOtherDamage;
+  const dotDamage = turnStats["dotDamage"];
+
+  const totalDamage = totalNormalAttackDamage +
+    totalChargedAttackDamage +
+    totalSkillDamage +
+    totalOtherDamage +
+    dotDamage;
 
   return (
     <details className="turn" open={true}>
