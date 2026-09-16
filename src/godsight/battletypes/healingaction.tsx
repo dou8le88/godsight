@@ -46,7 +46,7 @@ export class HealingAction extends BattleAction {
     return update;
   }
 
-  static fromJSON(json: { [key: string]: any; }): HealingAction | undefined {
+  static override fromJSON(json: Record<string, unknown>): HealingAction | undefined {
     const actionType = json["actionType"];
     if (actionType == ActionType.HEAL) {
       return new HealingAction(

@@ -2,7 +2,7 @@ import { AbilityScenarioData } from "./gbf/battletypes/scenariodata/abilityscena
 import { BossSpecialAttackScenarioData } from "./gbf/battletypes/scenariodata/bossspecialattackscenariodata";
 import { BossStatusScenarioData } from "./gbf/battletypes/scenariodata/bossstatusscenariodata";
 import { ChargeAttackMeterChangedScenarioData } from "./gbf/battletypes/scenariodata/chargeattackmeterchangedscenariodata";
-import { ChargedAttackDamageInstance, ChargedAttackScenarioData } from "./gbf/battletypes/scenariodata/chargedattackscenariodata";
+import { ChargedAttackDamageInstanceHelper, ChargedAttackScenarioData } from "./gbf/battletypes/scenariodata/chargedattackscenariodata";
 import { DamageScenarioData } from "./gbf/battletypes/scenariodata/damagescenariodata";
 import { DeathScenarioData } from "./gbf/battletypes/scenariodata/deathscenariodata";
 import { FatedChainGaugeScenarioData } from "./gbf/battletypes/scenariodata/fatedchaingaugescenariodata";
@@ -19,7 +19,7 @@ import { ReplaceCharacterScenarioData } from "./gbf/battletypes/scenariodata/rep
 import { ScenarioCommand } from "./gbf/battletypes/scenariodata/scenariocommand";
 import { HealingScenarioData } from "./gbf/battletypes/scenariodata/healingscenariodata";
 import { WindowEffectScenarioData } from "./gbf/battletypes/scenariodata/windoweffectscenariodata";
-import { BossData, PartyFormationData, StartData } from "./gbf/battletypes/startdata";
+import { BossData, StartData } from "./gbf/battletypes/startdata";
 import { AbilityAction } from "./godsight/battletypes/abilityaction";
 import { BattleAction } from "./godsight/battletypes/battleaction";
 import { GodsightBattleData } from "./godsight/battletypes/battledata";
@@ -57,17 +57,15 @@ import { StandbyScenarioData } from "./gbf/battletypes/scenariodata/standbyscena
 import { StandbyAction } from "./godsight/battletypes/standbyaction";
 import { BattleLogScenarioData } from "./gbf/battletypes/scenariodata/battlelogscenariodata";
 import { RetreatAction } from "./godsight/battletypes/retreataction";
-import { BattleStats } from "./godsight/battletypes/battlestats";
 import { GodsightPartyFormationData, PartyFormationHelper } from "./godsight/battletypes/partyformationdata";
 import { GranblueBattleData } from "./gbf/battletypes/battledata";
 import { BattleActionHelper } from "./godsight/battletypes/battleactionhelper";
-import { HealingInstance } from "./godsight/battletypes/healinginstance";
 import { ResurrectionScenarioData } from "./gbf/battletypes/scenariodata/resurrectionscenariodata";
 import { ResurrectedAction } from "./godsight/battletypes/resurrectedaction";
 
 export class BattleScenarioParser {
   constructor() {
-
+    // No params needed.
   }
 
   /**
@@ -171,7 +169,7 @@ export class BattleScenarioParser {
           break;
         }
 
-        case ScenarioCommand.CA_METER_CHANGED:
+        case ScenarioCommand.CA_METER_CHANGED: {
           const meterChangeScenario = scenario as ChargeAttackMeterChangedScenarioData;
           const meterChangedAction = this.handleMeterChangeScenario(
             meterChangeScenario,
@@ -184,8 +182,9 @@ export class BattleScenarioParser {
             actions.push(meterChangedAction);
           }
           break;
+        }
 
-        case ScenarioCommand.MESSAGE:
+        case ScenarioCommand.MESSAGE: {
           const buffDebuffChangeScenario = scenario as MessageScenarioData;
           const buffDebuffActions = this.handleMessageScenario(
             godsightBattleData,
@@ -195,11 +194,13 @@ export class BattleScenarioParser {
           actions.push(...buffDebuffActions);
           baseActionNumber += buffDebuffActions.length;
           break;
+        }
 
-        case ScenarioCommand.DEATH:
+        case ScenarioCommand.DEATH: {
           const deathScenario = scenario as DeathScenarioData;
           actions.push(this.handleDeathScenario(godsightBattleData, deathScenario, baseActionNumber + i));
           break;
+        }
 
         case ScenarioCommand.ABILITY: {
           if (stopOnMainAction) {
@@ -276,12 +277,13 @@ export class BattleScenarioParser {
           break;
         }
 
-        case ScenarioCommand.HONORS_GAINED:
+        case ScenarioCommand.HONORS_GAINED: {
           const honorsGainedScenario = scenario as HonorsGainedScenarioData;
           godsightBattleData["honors"] += honorsGainedScenario["amount"];
           break;
+        }
 
-        case ScenarioCommand.REPLACE_CHARACTER:
+        case ScenarioCommand.REPLACE_CHARACTER: {
           if (stopOnMainAction) {
             break baseLoop;
           }
@@ -311,8 +313,9 @@ export class BattleScenarioParser {
           godsightBattleData["party"]["frontline"] = newFrontline;
           godsightBattleData["party"]["backline"] = newBackline;
           break;
+        }
 
-        case ScenarioCommand.WINDOW_EFFECT:
+        case ScenarioCommand.WINDOW_EFFECT: {
           const windowScenario = scenario as WindowEffectScenarioData;
           const windowAction = new WindowEffectAction(
             baseActionNumber + i,
@@ -320,8 +323,9 @@ export class BattleScenarioParser {
           );
           actions.push(windowAction);
           break;
+        }
 
-        case ScenarioCommand.DAMAGE_DEALT:
+        case ScenarioCommand.DAMAGE_DEALT: {
           const damageDealtScenario = scenario as DamageScenarioData;
           const damageAction = new DamageAction(
             baseActionNumber + i,
@@ -354,8 +358,9 @@ export class BattleScenarioParser {
           );
           actions.push(damageAction);
           break;
+        }
 
-        case ScenarioCommand.DAMAGE_DEALT_MULTIHIT:
+        case ScenarioCommand.DAMAGE_DEALT_MULTIHIT: {
           const multihitDamageScenario = scenario as MultihitDamageScenarioData;
           const instances: DamageInstance[] = multihitDamageScenario["list"].flat(1).map(hit => {
             const receiverIndex = multihitDamageScenario["to"] == Actor.PLAYER ?
@@ -388,6 +393,7 @@ export class BattleScenarioParser {
           );
           actions.push(multihitDamageAction);
           break;
+        }
 
         case ScenarioCommand.NORMAL_ATTACK_START: {
           if (stopOnMainAction) {
@@ -422,7 +428,7 @@ export class BattleScenarioParser {
           }
           break;
 
-        case ScenarioCommand.NORMAL_ATTACK:
+        case ScenarioCommand.NORMAL_ATTACK: {
           const singularNormalAttackScenario = scenario as NormalAttackScenarioData;
           const sourceDamageInstances = singularNormalAttackScenario["damage"];
           let damageArray: NormalAttackDamage[] = [];
@@ -470,6 +476,7 @@ export class BattleScenarioParser {
           );
           actions.push(singularNormalAttackAction);
           break;
+        }
 
         case ScenarioCommand.MC_CHARGED_ATTACK:
         case ScenarioCommand.CHARACTER_CHARGED_ATTACK: {
@@ -477,7 +484,7 @@ export class BattleScenarioParser {
             break baseLoop;
           }
           const chargedAttackScenario = scenario as ChargedAttackScenarioData;
-          const wasCriticalHit: Map<GameElementValue, boolean> = new Map();
+          const wasCriticalHit = new Map<GameElementValue, boolean>();
           const allSplitChargedAttackDamage = chargedAttackScenario["list"].flatMap(l => l["damage"]);
           allSplitChargedAttackDamage.forEach(d => {
             if (d["critical"]) {
@@ -511,9 +518,8 @@ export class BattleScenarioParser {
             chargedAttackScenario["target"],
             godsightBattleData["party"]["partyMemberCount"],
             chargedAttackScenario["total"].map(damage => {
-              const damageTotal = ChargedAttackDamageInstance.getTotal(damage);
+              const damageTotal = ChargedAttackDamageInstanceHelper.getTotal(damage);
               const receiverIndex = damage["pos"];
-              damage["pos"];
               const receiverName = BattleActionHelper.getActorName(
                 godsightBattleData["boss"],
                 godsightBattleData["party"],
@@ -529,7 +535,7 @@ export class BattleScenarioParser {
                 "receiverHpAfterDamage": hpAfterDamage,
                 "miss": damageTotal > 0 ? 0 : 2,
                 "guarded": false,
-              };
+              } as DamageInstance;
             }),
             subactions.actions,
           );
@@ -538,10 +544,11 @@ export class BattleScenarioParser {
           break;
         }
 
-        case ScenarioCommand.FATED_CHAIN_GAUGE_CHANGE:
+        case ScenarioCommand.FATED_CHAIN_GAUGE_CHANGE: {
           const fatedChainGaugeScenario = scenario as FatedChainGaugeScenarioData;
           godsightBattleData["fatedChainGauge"] = fatedChainGaugeScenario["value"];
           break;
+        }
 
         case ScenarioCommand.FULL_ELIXIR: {
           // You can't use a full elixir in the middle of a turn, it's always its own button press,
@@ -560,7 +567,7 @@ export class BattleScenarioParser {
           break baseLoop;
         }
 
-        case ScenarioCommand.HEALING:
+        case ScenarioCommand.HEALING: {
           const healingScenario = scenario as HealingScenarioData;
           const healingAction = new HealingAction(
             baseActionNumber + i,
@@ -589,8 +596,9 @@ export class BattleScenarioParser {
           );
           actions.push(healingAction);
           break;
+        }
 
-        case ScenarioCommand.SUMMON:
+        case ScenarioCommand.SUMMON: {
           const summonScenario = scenario as SummonScenarioData;
           const subactions = this._parseScenarioData(
             scenarioData.slice(i + 1),
@@ -653,8 +661,9 @@ export class BattleScenarioParser {
           actions.push(summonAction);
           i += subactions.lastIndex;
           break;
+        }
 
-        case ScenarioCommand.CHAIN_BURST:
+        case ScenarioCommand.CHAIN_BURST: {
           if (stopOnMainAction) {
             break baseLoop;
           }
@@ -729,23 +738,26 @@ export class BattleScenarioParser {
           }
           actions.push(chainBurstAction);
           break;
+        }
 
-        case ScenarioCommand.RETREAT:
+        case ScenarioCommand.RETREAT: {
           godsightBattleData["battleProgressStatus"] = BattleProgressStatus.RETREATED;
           const retreatAction = new RetreatAction(
             baseActionNumber + i,
           );
           actions.push(retreatAction);
           break baseLoop;
+        }
 
-        case ScenarioCommand.WON_BATTLE:
+        case ScenarioCommand.WON_BATTLE: {
           const wonBattleScenario = scenario as WonBattleScenarioData;
           if (wonBattleScenario["is_last_raid"]) {
             godsightBattleData["battleProgressStatus"] = BattleProgressStatus.WON;
           }
           break;
+        }
 
-        case ScenarioCommand.TURN_CHANGE:
+        case ScenarioCommand.TURN_CHANGE: {
           if (stopOnMainAction) {
             break baseLoop;
           }
@@ -758,15 +770,16 @@ export class BattleScenarioParser {
           godsightBattleData["updateTurnTo"] = turnChangeAction.newTurn;
           actions.push(turnChangeAction);
           break;
+        }
 
-
-        case ScenarioCommand._TURN:
+        case ScenarioCommand._TURN: {
           if (stopOnMainAction) {
             break baseLoop;
           }
           break;
+        }
 
-        case ScenarioCommand.OMEN_CANCEL:
+        case ScenarioCommand.OMEN_CANCEL: {
           const omenCancelScenario = scenario as OmenCancelScenarioData;
           const omenCancelAction = new OmenCancelAction(
             baseActionNumber + i,
@@ -774,8 +787,9 @@ export class BattleScenarioParser {
           );
           actions.push(omenCancelAction);
           break;
+        }
 
-        case ScenarioCommand.STANDBY:
+        case ScenarioCommand.STANDBY: {
           // A disabling effect like charm or paralyze stopped a character from acting.
           // Some disabling effects display a custom message in the previous command.
           if (stopOnMainAction) {
@@ -802,8 +816,9 @@ export class BattleScenarioParser {
           );
           actions.push(standbyAction);
           break;
+        }
 
-        case ScenarioCommand.RESURRECTION:
+        case ScenarioCommand.RESURRECTION: {
           const resurrectionScenario = scenario as ResurrectionScenarioData;
           const resurrectedAction = new ResurrectedAction(
             baseActionNumber + i,
@@ -818,6 +833,7 @@ export class BattleScenarioParser {
           // TODO: handle party formation changes due to resurrection.
           actions.push(resurrectedAction);
           break;
+        }
 
         // TODO: what is this
         case ScenarioCommand.RESURRECTION_AVAILABLE:
@@ -892,7 +908,7 @@ export class BattleScenarioParser {
   ): CAMeterChangedAction {
     const position = meterChangeScenario["pos"];
     const target = meterChangeScenario["to"];
-    let newValue = meterChangeScenario["value"];
+    const newValue = meterChangeScenario["value"];
     let initialValue = newValue;
     if (target == Actor.PLAYER) {
       const allyIndex = battleData["party"]["frontline"][position];
@@ -937,7 +953,7 @@ export class BattleScenarioParser {
       const allBossChanges = bossChanges.flat(1);
       const uniquePositions = new Set(allBossChanges.map(b => b["pos"]));
 
-      const allBossConditionActions: { [key: string]: ConditionChangeAction } = {};
+      const allBossConditionActions: Record<string, ConditionChangeAction> = {};
 
       uniquePositions.forEach(pos => {
         allBossConditionActions[pos] = new ConditionChangeAction(
@@ -1006,7 +1022,7 @@ export class BattleScenarioParser {
       const allPositions = Object.keys(playerChanges);
       const uniquePositions = new Set(allPositions);
 
-      const allPlayerConditionActions: { [key: string]: ConditionChangeAction } = {};
+      const allPlayerConditionActions: Record<string, ConditionChangeAction> = {};
 
       uniquePositions.forEach(pos => {
         allPlayerConditionActions[pos] = new ConditionChangeAction(
@@ -1104,7 +1120,7 @@ export class BattleScenarioParser {
           "debuffCount": (character["condition"]["debuff"] || []).length,
           "canBeResurrected": character["resurrection_availble_flag"], // sic
           "isGuarding": Boolean(Number.parseInt(character["is_guard_status"])),
-          "canGuard": !Boolean(Number.parseInt(character["is_guard_unavailable"])),
+          "canGuard": !Number.parseInt(character["is_guard_unavailable"]),
           "isVanished": Boolean(character["is_vanished"]),
         };
       }),

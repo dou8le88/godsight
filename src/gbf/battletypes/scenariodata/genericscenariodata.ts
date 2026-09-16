@@ -1,5 +1,5 @@
 import { ScenarioCommand } from "./scenariocommand";
 
-export type GenericScenarioData = {
+export interface GenericScenarioData {
   "cmd": ScenarioCommand,
 }

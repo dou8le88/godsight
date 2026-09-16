@@ -4,10 +4,10 @@ const debounceTime = 100;
 let debounceId = 0;
 
 export default function SearchHandler() {
-  let [visible, setVisible] = useState(false);
-  let [query, setQuery] = useState({ query: "" });
+  const [visible, setVisible] = useState(false);
+  const [query, setQuery] = useState({ query: "" });
 
-  let searchRef = useRef<HTMLInputElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const listener = (e: KeyboardEvent) => {
@@ -51,8 +51,8 @@ export default function SearchHandler() {
     }, debounceTime);
   }
 
-  let [matchingActions, setMatchingActions] = useState([] as Element[]);
-  let [currentActionIndex, setCurrentActionIndex] = useState(-1);
+  const [matchingActions, setMatchingActions] = useState([] as Element[]);
+  const [currentActionIndex, setCurrentActionIndex] = useState(-1);
 
   function getMatchingActions() {
     const newMatchingActions: Element[] = [];
@@ -76,7 +76,7 @@ export default function SearchHandler() {
     const newMatchingActions = getMatchingActions();
 
     if (newMatchingActions.length > 0) {
-      let firstInOrBelowViewIndex = newMatchingActions.findIndex(container => {
+      const firstInOrBelowViewIndex = newMatchingActions.findIndex(container => {
         const rect = container.getBoundingClientRect();
         return (
           rect.top >= 0 &&

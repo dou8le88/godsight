@@ -1,8 +1,8 @@
 import { BattleAction } from "./battleaction";
 import { Stats } from "./stats";
 
-export type TurnData = {
+export interface TurnData {
   "turnStats": Stats,
-  "characterCurrentTurnStats": { [key: string | number]: Stats },
+  "characterCurrentTurnStats": Record<string | number, Stats>,
   "turnActions": BattleAction[],
 }

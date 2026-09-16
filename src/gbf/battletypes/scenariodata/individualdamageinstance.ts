@@ -1,7 +1,7 @@
 import { GameElementValue } from "./mechanics/element";
 import { AttackAccuracyResult } from "./mechanics/attackaccuracyresult";
 
-export type SkillOrDebuffDamageInstance = {
+export interface SkillOrDebuffDamageInstance {
   /**
    * Damage value for this hit
    */

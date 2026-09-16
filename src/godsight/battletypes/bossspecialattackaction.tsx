@@ -59,7 +59,7 @@ export class BossSpecialAttackAction extends BattleAction {
     );
   }
 
-  static fromJSON(json: { [key: string]: any }): BossSpecialAttackAction | undefined {
+  static override fromJSON(json: Record<string, unknown>): BossSpecialAttackAction | undefined {
     const actionType = json["actionType"];
     if (actionType == ActionType.BOSS_SPECIAL_ATTACK) {
       return new BossSpecialAttackAction(
@@ -69,7 +69,7 @@ export class BossSpecialAttackAction extends BattleAction {
         assertNotNullOrUndefined(json["target"] as Actor),
         assertNotNullOrUndefined(json["partySize"] as number),
         assertNotNullOrUndefined(json["damageInstances"] as DamageInstance[]),
-        json["subactions"].map((action: any) => {
+        (json["subactions"] as Record<string, unknown>[]).map(action => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],
       );

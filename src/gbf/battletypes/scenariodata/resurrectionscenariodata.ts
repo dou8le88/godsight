@@ -1,7 +1,7 @@
 import { GenericScenarioData } from "./genericscenariodata";
 import { ScenarioCommand } from "./scenariocommand";
 
-export type ResurrectionScenarioData = GenericScenarioData & {
+export interface ResurrectionScenarioData extends GenericScenarioData {
   "cmd": ScenarioCommand.RESURRECTION,
   "pos": number,
   "index": number,

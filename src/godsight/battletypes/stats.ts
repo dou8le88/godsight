@@ -1,6 +1,6 @@
 import { GameElementHelper } from "../../gbf/battletypes/scenariodata/mechanics/element";
 
-export type Stats = {
+export interface Stats {
   "hitCount": number,
   "debuffsInflictedCount": number,
   "healingReceived": number,
@@ -11,10 +11,10 @@ export type Stats = {
   "damageTaken": DamageByElement,
 }
 
-export type DamageByElement = { [key: string | number]: number };
+export type DamageByElement = Record<string | number, number>;
 
-export type StatsUpdate = {
-  "characterStats": { [key: string | number]: Stats },
+export interface StatsUpdate {
+  "characterStats": Record<string | number, Stats>,
   "generalStats": Stats,
 }
 
@@ -43,7 +43,7 @@ export class StatsUpdateHelper {
   }
 
   static getEmptyStatsUpdate(partySize?: number): StatsUpdate {
-    const characterStats: { [key: string | number]: Stats } = {};
+    const characterStats: Record<string | number, Stats> = {};
 
 
     if (partySize) {

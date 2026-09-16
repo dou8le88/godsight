@@ -1,7 +1,6 @@
 import { BattleAction } from "../battletypes/battleaction";
 import { BattleActionParser } from "../battletypes/battleactionparser";
 import { GodsightBattleData } from "../battletypes/battledata";
-import { StatsUpdateHelper } from "../battletypes/stats";
 import { defaultSettings, GodsightSettings } from "../godsightsettings";
 import { GodsightStorage } from "./battlestorage";
 
@@ -14,12 +13,13 @@ export class GodsightStorageManager {
     "battles": {},
   };
 
-  private lastSetPromise: Promise<any> = new Promise((resolve, _reject) => resolve(undefined));
+  private lastSetPromise = new Promise<void>((resolve) => resolve(undefined));
 
-  private changeListeners: Array<{ id: number, callback: () => void }> = [];
-  private listenerId: number = 0;
+  private changeListeners: { id: number, callback: () => void }[] = [];
+  private listenerId = 0;
 
   constructor() {
+    // No params needed.
   }
 
   static getInstance(): GodsightStorageManager {
@@ -43,7 +43,7 @@ export class GodsightStorageManager {
 
         turns.forEach(turn => {
           battleJson["turnData"][turn]["turnActions"] = battleJson["turnData"][turn]["turnActions"].map(action => {
-            return BattleActionParser.fromJSON(action);
+            return BattleActionParser.fromJSON(action as unknown as Record<string, unknown>);
           }).filter(i => i) as BattleAction[];
         });
       });

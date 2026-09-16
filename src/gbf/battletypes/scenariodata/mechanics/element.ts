@@ -32,10 +32,10 @@ export type StringGameElement = `${NumericGameElement}` | ""
 const elementValues = Object.values(GameElement);
 const elementNames = Object.values(PrettyElementName);
 
-const numericElementToName: { [key: number]: string } = elementValues.reduce((obj, key, index) => {
+const numericElementToName: Record<number, string> = elementValues.reduce((obj, key, index) => {
   obj[key] = elementNames[index];
   return obj;
-}, {} as { [key: number]: string });
+}, {} as Record<number, string>);
 
 export class GameElementHelper {
   static getAllElements(): GameElementValue[] {

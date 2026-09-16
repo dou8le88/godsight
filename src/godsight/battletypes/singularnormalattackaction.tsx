@@ -62,7 +62,7 @@ export class SingularNormalAttackAction extends BattleAction {
     return update;
   }
 
-  static fromJSON(json: { [key: string]: any; }): SingularNormalAttackAction | undefined {
+  static override fromJSON(json: Record<string, unknown>): SingularNormalAttackAction | undefined {
     const actionType = json["actionType"];
     if (actionType == ActionType.SINGULAR_NORMAL_ATTACK) {
       return new SingularNormalAttackAction(

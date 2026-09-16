@@ -2,7 +2,7 @@ import { StatusType } from "./mechanics/statustype"
 import { ScenarioCommand } from "./scenariocommand"
 import { GenericScenarioData } from "./genericscenariodata"
 
-export type AppliedStatus = {
+export interface AppliedStatus {
   /**
    * Party slot that received the status.
    */
@@ -20,12 +20,12 @@ export type AppliedStatus = {
   "dispel"?: number,
 }
 
-export type MessageData = {
+export interface MessageData {
   "boss"?: AppliedStatus[][],
-  "player"?: { [key: string]: AppliedStatus[] },
+  "player"?: Record<string, AppliedStatus[]>,
 }
 
-export type MessageScenarioData = GenericScenarioData & {
+export interface MessageScenarioData extends GenericScenarioData {
   "cmd": ScenarioCommand.MESSAGE,
   "data": MessageData,
 }

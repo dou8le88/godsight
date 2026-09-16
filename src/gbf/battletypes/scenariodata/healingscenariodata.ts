@@ -2,7 +2,7 @@ import { GenericScenarioData } from "./genericscenariodata";
 import { Actor } from "./mechanics/actor";
 import { ScenarioCommand } from "./scenariocommand";
 
-export type GbfHealingInstance = {
+export interface GbfHealingInstance {
   /**
    * The position of the healing recipient.
    */
@@ -17,7 +17,7 @@ export type GbfHealingInstance = {
   "hp": number,
 }
 
-export type HealingScenarioData = GenericScenarioData & {
+export interface HealingScenarioData extends GenericScenarioData {
   "cmd": ScenarioCommand.HEALING,
   "to": Actor,
   "list": GbfHealingInstance[],

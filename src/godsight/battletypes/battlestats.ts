@@ -1,6 +1,6 @@
 import { Stats } from "./stats"
 
-export type BattleStats = {
+export interface BattleStats {
   "generalStats": Stats,
-  "characterStats": { [key: string | number]: Stats },
+  "characterStats": Record<string | number, Stats>,
 }

@@ -1,4 +1,4 @@
-export type HealingInstance = {
+export interface HealingInstance {
   "receiverName": string,
   "receiverIndex": number,
   "value": number,

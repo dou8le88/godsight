@@ -48,7 +48,7 @@ export class CAMeterChangedAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
-  static fromJSON(json: { [key: string]: any; }): CAMeterChangedAction | undefined {
+  static override fromJSON(json: Record<string, unknown>): CAMeterChangedAction | undefined {
     const actionType = json["actionType"];
     if (actionType == ActionType.CA_METER_CHANGED) {
       return new CAMeterChangedAction(

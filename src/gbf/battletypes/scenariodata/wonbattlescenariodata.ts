@@ -1,7 +1,7 @@
 import { GenericScenarioData } from "./genericscenariodata";
 import { ScenarioCommand } from "./scenariocommand";
 
-export type WonBattleScenarioData = GenericScenarioData & {
+export interface WonBattleScenarioData extends GenericScenarioData {
   "cmd": ScenarioCommand.WON_BATTLE,
   /**
    * TODO: what is this?

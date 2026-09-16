@@ -9,7 +9,7 @@ import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class AbilityAction extends BattleAction {
   public actionType: ActionType = ActionType.ACTIVATED_ABILITY;
-  public overrideMessage: string = "";
+  public overrideMessage = "";
 
   constructor(
     public actionNumber: number,
@@ -56,7 +56,7 @@ export class AbilityAction extends BattleAction {
       update,
     );
     switch (this.actor) {
-      case Actor.PLAYER:
+      case Actor.PLAYER: {
         // The subactions have no way to associate certain general stats with
         // a specific character, so we must do it here for now. TODO: fix.
         const subactionHitCount = allUpdates["generalStats"]["hitCount"];
@@ -71,6 +71,7 @@ export class AbilityAction extends BattleAction {
           allUpdates["characterStats"][this.sourceIndex]["normalAttackDamage"][element] += subactionNormalAttackDamage[element];
         });
         break;
+      }
       case Actor.BOSS:
         // The boss used an "ability", can happen in certain raids.
         // Due to the quirks of the underlying commands, stats should be tracked correctly
@@ -84,7 +85,7 @@ export class AbilityAction extends BattleAction {
     return allUpdates;
   }
 
-  static fromJSON(json: Record<string, unknown>): AbilityAction | undefined {
+  static override fromJSON(json: Record<string, unknown>): AbilityAction | undefined {
     const actionType = json["actionType"];
     if (actionType == ActionType.ACTIVATED_ABILITY) {
       return new AbilityAction(
@@ -94,7 +95,7 @@ export class AbilityAction extends BattleAction {
         assertNotNullOrUndefined(json["sourceName"] as string),
         assertNotNullOrUndefined(json["sourceIndex"] as number),
         assertNotNullOrUndefined(json["partySize"] as number),
-        (json["subactions"] as Record<string, unknown>[]).map((action: any) => {
+        (json["subactions"] as Record<string, unknown>[]).map(action => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],
       );

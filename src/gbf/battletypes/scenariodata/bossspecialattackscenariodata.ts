@@ -4,7 +4,7 @@ import { AttackAccuracyResult } from "./mechanics/attackaccuracyresult";
 import { Actor } from "./mechanics/actor";
 import { ScenarioCommand } from "./scenariocommand";
 
-export type BossSpecialAttackScenarioData = GenericScenarioData & {
+export interface BossSpecialAttackScenarioData extends GenericScenarioData {
   "cmd": ScenarioCommand.BOSS_SPECIAL_ATTACK,
   "name": string,
   /**
@@ -19,11 +19,11 @@ export type BossSpecialAttackScenarioData = GenericScenarioData & {
   "list": BossSpecialAttackDamageSummary[]
 }
 
-export type BossSpecialAttackDamageSummary = {
+export interface BossSpecialAttackDamageSummary {
   "damage": BossSpecialAttackDamageInstance[],
 }
 
-export type BossSpecialAttackDamageInstance = {
+export interface BossSpecialAttackDamageInstance {
   "attr": GameElementValue,
   "pos": number,
   /**

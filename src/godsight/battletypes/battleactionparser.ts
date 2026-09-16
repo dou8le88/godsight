@@ -23,7 +23,7 @@ import { TurnChangeAction } from "./turnchangeaction";
 import { WindowEffectAction } from "./windoweffectaction";
 
 export class BattleActionParser {
-  static fromJSON(json: { [key: string]: any }): BattleAction | undefined {
+  static fromJSON(json: Record<string, unknown>): BattleAction | undefined {
     const actionType = json["actionType"];
     if (actionType) {
       switch (actionType as ActionType) {

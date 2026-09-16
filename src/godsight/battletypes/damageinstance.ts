@@ -1,6 +1,6 @@
 import { GameElementValue } from "../../gbf/battletypes/scenariodata/mechanics/element"
 
-export type DamageInstance = {
+export interface DamageInstance {
   "element": GameElementValue,
   "receiverName": string,
   "receiverIndex": number,

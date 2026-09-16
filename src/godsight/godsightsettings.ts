@@ -1,6 +1,4 @@
-export type GodsightSettings = {
-
-}
+export type GodsightSettings = object
 
 export const defaultSettings: GodsightSettings = {
 

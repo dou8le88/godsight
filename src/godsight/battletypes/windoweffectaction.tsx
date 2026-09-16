@@ -26,7 +26,7 @@ export class WindowEffectAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
-  static fromJSON(json: { [key: string]: any; }): WindowEffectAction | undefined {
+  static fromJSON(json: Record<string, unknown>): WindowEffectAction | undefined {
     const actionType = json["actionType"];
     if (actionType == ActionType.WINDOW_EFFECT) {
       return new WindowEffectAction(

@@ -57,13 +57,13 @@ export class NormalAttackAction extends BattleAction {
     );
   }
 
-  static fromJSON(json: { [key: string]: any; }): NormalAttackAction | undefined {
+  static override fromJSON(json: Record<string, unknown>): NormalAttackAction | undefined {
     const actionType = json["actionType"];
     if (actionType == ActionType.NORMAL_ATTACK) {
       return new NormalAttackAction(
         assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["attackerName"] as string),
-        json["subactions"].map((action: any) => {
+        (json["subactions"] as Record<string, unknown>[]).map(action => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],
       );

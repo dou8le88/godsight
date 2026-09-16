@@ -5,18 +5,18 @@ import { Actor } from "./mechanics/actor"
 import { ScenarioCommand } from "./scenariocommand"
 
 
-export type NormalAttackScenarioData = GenericScenarioData & {
+export interface NormalAttackScenarioData extends GenericScenarioData {
   "cmd": ScenarioCommand.NORMAL_ATTACK,
   "from": Actor,
   "pos": number,
   "num": number,
   "color": GameElementValue,
   "total_attack_num": number,
-  "damage": NormalAttackDamage[][] | { [key: string]: NormalAttackDamage[] },
+  "damage": NormalAttackDamage[][] | Record<string, NormalAttackDamage[]>,
   "is_all_attack": boolean,
 }
 
-export type NormalAttackDamage = {
+export interface NormalAttackDamage {
   "attack_count": number,
   "concurrent_attack_count": number,
   "pos": number,

@@ -8,7 +8,7 @@ import { ScenarioCommand } from "./scenariocommand";
  * It also has a target field, so it can perhaps be used for player characters that change sprites?
  * Frontline replacement like freezie?
  */
-export type FormChangeScenarioData = GenericScenarioData & {
+export interface FormChangeScenarioData extends GenericScenarioData {
   "cmd": ScenarioCommand.FORM_CHANGE,
   "param": {
     "attr": GameElementValue,

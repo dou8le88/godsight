@@ -63,7 +63,7 @@ export class ChargedAttackAction extends BattleAction {
     }
   }
 
-  static fromJSON(json: { [key: string]: any; }): ChargedAttackAction | undefined {
+  static override fromJSON(json: Record<string, unknown>): ChargedAttackAction | undefined {
     const actionType = json["actionType"];
     if (actionType == ActionType.CHARGED_ATTACK) {
       return new ChargedAttackAction(
@@ -74,7 +74,7 @@ export class ChargedAttackAction extends BattleAction {
         assertNotNullOrUndefined(json["target"] as Actor),
         assertNotNullOrUndefined(json["partySize"] as number),
         assertNotNullOrUndefined(json["damageTotals"] as DamageInstance[]),
-        json["subactions"].map((action: any) => {
+        (json["subactions"] as Record<string, unknown>[]).map(action => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],
       );

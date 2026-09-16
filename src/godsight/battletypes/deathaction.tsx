@@ -29,7 +29,7 @@ export class DeathAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
-  static fromJSON(json: { [key: string]: any; }): DeathAction | undefined {
+  static override fromJSON(json: Record<string, unknown>): DeathAction | undefined {
     const actionType = json["actionType"];
     if (actionType == ActionType.DEATH) {
       return new DeathAction(

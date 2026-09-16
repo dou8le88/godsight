@@ -4,7 +4,7 @@ import { ScenarioCommand } from "./scenariocommand";
 import { GenericScenarioData } from "./genericscenariodata";
 import { SkillOrDebuffDamageInstance } from "./individualdamageinstance";
 
-export type MultihitDamageScenarioData = GenericScenarioData & {
+export interface MultihitDamageScenarioData extends GenericScenarioData {
   "cmd": ScenarioCommand.DAMAGE_DEALT_MULTIHIT,
   "color": GameElementValue,
   "to": Actor,

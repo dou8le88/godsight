@@ -24,7 +24,7 @@ export class RetreatAction extends BattleAction {
     );
   }
 
-  static fromJSON(json: { [key: string]: any; }): RetreatAction | undefined {
+  static override fromJSON(json: Record<string, unknown>): RetreatAction | undefined {
     const actionType = json["actionType"];
     if (actionType == ActionType.RETREAT) {
       return new RetreatAction(

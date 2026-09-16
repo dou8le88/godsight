@@ -33,7 +33,7 @@ export class StandbyAction extends BattleAction {
     );
   }
 
-  static fromJSON(json: { [key: string]: any; }): StandbyAction | undefined {
+  static override fromJSON(json: Record<string, unknown>): StandbyAction | undefined {
     const actionType = json["actionType"];
     if (actionType == ActionType.STANDBY) {
       return new StandbyAction(

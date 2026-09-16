@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import WrongWebsiteBanner from "./wrongwebsitebanner";
 import { GranblueBattleData } from "../gbf/battletypes/battledata";
 import { StartData } from "../gbf/battletypes/startdata";
-import { RetreatData } from "../gbf/battletypes/retiredata";
 import BattleTracker from "./battletracker/battletracker";
 import { BattleScenarioParser } from "../battlescenarioparser";
 import { useGodsightStorage } from "./battletracker/usegodsightstorage";
@@ -10,8 +9,6 @@ import { GodsightStorageManager } from "../godsight/godsightstorage/godsightstor
 import BattleSummary from "./battletracker/battlesummary";
 import { StatsUpdateHelper } from "../godsight/battletypes/stats";
 import { GodsightBattleData } from "../godsight/battletypes/battledata";
-import { BattleProgressStatus } from "../godsight/battletypes/battleprogressstatus";
-import { BattleAction } from "../godsight/battletypes/battleaction";
 import { BattleActionParser } from "../godsight/battletypes/battleactionparser";
 import SearchHandler from "./search/searchhandler";
 
@@ -79,7 +76,7 @@ export default function GodsightPanel() {
       storageManager.setBattleData(raidId, godsightBattleData);
     }
 
-    function withActiveBattle(callback: (battleId: string, raid: GodsightBattleData) => any) {
+    function withActiveBattle(callback: (battleId: string, raid: GodsightBattleData) => void) {
       chrome.devtools.inspectedWindow.eval("window.location.hash", (url: string) => {
         const fragment = url.split("#").at(-1);
         const battleId = ((fragment || "").match(battleIdRegex) || []).at(-1);
@@ -187,7 +184,7 @@ export default function GodsightPanel() {
         // Ignore failed requests.
         if (request.response.status == 200) {
 
-          request.getContent((content, encoding) => {
+          request.getContent((content) => {
             const endpoint = url.pathname.split("/").at(-1);
 
             switch (endpoint) {

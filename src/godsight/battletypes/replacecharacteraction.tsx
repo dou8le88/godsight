@@ -30,7 +30,7 @@ export class ReplaceCharacterAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
-  static fromJSON(json: { [key: string]: any; }): ReplaceCharacterAction | undefined {
+  static override fromJSON(json: Record<string, unknown>): ReplaceCharacterAction | undefined {
     const actionType = json["actionType"];
     if (actionType == ActionType.REPLACED_CHARACTER) {
       return new ReplaceCharacterAction(

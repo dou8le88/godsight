@@ -46,7 +46,7 @@ export class ChainBurstAction extends BattleAction {
     return update;
   }
 
-  static fromJSON(json: { [key: string]: any; }): ChainBurstAction | undefined {
+  static override fromJSON(json: Record<string, unknown>): ChainBurstAction | undefined {
     const actionType = json["actionType"];
     if (actionType == ActionType.CHAIN_BURST) {
       return new ChainBurstAction(

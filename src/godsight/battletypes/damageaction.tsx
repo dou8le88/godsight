@@ -63,7 +63,7 @@ export class DamageAction extends BattleAction {
     return update;
   }
 
-  static fromJSON(json: { [key: string]: any; }): DamageAction | undefined {
+  static override fromJSON(json: Record<string, unknown>): DamageAction | undefined {
     const actionType = json["actionType"];
     if (actionType == ActionType.DAMAGE_DEALT) {
       return new DamageAction(

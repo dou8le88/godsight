@@ -2,7 +2,7 @@ import { GenericScenarioData } from "./genericscenariodata";
 import { GameElementValue } from "./mechanics/element";
 import { ScenarioCommand } from "./scenariocommand";
 
-export type BossStatusScenarioData = GenericScenarioData & {
+export interface BossStatusScenarioData extends GenericScenarioData {
   "cmd": ScenarioCommand.BOSS_STATUS,
   "name": {
     "en": string,

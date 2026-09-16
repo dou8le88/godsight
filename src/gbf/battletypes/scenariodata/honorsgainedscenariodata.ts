@@ -1,7 +1,7 @@
 import { ScenarioCommand } from "./scenariocommand";
 import { GenericScenarioData } from "./genericscenariodata";
 
-export type HonorsGainedScenarioData = GenericScenarioData & {
+export interface HonorsGainedScenarioData extends GenericScenarioData {
   "cmd": ScenarioCommand.HONORS_GAINED,
   "amount": number,
 }

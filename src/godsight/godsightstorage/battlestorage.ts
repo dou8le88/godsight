@@ -1,7 +1,7 @@
 import { GodsightBattleData } from "../battletypes/battledata";
 import { GodsightSettings } from "../godsightsettings";
 
-export type GodsightStorage = {
+export interface GodsightStorage {
   "settings": GodsightSettings,
-  "battles": { [key: string | number]: GodsightBattleData }
+  "battles": Record<string | number, GodsightBattleData>
 }

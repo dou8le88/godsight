@@ -1,5 +1,5 @@
 import { RetreatScenarioData } from "./scenariodata/retreatscenariodata";
 
-export type RetreatData = {
+export interface RetreatData {
   "scenario": RetreatScenarioData[],
 }

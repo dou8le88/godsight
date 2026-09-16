@@ -81,7 +81,7 @@ export class ConditionChangeAction extends BattleAction {
     }
   }
 
-  static fromJSON(json: { [key: string]: any; }): ConditionChangeAction | undefined {
+  static override fromJSON(json: Record<string, unknown>): ConditionChangeAction | undefined {
     const actionType = json["actionType"];
     if (actionType == ActionType.CONDITION_CHANGED) {
       return new ConditionChangeAction(

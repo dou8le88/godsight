@@ -56,14 +56,14 @@ export type StartData = GranblueBattleData & {
   "chain_burst_gauge"?: string;
 }
 
-export type WaveData = {
+export interface WaveData {
   "total": number,
   "count": number,
   "wave_progress_min": number,
   "wave_progress_max": number,
 }
 
-export type PartyFormationData = {
+export interface PartyFormationData {
   "type": "player", //always?
   /**
    * TODO: check if actually the total quantity of party members
@@ -72,7 +72,7 @@ export type PartyFormationData = {
   "param": PartyMemberData[],
 }
 
-export type PartyMemberData = {
+export interface PartyMemberData {
   "name": string,
   /**
    * Character ID. For MC, it's `1` regardless of class.
@@ -128,7 +128,7 @@ export type PartyMemberData = {
   "is_vanished": number,
 }
 
-export type BossFormationData = {
+export interface BossFormationData {
   /**
    * TODO: Numeric string?
    */
@@ -149,7 +149,7 @@ export type BossFormationData = {
   "param": BossData[],
 }
 
-export type BossData = {
+export interface BossData {
   /**
    * TODO: Numeric string?
    */

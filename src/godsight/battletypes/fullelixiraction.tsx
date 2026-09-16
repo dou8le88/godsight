@@ -37,12 +37,12 @@ export class FullElixirAction extends BattleAction {
     );
   }
 
-  static fromJSON(json: { [key: string]: any; }): FullElixirAction | undefined {
+  static override fromJSON(json: Record<string, unknown>): FullElixirAction | undefined {
     const actionType = json["actionType"];
     if (actionType == ActionType.USED_FULL_ELIXIR) {
       return new FullElixirAction(
         assertNotNullOrUndefined(json["actionNumber"] as number),
-        json["subactions"].map((action: any) => {
+        (json["subactions"] as Record<string, unknown>[]).map(action => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],
       );

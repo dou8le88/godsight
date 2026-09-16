@@ -3,9 +3,8 @@ import { BattleProgressStatus } from "./battleprogressstatus";
 import { GodsightBossData } from "./bossdata";
 import { GodsightPartyFormationData } from "./partyformationdata";
 import { TurnData } from "./turndata";
-import { GodsightSummonData } from "./summondata";
 
-export type GodsightBattleData = {
+export interface GodsightBattleData {
   "raidId": number,
   "questId": string,
   "IsCoopRaid": boolean,
@@ -20,5 +19,5 @@ export type GodsightBattleData = {
   "party": GodsightPartyFormationData,
   "boss": GodsightBossData[],
   "battleStats": BattleStats,
-  "turnData": { [key: number | string]: TurnData },
+  "turnData": Record<number | string, TurnData>,
 }

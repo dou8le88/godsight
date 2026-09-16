@@ -27,7 +27,7 @@ export class TurnChangeAction extends BattleAction {
     );
   }
 
-  static fromJSON(json: { [key: string]: any; }): TurnChangeAction | undefined {
+  static override fromJSON(json: Record<string, unknown>): TurnChangeAction | undefined {
     const actionType = json["actionType"];
     if (actionType == ActionType.TURN_CHANGE) {
       return new TurnChangeAction(

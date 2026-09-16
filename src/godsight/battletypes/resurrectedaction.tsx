@@ -27,7 +27,7 @@ export class ResurrectedAction extends BattleAction {
     );
   }
 
-  static override fromJSON(json: { [key: string]: any; }): ResurrectedAction | undefined {
+  static override fromJSON(json: Record<string, unknown>): ResurrectedAction | undefined {
     const actionType = json["actionType"];
     if (actionType == ActionType.RESURRECTED) {
       return new ResurrectedAction(

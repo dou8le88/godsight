@@ -1,4 +1,3 @@
-import { GodsightBattleData } from "../../godsight/battletypes/battledata";
 import { TurnData } from "../../godsight/battletypes/turndata";
 import Action from "./action";
 

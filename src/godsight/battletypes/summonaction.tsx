@@ -69,7 +69,7 @@ export class SummonAction extends BattleAction {
     );
   }
 
-  static fromJSON(json: { [key: string]: any; }): SummonAction | undefined {
+  static override fromJSON(json: Record<string, unknown>): SummonAction | undefined {
     const actionType = json["actionType"];
     if (actionType == ActionType.CALLED_SUMMON) {
       return new this(
@@ -78,7 +78,7 @@ export class SummonAction extends BattleAction {
         assertNotNullOrUndefined(json["mainCharacterName"] as string),
         assertNotNullOrUndefined(json["partySize"] as number),
         assertNotNullOrUndefined(json["damageInstances"] as DamageInstance[]),
-        json["subactions"].map((action: any) => {
+        (json["subactions"] as Record<string, unknown>[]).map(action => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],
         json["trueSummonHitCount"] as number | undefined,

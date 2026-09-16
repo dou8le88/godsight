@@ -63,7 +63,7 @@ export class MultihitDamageAction extends BattleAction {
     return update;
   }
 
-  static fromJSON(json: { [key: string]: any; }): MultihitDamageAction | undefined {
+  static override fromJSON(json: Record<string, unknown>): MultihitDamageAction | undefined {
     const actionType = json["actionType"];
     if (actionType == ActionType.DAMAGE_DEALT_MULTIHIT) {
       return new MultihitDamageAction(

@@ -18,11 +18,11 @@ export interface ChargedAttackScenarioData extends GenericScenarioData {
   "list": ChargedAttackPartitionedDamage[],
 }
 
-export type ChargedAttackPartitionedDamage = {
+export interface ChargedAttackPartitionedDamage {
   "damage": ChargedAttackPartitionedDamageInstance[],
 }
 
-export type ChargedAttackPartitionedDamageInstance = {
+export interface ChargedAttackPartitionedDamageInstance {
   "attr": GameElementValue,
   "critical": boolean,
   "hp": number,
@@ -35,7 +35,7 @@ export interface ChargedAttackDamageInstance {
   "count": number;
 }
 
-export class ChargedAttackDamageInstance {
+export class ChargedAttackDamageInstanceHelper {
   static getTotal(i: ChargedAttackDamageInstance): number {
     return Number(i.split.join(""));
   }

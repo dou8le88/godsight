@@ -2,7 +2,7 @@ import { CharacterType } from "./scenariodata/mechanics/charactertype"
 import { GuardStatus } from "./scenariodata/mechanics/guardstatus"
 import { GenericScenarioData } from "./scenariodata/genericscenariodata"
 
-export type CharacterAbilityStatus = {
+export interface CharacterAbilityStatus {
   "mode": CharacterType,
   "pos": number,
   "alive": number,
@@ -13,16 +13,14 @@ export type CharacterAbilityStatus = {
  * Seems to be only the frontline? Mostly focused on ability availability,
  * probably used for displaying ability and CD information.
  */
-export type PartyAbilityStatus = {
-  [key: string]: CharacterAbilityStatus,
-}
+export type PartyAbilityStatus = Record<string, CharacterAbilityStatus>;
 
-export type GroupGaugeStatus = {
+export interface GroupGaugeStatus {
   "value": number,
   "ability_available": boolean,
 }
 
-export type BattleStatus = {
+export interface BattleStatus {
   "raid_id": number,
   "turn": number,
   "timer": number,
@@ -39,12 +37,12 @@ export type BattleStatus = {
   "summon": SummonData[],
 }
 
-export type SummonData = {
+export interface SummonData {
   "skill": string,
   "comment": string,
 }
 
-export type GranblueBattleData = {
+export interface GranblueBattleData {
   "scenario": GenericScenarioData[],
   "status": BattleStatus,
 }

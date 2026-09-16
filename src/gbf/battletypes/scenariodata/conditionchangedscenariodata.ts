@@ -2,12 +2,12 @@ import { Actor } from "./mechanics/actor";
 import { ScenarioCommand } from "./scenariocommand";
 import { GenericScenarioData } from "./genericscenariodata";
 
-export type Condition = {
+export interface Condition {
   "status": string,
   "display_priority": number | string;
 }
 
-export type ConditionSummary = {
+export interface ConditionSummary {
   "buff"?: Condition[],
   "debuff"?: Condition[],
   /**
@@ -17,7 +17,7 @@ export type ConditionSummary = {
   "num"?: number,
 }
 
-export type ConditionChangedScenarioData = GenericScenarioData & {
+export interface ConditionChangedScenarioData extends GenericScenarioData {
   "cmd": ScenarioCommand._CONDITION,
   "to": Actor,
   "pos": number,

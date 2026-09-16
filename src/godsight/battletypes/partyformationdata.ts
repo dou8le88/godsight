@@ -1,14 +1,14 @@
 import { GameElementValue } from "../../gbf/battletypes/scenariodata/mechanics/element"
 import { Proficiency } from "../../gbf/battletypes/scenariodata/mechanics/proficiency"
 
-export type GodsightPartyFormationData = {
+export interface GodsightPartyFormationData {
   "partyMemberCount": number,
   "frontline": number[],
   "backline": number[],
   "members": GodsightPartyMemberData[],
 }
 
-export type GodsightPartyMemberData = {
+export interface GodsightPartyMemberData {
   "name": string,
   /**
    * MC's is always "1".
@@ -50,7 +50,7 @@ export class PartyFormationHelper {
 
     const characterIndex = entireFormation[position];
 
-    if (characterIndex) {
+    if (characterIndex !== undefined) {
       return this.getNameOfCharacterAtPartyIndex(formation, characterIndex);
     } else {
       console.error(`No character at ${position} when looking up character name!`);

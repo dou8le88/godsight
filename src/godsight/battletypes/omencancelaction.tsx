@@ -21,12 +21,12 @@ export class OmenCancelAction extends BattleAction {
 
   getDescription(): JSX.Element {
     return (
-      <div key={this.actionNumber} className="action-description">{this.bossName}'s omen was canceled!
+      <div key={this.actionNumber} className="action-description">{this.bossName}&apos;s omen was canceled!
       </div>
     )
   }
 
-  static fromJSON(json: { [key: string]: any; }): OmenCancelAction | undefined {
+  static override fromJSON(json: Record<string, unknown>): OmenCancelAction | undefined {
     const actionType = json["actionType"];
     if (actionType == ActionType.OMEN_CANCELLED) {
       return new OmenCancelAction(

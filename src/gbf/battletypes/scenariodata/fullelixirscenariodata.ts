@@ -1,6 +1,6 @@
 import { GenericScenarioData } from "./genericscenariodata";
 import { ScenarioCommand } from "./scenariocommand";
 
-export type FullElixirScenarioData = GenericScenarioData & {
+export interface FullElixirScenarioData extends GenericScenarioData {
   "cmd": ScenarioCommand.FULL_ELIXIR,
 }

@@ -2,7 +2,7 @@ import { GameElementValue } from "./mechanics/element";
 import { ScenarioCommand } from "./scenariocommand";
 import { GenericScenarioData } from "./genericscenariodata";
 
-export type SummonDamageInstance = {
+export interface SummonDamageInstance {
   "pos": number,
   "value": number,
   "hp": number,
@@ -11,11 +11,11 @@ export type SummonDamageInstance = {
   "color": GameElementValue
 }
 
-export type SummonDamageDescription = {
+export interface SummonDamageDescription {
   "damage": SummonDamageInstance[]
 }
 
-export type SummonScenarioData = GenericScenarioData & {
+export interface SummonScenarioData extends GenericScenarioData {
   "cmd": ScenarioCommand.SUMMON,
   "name": string,
   "list": SummonDamageDescription[],

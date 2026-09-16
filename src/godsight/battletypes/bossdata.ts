@@ -1,6 +1,6 @@
 import { GameElementValue } from "../../gbf/battletypes/scenariodata/mechanics/element"
 
-export type GodsightBossData = {
+export interface GodsightBossData {
   "name": string,
   "element": GameElementValue,
   "hpMax": number,
