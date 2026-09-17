@@ -197,4 +197,12 @@ export enum ScenarioCommand {
    * Ignored command, do not use, exists for completeness in the parser.
    */
   _LOSE = "lose",
+  /**
+   * Ignored command, do not use, exists for completeness in the parser.
+   */
+  _INFORMATION = "information",
+  /**
+   * Ignored command, do not use, exists for completeness in the parser.
+   */
+  _MOTION = "motion",
 }

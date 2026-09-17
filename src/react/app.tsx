@@ -215,12 +215,14 @@ export default function GodsightPanel() {
               case "auto_setting":
               case "special_skill_setting":
               case "user_battle_log":
+              case "stamp_list":
               case "vote_abort.json":
               case "showed_vote_result.json":
               case "guard_setting.json":
+              case "chat_result.json":
                 return;
               default:
-                if (endpoint && !isNaN(Number.parseInt(endpoint))) {
+                if (endpoint && !isNaN(Number(endpoint))) {
                   // Battle-specific settings, endpoint is like /rest/raid/setting/123456
                 } else {
                   if (content.length) {
@@ -230,7 +232,7 @@ export default function GodsightPanel() {
                         console.warn(`Got scenario data from fallback-processed endpoint ${endpoint}`);
                         battleDataHandler(json as GranblueBattleData, endpoint);
                       } else {
-                        console.warn(`Got unknown JSON from fallback-processed endpoint ${endpoint}`, json);
+                        console.warn(`Got unknown JSON from fallback-processed endpoint ${endpoint}`, content);
                       }
                     } catch (e: unknown) {
                       console.warn(`Got non-JSON response when trying to fallback-process ${endpoint}`, e);
