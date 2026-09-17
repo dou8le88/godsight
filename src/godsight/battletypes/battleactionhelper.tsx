@@ -5,8 +5,22 @@ import { GodsightPartyFormationData, PartyFormationHelper } from "./partyformati
 import { GameElementHelper, GameElementValue } from "../../gbf/battletypes/scenariodata/mechanics/element";
 import { HealingInstance } from "./healinginstance";
 import { GodsightBossData } from "./bossdata";
+import { BattleAction } from "./battleaction";
+import { identity } from "../../util/functional";
+import { BattleActionParser } from "./battleactionparser";
 
 export class BattleActionHelper {
+  static getRehydratedActions(battleActions: BattleAction[]): BattleAction[] {
+    const rehydratedActions: (BattleAction | undefined)[] = [];
+
+    battleActions.forEach(action => {
+      rehydratedActions.push(BattleActionParser.fromJSON(action as unknown as Record<string, unknown>));
+    });
+
+    return rehydratedActions.filter(identity) as BattleAction[];
+  }
+
+
   static getActorName(bossData: GodsightBossData[], formation: GodsightPartyFormationData, actor: Actor, position: number): string {
     let actorName = "";
     if (actor == Actor.BOSS) {
@@ -51,26 +65,35 @@ export class BattleActionHelper {
     maybeHitCountOverride?: number,
   ): JSX.Element {
     const damageInstancesByRecipient = this.getDamageInstancesGroupedByRecipient(damageInstances);
+    const onlyRealDamageInstancesByRecipient: Record<string, DamageInstance[]> = {};
+    Object.keys(damageInstancesByRecipient).forEach(key => {
+      const instances = damageInstancesByRecipient[key];
+      const nonZeroInstances = instances.filter(i => i["value"] > 0);
+      if (nonZeroInstances.length == 0) {
+        nonZeroInstances.push(instances[0]);
+      }
+      onlyRealDamageInstancesByRecipient[key] = nonZeroInstances;
+    });
     return (
       <>
-        {Object.keys(damageInstancesByRecipient).map(recipient => (
-          <div key={recipient} className="action-description">{recipient} took {damageInstancesByRecipient[recipient].map((instance, idx) => (
+        {Object.keys(onlyRealDamageInstancesByRecipient).map(recipient => (
+          <div key={recipient} className="action-description">{recipient} took {onlyRealDamageInstancesByRecipient[recipient].map((instance, idx) => (
             <span key={idx} className={`element ${GameElementHelper.getPrettyElementName(instance["element"])}`}>{instance["value"].toLocaleString()}</span>
           )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, " + ", cur], null)
-          } damage! {damageInstancesByRecipient[recipient].length > 1 || (maybeHitCountOverride !== undefined && maybeHitCountOverride > 1) ?
+          } damage! {onlyRealDamageInstancesByRecipient[recipient].length > 1 || (maybeHitCountOverride !== undefined && maybeHitCountOverride > 1) ?
             <>
-              {damageInstancesByRecipient[recipient]
-                .every(i => i["element"] == damageInstancesByRecipient[recipient][0]["element"]) ?
+              {onlyRealDamageInstancesByRecipient[recipient].filter(instance => instance["value"] > 0)
+                .every(i => i["element"] == onlyRealDamageInstancesByRecipient[recipient][0]["element"]) ?
                 <>
-                  (Total: <span className={`element ${GameElementHelper.getPrettyElementName(damageInstancesByRecipient[recipient][0]["element"])}`}>{damageInstancesByRecipient[recipient].reduce((prev, cur) => prev + cur["value"], 0).toLocaleString()}</span>)&nbsp;
+                  (Total: <span className={`element ${GameElementHelper.getPrettyElementName(onlyRealDamageInstancesByRecipient[recipient][0]["element"])}`}>{onlyRealDamageInstancesByRecipient[recipient].reduce((prev, cur) => prev + cur["value"], 0).toLocaleString()}</span>)&nbsp;
                 </>
                 :
                 <>
-                  (Total: {damageInstancesByRecipient[recipient].reduce((prev, cur) => prev + cur["value"], 0).toLocaleString()})&nbsp;
+                  (Total: {onlyRealDamageInstancesByRecipient[recipient].reduce((prev, cur) => prev + cur["value"], 0).toLocaleString()})&nbsp;
                 </>
               }
 
-              (Hits: {maybeHitCountOverride ? maybeHitCountOverride : damageInstancesByRecipient[recipient].filter(i => i["value"] > 0).length})
+              (Hits: {maybeHitCountOverride ? maybeHitCountOverride : onlyRealDamageInstancesByRecipient[recipient].filter(i => i["value"] > 0).length})
             </> :
             <>
             </>

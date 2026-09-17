@@ -10,7 +10,6 @@ export class NormalAttackAction extends BattleAction {
   public actionType: ActionType = ActionType.NORMAL_ATTACK;
 
   constructor(
-    public actionNumber: number,
     public attackerName: string,
     public subactions: BattleAction[],
   ) {
@@ -32,15 +31,15 @@ export class NormalAttackAction extends BattleAction {
     10: "made a decuple attack",
   }
 
-  getDescription(): JSX.Element {
+  getDescription(key: number): JSX.Element {
     const attacks = this.subactions.filter(a => a instanceof SingularNormalAttackAction);
     const attackCount = attacks.length;
     const attackWording = (this.attackCountWording[attackCount] || "made unknown attacks!");
 
     return (
-      <div key={this.actionNumber} className="action-description">{this.attackerName} {attackWording}!
-        {this.subactions.map(subaction => (
-          subaction.getDescription()
+      <div key={key} className="action-description">{this.attackerName} {attackWording}!
+        {this.subactions.map((subaction, idx) => (
+          subaction.getDescription(idx)
         ))}
       </div>
     );
@@ -61,7 +60,6 @@ export class NormalAttackAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.NORMAL_ATTACK) {
       return new NormalAttackAction(
-        assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["attackerName"] as string),
         (json["subactions"] as Record<string, unknown>[]).map(action => {
           return BattleActionParser.fromJSON(action);

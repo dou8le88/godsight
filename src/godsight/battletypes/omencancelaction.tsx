@@ -9,7 +9,6 @@ export class OmenCancelAction extends BattleAction {
   public subactions: BattleAction[] = [];
 
   constructor(
-    public actionNumber: number,
     public bossName: string,
   ) {
     super();
@@ -19,9 +18,9 @@ export class OmenCancelAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
-  getDescription(): JSX.Element {
+  getDescription(key: number): JSX.Element {
     return (
-      <div key={this.actionNumber} className="action-description">{this.bossName}&apos;s omen was canceled!
+      <div key={key} className="action-description">{this.bossName}&apos;s omen was canceled!
       </div>
     )
   }
@@ -30,7 +29,6 @@ export class OmenCancelAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.OMEN_CANCELLED) {
       return new OmenCancelAction(
-        assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["bossName"] as string),
       );
     } else {

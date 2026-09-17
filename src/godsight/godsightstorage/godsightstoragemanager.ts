@@ -1,5 +1,4 @@
-import { BattleAction } from "../battletypes/battleaction";
-import { BattleActionParser } from "../battletypes/battleactionparser";
+import { BattleActionHelper } from "../battletypes/battleactionhelper";
 import { GodsightBattleData } from "../battletypes/battledata";
 import { defaultSettings, GodsightSettings } from "../godsightsettings";
 import { GodsightStorage } from "./battlestorage";
@@ -30,6 +29,24 @@ export class GodsightStorageManager {
     return this.instance;
   }
 
+  private rehydrateTurns(data: GodsightBattleData): void {
+    const turns = Object.keys(data["turnData"]);
+
+    turns.forEach(turn => {
+      data["turnData"][turn]["turnActions"] = BattleActionHelper.getRehydratedActions(
+        data["turnData"][turn]["turnActions"]
+      );
+    });
+  }
+
+  private cloneAndRehydrateStorage() {
+    this.storageCache = structuredClone(this.storageCache);
+    Object.keys(this.storageCache["battles"]).forEach(key => {
+      const battle = this.storageCache["battles"][key];
+      this.rehydrateTurns(battle);
+    });
+  }
+
   private async initialize() {
     const existingData = await chrome.storage.local.get(GodsightStorageManager.godsightStorageKey) as { [GodsightStorageManager.godsightStorageKey]?: string };
 
@@ -39,13 +56,7 @@ export class GodsightStorageManager {
       Object.keys(storage["battles"]).forEach(battle => {
         const battleJson = storage["battles"][battle];
 
-        const turns = Object.keys(battleJson["turnData"]);
-
-        turns.forEach(turn => {
-          battleJson["turnData"][turn]["turnActions"] = battleJson["turnData"][turn]["turnActions"].map(action => {
-            return BattleActionParser.fromJSON(action as unknown as Record<string, unknown>);
-          }).filter(i => i) as BattleAction[];
-        });
+        this.rehydrateTurns(battleJson);
       });
 
       this.storageCache = storage;
@@ -115,19 +126,19 @@ export class GodsightStorageManager {
   }
 
   public setBattleData(battleId: number, battleData: GodsightBattleData) {
-    this.storageCache = structuredClone(this.storageCache);
+    this.cloneAndRehydrateStorage();
     this.storageCache["battles"][battleId] = battleData;
     this.updateUnderlyingStorageAndNotify();
   }
 
   public deleteBattle(battleId: string | number) {
-    this.storageCache = structuredClone(this.storageCache);
+    this.cloneAndRehydrateStorage();
     delete this.storageCache["battles"][battleId];
     this.updateUnderlyingStorageAndNotify();
   }
 
   public setSettings(settings: GodsightSettings) {
-    this.storageCache = structuredClone(this.storageCache);
+    this.cloneAndRehydrateStorage();
     this.storageCache["settings"] = settings;
     this.updateUnderlyingStorageAndNotify();
   }

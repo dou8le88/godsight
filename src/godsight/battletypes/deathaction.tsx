@@ -10,7 +10,6 @@ export class DeathAction extends BattleAction {
   public subactions: BattleAction[] = [];
 
   constructor(
-    public actionNumber: number,
     public target: Actor,
     public targetName: string,
     public index: number | null,
@@ -18,9 +17,9 @@ export class DeathAction extends BattleAction {
     super();
   }
 
-  getDescription(): JSX.Element {
+  getDescription(key: number): JSX.Element {
     return (
-      <div key={this.actionNumber} className="action-description">{this.targetName} was knocked out!
+      <div key={key} className="action-description">{this.targetName} was knocked out!
       </div>
     );
   }
@@ -33,7 +32,6 @@ export class DeathAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.DEATH) {
       return new DeathAction(
-        assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["target"] as Actor),
         assertNotNullOrUndefined(json["targetName"] as string),
         assertNotUndefined(json["index"] as number | null),

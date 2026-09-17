@@ -10,7 +10,6 @@ export class CAMeterChangedAction extends BattleAction {
   public subactions: BattleAction[] = [];
 
   constructor(
-    public actionNumber: number,
     public target: Actor,
     public targetName: string,
     public newValue: number,
@@ -19,7 +18,7 @@ export class CAMeterChangedAction extends BattleAction {
     super();
   }
 
-  getDescription(): JSX.Element {
+  getDescription(key: number): JSX.Element {
     let changeWord = "";
     if (this.change > 0) {
       changeWord = "gained";
@@ -39,7 +38,7 @@ export class CAMeterChangedAction extends BattleAction {
     }
 
     return (
-      <div key={this.actionNumber} className="action-description">{this.targetName} {changeWord} {this.change} {meterWord}!
+      <div key={key} className="action-description">{this.targetName} {changeWord} {Math.abs(this.change)} {meterWord}!
       </div>
     );
   }
@@ -52,7 +51,6 @@ export class CAMeterChangedAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.CA_METER_CHANGED) {
       return new CAMeterChangedAction(
-        assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["target"] as Actor),
         assertNotNullOrUndefined(json["targetName"] as string),
         assertNotNullOrUndefined(json["newValue"] as number),

@@ -12,7 +12,6 @@ export class ConditionChangeAction extends BattleAction {
   public subactions: BattleAction[] = [];
 
   constructor(
-    public actionNumber: number,
     public target: Actor,
     public targetName: string,
     public missCount: number,
@@ -23,7 +22,11 @@ export class ConditionChangeAction extends BattleAction {
     super();
   }
 
-  getDescription(): JSX.Element {
+  private iconlessStatusEffects = [
+    "1047",
+  ];
+
+  getDescription(key: number): JSX.Element {
     const allStatuses = [
       ...this.buffs,
       ...this.debuffs,
@@ -35,7 +38,7 @@ export class ConditionChangeAction extends BattleAction {
 
     const gainedStatusesJsx: React.ReactNode[] | null = gainedStatuses.map((status, idx) => (
       <span key={idx}>
-        <span className="status-text">{status.name}</span> <img className="status-icon" src={BattleActionHelper.getStatusUrl(status.icon)} />
+        <span className="status-text">{status.name}</span> {status.icon && !this.iconlessStatusEffects.includes(status.icon) ? <img className="status-icon" src={BattleActionHelper.getStatusUrl(status.icon)} /> : <></>}
       </span>
     )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, ", ", cur], null);
 
@@ -56,15 +59,19 @@ export class ConditionChangeAction extends BattleAction {
 
     let finalDispelledStatusesJsx = <></>;
     if (dispelledStatusesJsx) {
+      let connectorWord = "was";
+      if (dispelledStatuses.length > 1) {
+        connectorWord = "were";
+      }
       finalDispelledStatusesJsx = (
         <>
-          {this.targetName} had {dispelledStatusesJsx} dispelled!
+          {this.targetName}&apos;s {dispelledStatusesJsx} {connectorWord} dispelled!
         </>
       );
     }
 
     return (
-      <div key={this.actionNumber} className="action-description">{finalDispelledStatusesJsx} {finalGainedStatusJsx}
+      <div key={key} className="action-description">{finalDispelledStatusesJsx} {finalGainedStatusJsx}
       </div>
     );
   }
@@ -85,7 +92,6 @@ export class ConditionChangeAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.CONDITION_CHANGED) {
       return new ConditionChangeAction(
-        assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["target"] as Actor),
         assertNotNullOrUndefined(json["targetName"] as string),
         assertNotNullOrUndefined(json["missCount"] as number),

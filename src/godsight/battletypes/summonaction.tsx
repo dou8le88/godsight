@@ -11,7 +11,6 @@ export class SummonAction extends BattleAction {
   public actionType: ActionType = ActionType.CALLED_SUMMON;
 
   constructor(
-    public actionNumber: number,
     public summonCallName: string,
     public mainCharacterName: string,
     public partySize: number,
@@ -22,7 +21,7 @@ export class SummonAction extends BattleAction {
     super();
   }
 
-  getDescription(): JSX.Element {
+  getDescription(key: number): JSX.Element {
     let damageInstanceJsx = <></>;
     if (this.damageInstances.length) {
       damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(
@@ -32,10 +31,10 @@ export class SummonAction extends BattleAction {
     }
 
     return (
-      <div key={this.actionNumber} className="action-description">{this.mainCharacterName} called {this.summonCallName}!
+      <div key={key} className="action-description">{this.mainCharacterName} called {this.summonCallName}!
         {damageInstanceJsx}
-        {this.subactions.map(subaction => (
-          subaction.getDescription()
+        {this.subactions.map((subaction, idx) => (
+          subaction.getDescription(idx)
         ))}
       </div>
     );
@@ -73,7 +72,6 @@ export class SummonAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.CALLED_SUMMON) {
       return new this(
-        assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["summonCallName"] as string),
         assertNotNullOrUndefined(json["mainCharacterName"] as string),
         assertNotNullOrUndefined(json["partySize"] as number),

@@ -11,7 +11,6 @@ export class ChainBurstAction extends BattleAction {
   public subactions: BattleAction[] = [];
 
   constructor(
-    public actionNumber: number,
     public chainCount: number,
     public name: string,
     public partySize: number,
@@ -20,11 +19,11 @@ export class ChainBurstAction extends BattleAction {
     super();
   }
 
-  getDescription(): JSX.Element {
+  getDescription(key: number): JSX.Element {
     const damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(this.damageInstances);
 
     return (
-      <div key={this.actionNumber} className="action-description" > The party activated the chain burst {this.name}!
+      <div key={key} className="action-description" > The party activated the chain burst {this.name}!
         {damageInstanceJsx}
       </div>
     );
@@ -50,7 +49,6 @@ export class ChainBurstAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.CHAIN_BURST) {
       return new ChainBurstAction(
-        assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["chainCount"] as number),
         assertNotNullOrUndefined(json["name"] as string),
         assertNotNullOrUndefined(json["partySize"] as number),

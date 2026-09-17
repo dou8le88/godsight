@@ -22,7 +22,18 @@ export default function SearchHandler() {
             setVisible(false);
             setQuery({ query: "" });
           } else {
-            searchRef.current?.focus();
+            const currentSelection = window.getSelection()?.toString();
+            if (currentSelection && currentSelection.length > 0) {
+              if (searchRef.current) {
+                setQuery({ query: currentSelection });
+                searchRef.current.value = currentSelection;
+                searchRef.current.focus();
+                searchRef.current.select();
+              }
+            } else {
+              searchRef.current?.focus();
+              searchRef.current?.select();
+            }
           }
         }
       }
@@ -104,7 +115,9 @@ export default function SearchHandler() {
       const matchingAction = matchingActions[currentActionIndex];
       if (matchingAction) {
         if (document.body.contains(matchingAction)) {
-          matchingAction.scrollIntoView();
+          matchingAction.scrollIntoView({
+            "block": "nearest",
+          });
           matchingActions.forEach(action => {
             action.className = "action-container highlighted";
           });
@@ -150,6 +163,12 @@ export default function SearchHandler() {
                   } else {
                     selectNext();
                   }
+                }
+              } else if (e.key == "Escape") {
+                if (searchRef.current && searchRef.current.value == "") {
+                  setVisible(false);
+                  e.preventDefault();
+                  e.stopPropagation();
                 }
               }
             }}

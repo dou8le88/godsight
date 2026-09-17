@@ -30,6 +30,7 @@ export interface NormalAttackDamage {
    * TODO: Expanded boolean with 0/1/2, for different types of missing?
    */
   "miss": AttackAccuracyResult,
-  "color": GameElementValue,
+  "color"?: GameElementValue,
+  "attr"?: GameElementValue,
   "guard": boolean
 }

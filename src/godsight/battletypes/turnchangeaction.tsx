@@ -9,7 +9,6 @@ export class TurnChangeAction extends BattleAction {
   public subactions: BattleAction[] = [];
 
   constructor(
-    public actionNumber: number,
     public currentTurn: number,
     public newTurn: number,
   ) {
@@ -20,9 +19,9 @@ export class TurnChangeAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
-  getDescription(): JSX.Element {
+  getDescription(key: number): JSX.Element {
     return (
-      <div key={this.actionNumber} className="action-description">The turn counter advanced by {this.newTurn - this.currentTurn}!
+      <div key={key} className="action-description">The turn counter advanced by {this.newTurn - this.currentTurn}!
       </div>
     );
   }
@@ -31,7 +30,6 @@ export class TurnChangeAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.TURN_CHANGE) {
       return new TurnChangeAction(
-        assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["currentTurn"] as number),
         assertNotNullOrUndefined(json["newTurn"] as number),
       );

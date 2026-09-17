@@ -12,7 +12,6 @@ export class ChargedAttackAction extends BattleAction {
   public actionType: ActionType = ActionType.CHARGED_ATTACK;
 
   constructor(
-    public actionNumber: number,
     public name: string,
     public attackerIndex: number,
     public attackerName: string,
@@ -24,17 +23,17 @@ export class ChargedAttackAction extends BattleAction {
     super();
   }
 
-  getDescription(): JSX.Element {
+  getDescription(key: number): JSX.Element {
     const damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(
       this.damageTotals,
     );
 
     return (
-      <div key={this.actionNumber} className="action-description">{this.attackerName} activated their charged attack, {this.name}!
+      <div key={key} className="action-description">{this.attackerName} activated their charged attack, {this.name}!
         {damageInstanceJsx}
         {
-          this.subactions.map(subaction => (
-            subaction.getDescription()
+          this.subactions.map((subaction, idx) => (
+            subaction.getDescription(idx)
           ))
         }
       </div>
@@ -67,7 +66,6 @@ export class ChargedAttackAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.CHARGED_ATTACK) {
       return new ChargedAttackAction(
-        assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["name"] as string),
         assertNotNullOrUndefined(json["attackerIndex"] as number),
         assertNotNullOrUndefined(json["attackerName"] as string),

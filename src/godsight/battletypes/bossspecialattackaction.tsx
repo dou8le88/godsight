@@ -12,7 +12,6 @@ export class BossSpecialAttackAction extends BattleAction {
   public actionType: ActionType = ActionType.BOSS_SPECIAL_ATTACK;
 
   constructor(
-    public actionNumber: number,
     public attackName: string,
     public sourceName: string,
     public target: Actor,
@@ -23,7 +22,7 @@ export class BossSpecialAttackAction extends BattleAction {
     super();
   }
 
-  getDescription(): JSX.Element {
+  getDescription(key: number): JSX.Element {
     let damageInstanceJsx = <></>;
     if (this.damageInstances.length) {
       damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(
@@ -32,10 +31,10 @@ export class BossSpecialAttackAction extends BattleAction {
     }
 
     return (
-      <div key={this.actionNumber} className="action-description">{this.sourceName} activated {this.attackName}!
+      <div key={key} className="action-description">{this.sourceName} activated {this.attackName}!
         {damageInstanceJsx}
-        {this.subactions.map(subaction => (
-          subaction.getDescription()
+        {this.subactions.map((subaction, idx) => (
+          subaction.getDescription(idx)
         ))}
       </div>
     );
@@ -63,7 +62,6 @@ export class BossSpecialAttackAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.BOSS_SPECIAL_ATTACK) {
       return new BossSpecialAttackAction(
-        assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["attackName"] as string),
         assertNotNullOrUndefined(json["sourceName"] as string),
         assertNotNullOrUndefined(json["target"] as Actor),

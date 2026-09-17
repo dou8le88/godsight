@@ -6,14 +6,12 @@ import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { JSX } from "react/jsx-runtime";
 import { BattleActionHelper } from "./battleactionhelper";
 import { assertNotNullOrUndefined } from "../../util/assert";
-import { GameElement } from "../../gbf/battletypes/scenariodata/mechanics/element";
 
 export class DamageAction extends BattleAction {
   public actionType: ActionType = ActionType.DAMAGE_DEALT;
   public subactions: BattleAction[] = [];
 
   constructor(
-    public actionNumber: number,
     public target: Actor,
     public partySize: number,
     public endOfTurnDamage: boolean,
@@ -22,13 +20,13 @@ export class DamageAction extends BattleAction {
     super();
   }
 
-  getDescription(): JSX.Element {
+  getDescription(key: number): JSX.Element {
     const damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(
       this.instances,
     );
 
     return (
-      <span key={this.actionNumber}>
+      <span key={key}>
         {damageInstanceJsx}
       </span>
     );
@@ -69,7 +67,6 @@ export class DamageAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.DAMAGE_DEALT) {
       return new DamageAction(
-        assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["target"] as Actor),
         assertNotNullOrUndefined(json["partySize"] as number),
         assertNotNullOrUndefined(json["endOfTurnDamage"] as boolean),

@@ -9,17 +9,16 @@ export class ReplaceCharacterAction extends BattleAction {
   public subactions: BattleAction[] = [];
 
   constructor(
-    public actionNumber: number,
     public characterName: string,
     public replacementCharacterName: string,
   ) {
     super();
   }
 
-  getDescription(): JSX.Element {
+  getDescription(key: number): JSX.Element {
 
     return (
-      <div key={this.actionNumber} className="action-description">{this.characterName} was replaced by {
+      <div key={key} className="action-description">{this.characterName} was replaced by {
         this.replacementCharacterName
       }!
       </div>
@@ -34,7 +33,6 @@ export class ReplaceCharacterAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.REPLACED_CHARACTER) {
       return new ReplaceCharacterAction(
-        assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["characterName"] as string),
         assertNotNullOrUndefined(json["replacementCharacterName"] as string),
       );

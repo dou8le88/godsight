@@ -12,7 +12,6 @@ export class AbilityAction extends BattleAction {
   public overrideMessage = "";
 
   constructor(
-    public actionNumber: number,
     public name: string,
     public actor: Actor,
     public sourceName: string,
@@ -23,13 +22,13 @@ export class AbilityAction extends BattleAction {
     super();
   }
 
-  getDescription(): JSX.Element {
+  getDescription(key: number): JSX.Element {
     if (this.overrideMessage) {
       return (
-        <div key={this.actionNumber} className="action-description" >{this.overrideMessage}
+        <div key={key} className="action-description" >{this.overrideMessage}
           {
-            this.subactions.map(subaction => (
-              subaction.getDescription()
+            this.subactions.map((subaction, idx) => (
+              subaction.getDescription(idx)
             ))
           }
         </div>
@@ -38,8 +37,8 @@ export class AbilityAction extends BattleAction {
       return (
         <div className="action-description"> {this.sourceName} activated {this.name}!
           {
-            this.subactions.map(subaction => (
-              subaction.getDescription()
+            this.subactions.map((subaction, idx) => (
+              subaction.getDescription(idx)
             ))
           }
         </div>
@@ -89,7 +88,6 @@ export class AbilityAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.ACTIVATED_ABILITY) {
       return new AbilityAction(
-        assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["name"] as string),
         assertNotNullOrUndefined(json["actor"] as Actor),
         assertNotNullOrUndefined(json["sourceName"] as string),

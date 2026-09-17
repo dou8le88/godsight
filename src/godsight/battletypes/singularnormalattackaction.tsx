@@ -12,7 +12,6 @@ export class SingularNormalAttackAction extends BattleAction {
   public subactions: BattleAction[] = [];
 
   constructor(
-    public actionNumber: number,
     public source: Actor,
     public attackerIndex: number,
     public partySize: number,
@@ -21,13 +20,13 @@ export class SingularNormalAttackAction extends BattleAction {
     super();
   }
 
-  getDescription(): JSX.Element {
+  getDescription(key: number): JSX.Element {
     const damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(
       this.damageInstances,
     );
 
     return (
-      <span key={this.actionNumber}>
+      <span key={key}>
         {damageInstanceJsx}
       </span>
     );
@@ -66,7 +65,6 @@ export class SingularNormalAttackAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.SINGULAR_NORMAL_ATTACK) {
       return new SingularNormalAttackAction(
-        assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["source"] as Actor),
         assertNotNullOrUndefined(json["attackerIndex"] as number),
         assertNotNullOrUndefined(json["partySize"] as number),

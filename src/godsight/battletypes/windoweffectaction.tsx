@@ -9,15 +9,14 @@ export class WindowEffectAction extends BattleAction {
   public subactions: BattleAction[] = [];
 
   constructor(
-    public actionNumber: number,
     public name: string,
   ) {
     super();
   }
 
-  getDescription(): JSX.Element {
+  getDescription(key: number): JSX.Element {
     return (
-      <div key={this.actionNumber} className="action-description">The window effect {this.name} was activated!
+      <div key={key} className="action-description">The window effect {this.name} was activated!
       </div>
     );
   }
@@ -30,7 +29,6 @@ export class WindowEffectAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.WINDOW_EFFECT) {
       return new WindowEffectAction(
-        assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["name"] as string),
       );
     } else {

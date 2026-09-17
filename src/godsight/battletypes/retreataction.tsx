@@ -2,14 +2,12 @@ import { JSX } from "react/jsx-runtime";
 import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
-import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class RetreatAction extends BattleAction {
   public actionType: ActionType = ActionType.RETREAT;
   public subactions: BattleAction[] = [];
 
   constructor(
-    public actionNumber: number,
   ) {
     super();
   }
@@ -17,9 +15,9 @@ export class RetreatAction extends BattleAction {
   getStats(): StatsUpdate {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
-  getDescription(): JSX.Element {
+  getDescription(key: number): JSX.Element {
     return (
-      <div key={this.actionNumber} className="action-description">The party retreated!
+      <div key={key} className="action-description">The party retreated!
       </div>
     );
   }
@@ -27,9 +25,7 @@ export class RetreatAction extends BattleAction {
   static override fromJSON(json: Record<string, unknown>): RetreatAction | undefined {
     const actionType = json["actionType"];
     if (actionType == ActionType.RETREAT) {
-      return new RetreatAction(
-        assertNotNullOrUndefined(json["actionNumber"] as number),
-      );
+      return new RetreatAction();
     } else {
       console.error(`RetreatAction.fromJSON called on ${json}`);
       return undefined;

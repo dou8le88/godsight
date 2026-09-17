@@ -12,7 +12,6 @@ export class MultihitDamageAction extends BattleAction {
   public subactions: BattleAction[] = [];
 
   constructor(
-    public actionNumber: number,
     public target: Actor,
     public partySize: number,
     public hits: DamageInstance[],
@@ -20,13 +19,13 @@ export class MultihitDamageAction extends BattleAction {
     super();
   }
 
-  getDescription(): JSX.Element {
+  getDescription(key: number): JSX.Element {
     const damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(
       this.hits,
     );
 
     return (
-      <span key={this.actionNumber}>
+      <span key={key}>
         {damageInstanceJsx}
       </span>
     );
@@ -67,7 +66,6 @@ export class MultihitDamageAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.DAMAGE_DEALT_MULTIHIT) {
       return new MultihitDamageAction(
-        assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["target"] as Actor),
         assertNotNullOrUndefined(json["partySize"] as number),
         assertNotNullOrUndefined(json["hits"] as DamageInstance[]),

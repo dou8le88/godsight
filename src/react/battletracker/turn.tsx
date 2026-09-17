@@ -36,8 +36,8 @@ export default function Turn({ turnData, turnNumber }: { turnData: TurnData, tur
       <summary className="turn-counter">Turn {turnNumber}</summary>
 
       <div className="turn-action-container">
-        {turnData["turnActions"].map(action =>
-          <Action key={action.actionNumber} action={action} />
+        {turnData["turnActions"].map((action, idx) =>
+          <Action key={idx} idx={idx} action={action} />
         )}
       </div>
       <div className="turn-stats">

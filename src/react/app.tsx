@@ -9,8 +9,8 @@ import { GodsightStorageManager } from "../godsight/godsightstorage/godsightstor
 import BattleSummary from "./battletracker/battlesummary";
 import { StatsUpdateHelper } from "../godsight/battletypes/stats";
 import { GodsightBattleData } from "../godsight/battletypes/battledata";
-import { BattleActionParser } from "../godsight/battletypes/battleactionparser";
 import SearchHandler from "./search/searchhandler";
+import { BattleActionHelper } from "../godsight/battletypes/battleactionhelper";
 
 export default function GodsightPanel() {
   const validHosts = [
@@ -86,14 +86,7 @@ export default function GodsightPanel() {
           if (raid) {
             const raidCopy = structuredClone(raid);
             Object.keys(raidCopy["turnData"]).forEach(turnNumber => {
-              raidCopy["turnData"][turnNumber]["turnActions"] = raidCopy["turnData"][turnNumber]["turnActions"].map(action => {
-                const rehydratedAction = BattleActionParser.fromJSON(action as unknown as Record<string, unknown>);
-                if (rehydratedAction) {
-                  return rehydratedAction;
-                } else {
-                  return action;
-                }
-              });
+              raidCopy["turnData"][turnNumber]["turnActions"] = BattleActionHelper.getRehydratedActions(raidCopy["turnData"][turnNumber]["turnActions"]);
             });
             callback(battleId, raidCopy);
           } else {
@@ -123,16 +116,8 @@ export default function GodsightPanel() {
         }
 
         const existingTurnActions = currentTurn["turnActions"];
-        let currentActionNumber = 0;
-        if (existingTurnActions.length > 0) {
-          let lastAction = (existingTurnActions.at(-1) || existingTurnActions.at(0))!;
-          if (lastAction.subactions.length) {
-            lastAction = (lastAction.subactions.at(-1) || lastAction.subactions.at(0))!;
-          }
-          currentActionNumber = lastAction["actionNumber"] + 1;
-        }
 
-        const newActions = battleScenarioParser.parseScenarioData(data["scenario"], data, raid, currentActionNumber);
+        const newActions = battleScenarioParser.parseScenarioData(data["scenario"], data, raid);
         const newTurnData = battleScenarioParser.processTurnActionData(newActions, raid["party"]);
 
         // Merge previous actions and stats into the new stuff.
@@ -157,6 +142,8 @@ export default function GodsightPanel() {
         // Then merge the old actions into the new ones.
         newTurnData["turnActions"] = existingTurnActions.concat(newTurnData["turnActions"]);
         raid["turnData"][currentTurnNumber] = newTurnData;
+
+        raid["lastUpdated"] = Date.now();
 
         if ("updateTurnTo" in raid) {
           raid["currentTurn"] = raid["updateTurnTo"]!;

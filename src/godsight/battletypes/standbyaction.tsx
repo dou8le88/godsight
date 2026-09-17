@@ -9,7 +9,6 @@ export class StandbyAction extends BattleAction {
   public subactions: BattleAction[] = [];
 
   constructor(
-    public actionNumber: number,
     public actorName: string,
     public standby: boolean,
     public battleMessage: string | null,
@@ -21,7 +20,7 @@ export class StandbyAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
-  getDescription(): JSX.Element {
+  getDescription(key: number): JSX.Element {
     const baseMessage = `${this.actorName} couldn't attack!`;
     let fullMessage = baseMessage;
     if (this.battleMessage) {
@@ -29,7 +28,7 @@ export class StandbyAction extends BattleAction {
     }
 
     return (
-      <div key={this.actionNumber} className="action-description">{fullMessage}</div>
+      <div key={key} className="action-description">{fullMessage}</div>
     );
   }
 
@@ -37,7 +36,6 @@ export class StandbyAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.STANDBY) {
       return new StandbyAction(
-        assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["actorName"] as string),
         assertNotNullOrUndefined(json["standby"] as boolean),
         assertNotUndefined(json["battleMessage"] as string | null),

@@ -79,9 +79,8 @@ export class BattleScenarioParser {
     scenarioData: GenericScenarioData[],
     gbfBattleData: GranblueBattleData,
     battleData: GodsightBattleData,
-    baseActionNumber: number,
   ): BattleAction[] {
-    return this._parseScenarioData(scenarioData, gbfBattleData, battleData, baseActionNumber).actions;
+    return this._parseScenarioData(scenarioData, gbfBattleData, battleData).actions;
   }
 
   private containsJapaneseRegex = /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u;
@@ -98,7 +97,6 @@ export class BattleScenarioParser {
     scenarioData: GenericScenarioData[],
     gbfBattleData: GranblueBattleData,
     godsightBattleData: GodsightBattleData,
-    baseActionNumber: number,
     stopOnMainAction?: boolean
   ): { actions: BattleAction[], lastIndex: number } {
     const actions: BattleAction[] = [];
@@ -126,16 +124,14 @@ export class BattleScenarioParser {
             scenarioData.slice(i + 1),
             gbfBattleData,
             godsightBattleData,
-            baseActionNumber + i + 1,
             true,
           );
           const bossSpecialAttackAction = new BossSpecialAttackAction(
-            baseActionNumber + i,
             bossSpecialAttackScenario["name"],
             godsightBattleData["boss"][bossSpecialAttackScenario["pos"]]["name"],
             bossSpecialAttackScenario["target"],
             godsightBattleData["party"]["partyMemberCount"],
-            bossSpecialAttackScenario["list"].flatMap(l => l["damage"]).map(instance => {
+            (bossSpecialAttackScenario["list"] || []).flatMap(l => l["damage"]).map(instance => {
               const receiverIndex = bossSpecialAttackScenario["target"] == Actor.PLAYER ?
                 BattleActionHelper.getCharacterIndexAtPosition(
                   godsightBattleData["party"],
@@ -165,7 +161,6 @@ export class BattleScenarioParser {
           actions.push(bossSpecialAttackAction);
           // Skip ahead past actions we already included as subactions.
           i += subactions.lastIndex;
-          baseActionNumber += subactions.lastIndex;
           break;
         }
 
@@ -174,7 +169,6 @@ export class BattleScenarioParser {
           const meterChangedAction = this.handleMeterChangeScenario(
             meterChangeScenario,
             godsightBattleData,
-            baseActionNumber + i
           );
           // handle not getting any bar (due to debuffs, already being at max, etc.)
           // or diamondless enemies getting funny calcs.
@@ -189,16 +183,14 @@ export class BattleScenarioParser {
           const buffDebuffActions = this.handleMessageScenario(
             godsightBattleData,
             buffDebuffChangeScenario,
-            baseActionNumber + i,
           );
           actions.push(...buffDebuffActions);
-          baseActionNumber += buffDebuffActions.length;
           break;
         }
 
         case ScenarioCommand.DEATH: {
           const deathScenario = scenario as DeathScenarioData;
-          actions.push(this.handleDeathScenario(godsightBattleData, deathScenario, baseActionNumber + i));
+          actions.push(this.handleDeathScenario(godsightBattleData, deathScenario));
           break;
         }
 
@@ -211,7 +203,6 @@ export class BattleScenarioParser {
             scenarioData.slice(i + 1),
             gbfBattleData,
             godsightBattleData,
-            baseActionNumber + i + 1,
             true,
           );
           if (subactions.actions.length == 0) {
@@ -231,7 +222,6 @@ export class BattleScenarioParser {
             abilityScenario["pos"],
           );
           const abilityAction = new AbilityAction(
-            baseActionNumber + i,
             abilityScenario["name"],
             abilityScenario["to"],
             sourceName,
@@ -294,7 +284,6 @@ export class BattleScenarioParser {
           const currentCharacterAtPos = entireFormation[position];
           const oldPositionOfNewCharacter = entireFormation.findIndex(c => c == newCharacter);
           const replaceCharacterAction = new ReplaceCharacterAction(
-            baseActionNumber + i,
             PartyFormationHelper.getNameOfCharacterInPosition(
               godsightBattleData["party"],
               position,
@@ -318,7 +307,6 @@ export class BattleScenarioParser {
         case ScenarioCommand.WINDOW_EFFECT: {
           const windowScenario = scenario as WindowEffectScenarioData;
           const windowAction = new WindowEffectAction(
-            baseActionNumber + i,
             windowScenario["name"],
           );
           actions.push(windowAction);
@@ -328,7 +316,6 @@ export class BattleScenarioParser {
         case ScenarioCommand.DAMAGE_DEALT: {
           const damageDealtScenario = scenario as DamageScenarioData;
           const damageAction = new DamageAction(
-            baseActionNumber + i,
             damageDealtScenario["to"],
             godsightBattleData["party"]["partyMemberCount"],
             damageDealtScenario["turn_end"] !== undefined ? damageDealtScenario["turn_end"] : false,
@@ -387,7 +374,6 @@ export class BattleScenarioParser {
             };
           });
           const multihitDamageAction = new MultihitDamageAction(
-            baseActionNumber + i,
             multihitDamageScenario["to"],
             godsightBattleData["party"]["partyMemberCount"],
             instances,
@@ -404,7 +390,6 @@ export class BattleScenarioParser {
             scenarioData.slice(i + 1),
             gbfBattleData,
             godsightBattleData,
-            baseActionNumber + i + 1,
             true,
           );
           const firstNormalAttack = subactions.actions.filter(a => a instanceof SingularNormalAttackAction);
@@ -414,7 +399,6 @@ export class BattleScenarioParser {
               godsightBattleData["boss"][firstNormalAttack[0].attackerIndex]["name"] :
             "Unknown";
           const normalAttackAction = new NormalAttackAction(
-            baseActionNumber + i,
             attackerName,
             subactions.actions,
           );
@@ -446,7 +430,6 @@ export class BattleScenarioParser {
               singularNormalAttackScenario["pos"],
             ) : singularNormalAttackScenario["pos"];
           const singularNormalAttackAction = new SingularNormalAttackAction(
-            baseActionNumber + i,
             singularNormalAttackScenario["from"],
             attackerIndex,
             godsightBattleData["party"]["partyMemberCount"],
@@ -463,8 +446,24 @@ export class BattleScenarioParser {
                 singularNormalAttackScenario["from"] == Actor.PLAYER ? Actor.BOSS : Actor.PLAYER,
                 damage["pos"],
               );
+              let damageElement: GameElementValue;
+              if ("color" in damage) {
+                if (damage["color"] !== "" && damage["color"] !== undefined) {
+                  damageElement = damage["color"];
+                } else {
+                  damageElement = GameElement.NULL_PLAIN;
+                }
+              } else if ("attr" in damage) {
+                if (damage["attr"] !== "" && damage["attr"] !== undefined) {
+                  damageElement = damage["attr"];
+                } else {
+                  damageElement = GameElement.NULL_PLAIN;
+                }
+              } else {
+                damageElement = GameElement.NULL_PLAIN;
+              }
               return {
-                "element": "color" in damage && damage["color"] !== "" ? damage["color"] : GameElement.NULL_PLAIN,
+                "element": damageElement,
                 "receiverIndex": receiverIndex,
                 "receiverName": receiverName,
                 "value": damage["value"],
@@ -497,7 +496,6 @@ export class BattleScenarioParser {
             scenarioData.slice(i + 1),
             gbfBattleData,
             godsightBattleData,
-            baseActionNumber + i + 1,
             true,
           );
           const attackerIndex = BattleActionHelper.getCharacterIndexAtPosition(
@@ -512,7 +510,6 @@ export class BattleScenarioParser {
           );
 
           const chargedAttackAction = new ChargedAttackAction(
-            baseActionNumber + i,
             chargedAttackScenario["name"],
             attackerIndex,
             attackerName,
@@ -558,10 +555,8 @@ export class BattleScenarioParser {
             scenarioData.slice(i + 1),
             gbfBattleData,
             godsightBattleData,
-            baseActionNumber + i + 1,
           );
           const fullElixirAction = new FullElixirAction(
-            baseActionNumber + i,
             subactions.actions,
           );
           actions.push(fullElixirAction);
@@ -571,7 +566,6 @@ export class BattleScenarioParser {
         case ScenarioCommand.HEALING: {
           const healingScenario = scenario as HealingScenarioData;
           const healingAction = new HealingAction(
-            baseActionNumber + i,
             healingScenario["to"],
             godsightBattleData["party"]["partyMemberCount"],
             healingScenario["list"].map(h => {
@@ -605,7 +599,6 @@ export class BattleScenarioParser {
             scenarioData.slice(i + 1),
             gbfBattleData,
             godsightBattleData,
-            baseActionNumber + i + 1,
           );
           let trueSummonHitCount: number | undefined;
           if (summonScenario["name"]) {
@@ -622,7 +615,6 @@ export class BattleScenarioParser {
             }
           }
           const summonAction = new SummonAction(
-            baseActionNumber + i,
             summonScenario["name"],
             BattleActionHelper.getMainCharacterName(godsightBattleData["party"]),
             godsightBattleData["party"]["partyMemberCount"],
@@ -670,7 +662,6 @@ export class BattleScenarioParser {
           }
           const chainBurstScenario = scenario as ChainBurstScenarioData;
           const chainBurstAction = new ChainBurstAction(
-            baseActionNumber + i,
             chainBurstScenario["chain_num"],
             "Unknown",
             godsightBattleData["party"]["partyMemberCount"],
@@ -743,9 +734,7 @@ export class BattleScenarioParser {
 
         case ScenarioCommand.RETREAT: {
           godsightBattleData["battleProgressStatus"] = BattleProgressStatus.RETREATED;
-          const retreatAction = new RetreatAction(
-            baseActionNumber + i,
-          );
+          const retreatAction = new RetreatAction();
           actions.push(retreatAction);
           break baseLoop;
         }
@@ -764,7 +753,6 @@ export class BattleScenarioParser {
           }
           const turnChangeScenario = scenario as TurnChangeScenarioData;
           const turnChangeAction = new TurnChangeAction(
-            baseActionNumber + i,
             godsightBattleData["currentTurn"],
             turnChangeScenario["turn"],
           );
@@ -781,9 +769,11 @@ export class BattleScenarioParser {
         }
 
         case ScenarioCommand.OMEN_CANCEL: {
+          if (stopOnMainAction) {
+            break baseLoop;
+          }
           const omenCancelScenario = scenario as OmenCancelScenarioData;
           const omenCancelAction = new OmenCancelAction(
-            baseActionNumber + i,
             godsightBattleData["boss"][omenCancelScenario["pos"]]["name"],
           );
           actions.push(omenCancelAction);
@@ -805,7 +795,6 @@ export class BattleScenarioParser {
             }
           }
           const standbyAction = new StandbyAction(
-            baseActionNumber + i,
             BattleActionHelper.getActorName(
               godsightBattleData["boss"],
               godsightBattleData["party"],
@@ -822,7 +811,6 @@ export class BattleScenarioParser {
         case ScenarioCommand.RESURRECTION: {
           const resurrectionScenario = scenario as ResurrectionScenarioData;
           const resurrectedAction = new ResurrectedAction(
-            baseActionNumber + i,
             BattleActionHelper.getActorName(
               godsightBattleData["boss"],
               godsightBattleData["party"],
@@ -873,10 +861,8 @@ export class BattleScenarioParser {
   private handleDeathScenario(
     battleData: GodsightBattleData,
     deathScenario: DeathScenarioData,
-    actionNumber: number,
   ): BattleAction {
     const action = new DeathAction(
-      actionNumber,
       deathScenario["to"],
       BattleActionHelper.getActorName(
         battleData["boss"],
@@ -905,7 +891,6 @@ export class BattleScenarioParser {
   private handleMeterChangeScenario(
     meterChangeScenario: ChargeAttackMeterChangedScenarioData,
     battleData: GodsightBattleData,
-    actionNumber: number,
   ): CAMeterChangedAction {
     const position = meterChangeScenario["pos"];
     const target = meterChangeScenario["to"];
@@ -925,7 +910,6 @@ export class BattleScenarioParser {
     }
 
     const action = new CAMeterChangedAction(
-      actionNumber,
       target,
       BattleActionHelper.getActorName(
         battleData["boss"],
@@ -943,10 +927,8 @@ export class BattleScenarioParser {
   private handleMessageScenario(
     battleData: GodsightBattleData,
     buffDebuffChangeScenario: MessageScenarioData,
-    actionNumber: number,
   ): BattleAction[] {
     const actions: BattleAction[] = [];
-
     // Buffs and debuffs changed.
     const bossChanges = buffDebuffChangeScenario["data"]["boss"]
     const playerChanges = buffDebuffChangeScenario["data"]["player"]
@@ -958,7 +940,6 @@ export class BattleScenarioParser {
 
       uniquePositions.forEach(pos => {
         allBossConditionActions[pos] = new ConditionChangeAction(
-          actionNumber++,
           Actor.BOSS,
           BattleActionHelper.getActorName(
             battleData["boss"],
@@ -979,15 +960,12 @@ export class BattleScenarioParser {
         const missPool: GodsightCondition[] = [];
         let type = GodsightStatusType.UNKNOWN;
         switch (String(change["type"])) {
-          case StatusType.PLAYER_BUFF:
-            type = GodsightStatusType.BUFF;
-            console.error("Player debuff status type in boss list? Must be wrong classification.");
-            break;
-          case StatusType.GLOBAL_DEBUFF_OR_PLAYER_DEBUFF:
+          case StatusType.DEBUFF:
           case StatusType.LOCAL_BOSS_DEBUFF:
             type = GodsightStatusType.DEBUFF;
             destination = allBossConditionActions[position].debuffs;
             break;
+          case StatusType.BUFF:
           case StatusType.LOCAL_BOSS_BUFF:
             type = GodsightStatusType.BUFF;
             destination = allBossConditionActions[position].buffs;
@@ -1027,7 +1005,6 @@ export class BattleScenarioParser {
 
       uniquePositions.forEach(pos => {
         allPlayerConditionActions[pos] = new ConditionChangeAction(
-          actionNumber++,
           Actor.PLAYER,
           BattleActionHelper.getActorName(
             battleData["boss"],
@@ -1048,11 +1025,11 @@ export class BattleScenarioParser {
           const missPool: GodsightCondition[] = [];
           let type = GodsightStatusType.UNKNOWN;
           switch (String(change["type"])) {
-            case StatusType.PLAYER_BUFF:
+            case StatusType.BUFF:
               type = GodsightStatusType.BUFF;
               destination = allPlayerConditionActions[position].buffs;
               break;
-            case StatusType.GLOBAL_DEBUFF_OR_PLAYER_DEBUFF:
+            case StatusType.DEBUFF:
               type = GodsightStatusType.DEBUFF;
               destination = allPlayerConditionActions[position].debuffs;
               break;
@@ -1155,7 +1132,8 @@ export class BattleScenarioParser {
     // It's empty when loading into a raid in the middle of some arbitrary turn,
     // so if we have a non-empty scenario, our convention is that those entries belong to turn 0.
     if (startData["scenario"].length) {
-      const actions = this.parseScenarioData(startData["scenario"], startData, battleData, 0);
+      startData["turn"] = 0;
+      const actions = this.parseScenarioData(startData["scenario"], startData, battleData);
       battleData["turnData"][0] = this.processTurnActionData(actions, party);
     }
 

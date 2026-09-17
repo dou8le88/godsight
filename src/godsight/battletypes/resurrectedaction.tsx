@@ -9,7 +9,6 @@ export class ResurrectedAction extends BattleAction {
   public subactions: BattleAction[] = [];
 
   constructor(
-    public actionNumber: number,
     public resurrectedCharacterName: string,
     public resurrectionCause: string,
   ) {
@@ -20,9 +19,9 @@ export class ResurrectedAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
-  getDescription(): JSX.Element {
+  getDescription(key: number): JSX.Element {
     return (
-      <div key={this.actionNumber} className="action-description">{this.resurrectedCharacterName} was revived by {this.resurrectionCause}!
+      <div key={key} className="action-description">{this.resurrectedCharacterName} was revived by {this.resurrectionCause}!
       </div>
     );
   }
@@ -31,7 +30,6 @@ export class ResurrectedAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.RESURRECTED) {
       return new ResurrectedAction(
-        assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["resurrectedCharacterName"] as string),
         assertNotNullOrUndefined(json["resurrectionCause"] as string),
       );

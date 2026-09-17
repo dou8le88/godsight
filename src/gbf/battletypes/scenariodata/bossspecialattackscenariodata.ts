@@ -16,7 +16,7 @@ export interface BossSpecialAttackScenarioData extends GenericScenarioData {
   "count": number,
   "attr": GameElementValue,
   "total": [],
-  "list": BossSpecialAttackDamageSummary[]
+  "list"?: BossSpecialAttackDamageSummary[]
 }
 
 export interface BossSpecialAttackDamageSummary {

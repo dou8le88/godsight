@@ -4,12 +4,11 @@ import { StatsUpdate } from "./stats";
 
 export abstract class BattleAction {
   abstract actionType: ActionType;
-  abstract actionNumber: number;
   abstract subactions: BattleAction[];
 
   abstract getStats(): StatsUpdate;
 
-  abstract getDescription(): JSX.Element;
+  abstract getDescription(key: number): JSX.Element;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   static fromJSON(json: Record<string, unknown>): BattleAction | undefined {

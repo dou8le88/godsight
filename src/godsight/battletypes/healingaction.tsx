@@ -12,7 +12,6 @@ export class HealingAction extends BattleAction {
   public subactions: BattleAction[] = [];
 
   constructor(
-    public actionNumber: number,
     public target: Actor,
     public partySize: number,
     public healingInstances: HealingInstance[],
@@ -20,13 +19,13 @@ export class HealingAction extends BattleAction {
     super();
   }
 
-  getDescription(): JSX.Element {
+  getDescription(key: number): JSX.Element {
     const healingJsx = BattleActionHelper.getHealingInstanceJsx(
       this.healingInstances,
     );
 
     return (
-      <span key={this.actionNumber}>
+      <span key={key}>
         {healingJsx}
       </span>
     );
@@ -50,7 +49,6 @@ export class HealingAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.HEAL) {
       return new HealingAction(
-        assertNotNullOrUndefined(json["actionNumber"] as number),
         assertNotNullOrUndefined(json["target"] as Actor),
         assertNotNullOrUndefined(json["partySize"] as number),
         assertNotNullOrUndefined(json["healingInstances"] as HealingInstance[]),
