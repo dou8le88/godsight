@@ -610,7 +610,7 @@ export class BattleScenarioParser {
             if (currentSummon) {
               const matchResult = currentSummon["comment"].match(this.summonHitCountRegex);
               if (matchResult) {
-                trueSummonHitCount = parseInt(matchResult.at(-1)!);;
+                trueSummonHitCount = Number(matchResult.at(-1)!);;
               }
             } else {
               console.error(`Unable to find summon matching ${name}!`);
@@ -847,6 +847,8 @@ export class BattleScenarioParser {
         case ScenarioCommand._GROUP_GAUGE:
         case ScenarioCommand._UNIQUE_GAUGE:
         case ScenarioCommand._LOSE:
+        case ScenarioCommand._INFORMATION:
+        case ScenarioCommand._MOTION:
         case undefined:
           break;
         default:
@@ -897,19 +899,23 @@ export class BattleScenarioParser {
   ): CAMeterChangedAction {
     const position = meterChangeScenario["pos"];
     const target = meterChangeScenario["to"];
-    const newValue = meterChangeScenario["value"];
+    let newValue = meterChangeScenario["value"];
+
     let initialValue = newValue;
+    let change = 0;
     if (target == Actor.PLAYER) {
       const allyIndex = battleData["party"]["frontline"][position];
       const targetAlly = battleData["party"]["members"][allyIndex];
       initialValue = targetAlly.meter;
 
       targetAlly["meter"] = newValue;
+      change = newValue - initialValue;
     } else {
       const boss = battleData["boss"][position];
       initialValue = boss["currentDiamonds"];
-
-      boss["currentDiamonds"] = boss["maxDiamonds"] - newValue;
+      newValue = Number(meterChangeScenario["max"]) - newValue;
+      change = newValue - initialValue;
+      boss["currentDiamonds"] = newValue;
     }
 
     const action = new CAMeterChangedAction(
@@ -921,7 +927,7 @@ export class BattleScenarioParser {
         meterChangeScenario["pos"],
       ),
       newValue,
-      newValue - initialValue,
+      change,
     );
 
     return action;
@@ -1093,15 +1099,15 @@ export class BattleScenarioParser {
           "hpMax": character["hpmax"],
           "hp": character["hp"],
           "meter": character["recast"],
-          "meterMax": Number.parseInt(character["recastmax"]),
+          "meterMax": Number(character["recastmax"]),
           "element": character["attr"],
           "weaponProficiency": character["weapon"],
           "alive": Boolean(character["alive"]),
           "buffCount": (character["condition"]["buff"] || []).length,
           "debuffCount": (character["condition"]["debuff"] || []).length,
           "canBeResurrected": character["resurrection_availble_flag"], // sic
-          "isGuarding": Boolean(Number.parseInt(character["is_guard_status"])),
-          "canGuard": !Number.parseInt(character["is_guard_unavailable"]),
+          "isGuarding": Boolean(Number(character["is_guard_status"])),
+          "canGuard": !Number(character["is_guard_unavailable"]),
           "isVanished": Boolean(character["is_vanished"]),
         };
       }),
@@ -1159,17 +1165,17 @@ export class BattleScenarioParser {
   }
 
   private getBossData(b: BossData): GodsightBossData {
-    const maxDiamonds = parseInt(b["recastmax"]);
-    const currentDiamonds = parseInt(b["recast"]);
-    const currentHp = parseInt(b["hp"]);
+    const maxDiamonds = Number(b["recastmax"]);
+    const currentDiamonds = Number(b["recast"]);
+    const currentHp = Number(b["hp"]);
 
     const godsightBossData: GodsightBossData = {
       "name": b["name"]["en"],
       "element": b["attr"],
       "hpCurrent": currentHp,
       "hpMax": b["hpmax"],
-      "maxDiamonds": isNaN(maxDiamonds) ? 0 : maxDiamonds,
-      // For some reason empty diamonds is set to max in data, and it counts down to 0 as diamonds fill.
+      "maxDiamonds": isNaN(maxDiamonds) ? 0 : maxDiamonds - 1,
+      // For some reason empty diamonds is set to max in data, and it counts down to 1 as diamonds fill.
       "currentDiamonds": isNaN(maxDiamonds) ? 0 : maxDiamonds - currentDiamonds,
     };
 
@@ -1177,15 +1183,20 @@ export class BattleScenarioParser {
   }
 
   private getBossDataFromBossStatusScenario(b: BossStatusScenarioData, existingData: GodsightBossData): GodsightBossData {
+    const maxDiamonds = Number(b["recastmax"]);
+    const currentDiamonds = Number(b["recast"]);
+
     const godsightBossData: GodsightBossData = {
       "name": b["name"]["en"],
       "element": b["attr"],
       "hpCurrent": b["hp"],
       "hpMax": existingData["hpMax"],
-      "maxDiamonds": b["recastmax"],
-      // For some reason empty diamonds is set to max in data, and it counts down to 0 as diamonds fill.
-      "currentDiamonds": b["recastmax"] - b["recast"],
+      "maxDiamonds": isNaN(maxDiamonds) ? 0 : maxDiamonds - 1,
+      // For some reason empty diamonds is set to max in data, and it counts down to 1 as diamonds fill.
+      "currentDiamonds": isNaN(maxDiamonds) ? 0 : maxDiamonds - currentDiamonds,
     };
+
+    // TODO: maybe return a CAMeterChangedAction if diamonds changed?
 
     return godsightBossData;
   }

@@ -28,7 +28,7 @@ export class CAMeterChangedAction extends BattleAction {
 
     let meterWord = "meter";
     if (this.target == Actor.BOSS) {
-      if (this.change > 1 || this.change < 1) {
+      if (Math.abs(this.change) != 1) {
         meterWord = "charge diamonds";
       } else {
         meterWord = "charge diamond";
