@@ -72,6 +72,11 @@ export default function GodsightPanel() {
         godsightBattleData["honors"] = existingRaid["honors"];
       }
 
+      if ("updateTurnTo" in godsightBattleData) {
+        godsightBattleData["currentTurn"] = godsightBattleData["updateTurnTo"]!;
+        delete godsightBattleData["updateTurnTo"];
+      }
+
       setSelectedBattle(String(raidId));
       storageManager.setBattleData(raidId, godsightBattleData);
     }
@@ -98,7 +103,7 @@ export default function GodsightPanel() {
       });
     }
 
-    function battleDataHandler(data: GranblueBattleData, endpoint: string) {
+    function battleDataHandler(data: GranblueBattleData, endpoint: string | undefined) {
       console.info(`Got battle data for ${endpoint}`);
 
       withActiveBattle((battleId, raid) => {
@@ -212,12 +217,27 @@ export default function GodsightPanel() {
               case "user_battle_log":
               case "vote_abort.json":
               case "showed_vote_result.json":
+              case "guard_setting.json":
                 return;
               default:
                 if (endpoint && !isNaN(Number.parseInt(endpoint))) {
                   // Battle-specific settings, endpoint is like /rest/raid/setting/123456
                 } else {
-                  console.warn(`Unhandled battle API endpoint ${endpoint}`);
+                  if (content.length) {
+                    try {
+                      const json = JSON.parse(content);
+                      if (json["scenario"]) {
+                        console.warn(`Got scenario data from fallback-processed endpoint ${endpoint}`);
+                        battleDataHandler(json as GranblueBattleData, endpoint);
+                      } else {
+                        console.warn(`Got unknown JSON from fallback-processed endpoint ${endpoint}`, json);
+                      }
+                    } catch (e: unknown) {
+                      console.warn(`Got non-JSON response when trying to fallback-process ${endpoint}`, e);
+                    }
+                  } else {
+                    console.warn(`Unhandled battle API endpoint ${endpoint}`);
+                  }
                 }
                 return;
             }

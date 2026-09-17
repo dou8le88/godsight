@@ -309,7 +309,9 @@ export class BattleScenarioParser {
           const windowAction = new WindowEffectAction(
             windowScenario["name"],
           );
-          actions.push(windowAction);
+          if (windowAction.name) {
+            actions.push(windowAction);
+          }
           break;
         }
 
@@ -754,7 +756,7 @@ export class BattleScenarioParser {
           const turnChangeScenario = scenario as TurnChangeScenarioData;
           const turnChangeAction = new TurnChangeAction(
             godsightBattleData["currentTurn"],
-            turnChangeScenario["turn"],
+            Number(turnChangeScenario["turn"]),
           );
           godsightBattleData["updateTurnTo"] = turnChangeAction.newTurn;
           actions.push(turnChangeAction);
@@ -844,6 +846,7 @@ export class BattleScenarioParser {
         case ScenarioCommand._DROP:
         case ScenarioCommand._GROUP_GAUGE:
         case ScenarioCommand._UNIQUE_GAUGE:
+        case ScenarioCommand._LOSE:
         case undefined:
           break;
         default:
@@ -1132,7 +1135,7 @@ export class BattleScenarioParser {
     // It's empty when loading into a raid in the middle of some arbitrary turn,
     // so if we have a non-empty scenario, our convention is that those entries belong to turn 0.
     if (startData["scenario"].length) {
-      startData["turn"] = 0;
+      battleData["currentTurn"] = 0;
       const actions = this.parseScenarioData(startData["scenario"], startData, battleData);
       battleData["turnData"][0] = this.processTurnActionData(actions, party);
     }

@@ -141,11 +141,11 @@ export enum ScenarioCommand {
    */
   _BATTLE_LOG = "battlelog",
   /**
-   * Ignored command, do not use, exists for type completeness in the parser.
+   * Ignored command, do not use, exists for completeness in the parser.
    */
   _TURN = "turn",
   /**
-   * Ignored command, do not use, exists for type completeness in the parser.
+   * Ignored command, do not use, exists for completeness in the parser.
    */
   _BGM = "bgm",
   /**
@@ -155,42 +155,46 @@ export enum ScenarioCommand {
    */
   _SCREEN_EFFECT = "effect",
   /**
-   * Ignored command, do not use, exists for type completeness in the parser.
+   * Ignored command, do not use, exists for completeness in the parser.
    */
   _SPECIAL_CHANGE = "special_change",
   /**
-   * Ignored command, do not use, exists for type completeness in the parser.
+   * Ignored command, do not use, exists for completeness in the parser.
    */
   _HP_CHANGED = "hp",
   /**
-   * Ignored command, do not use, exists for type completeness in the parser.
+   * Ignored command, do not use, exists for completeness in the parser.
    */
   _CONDITION = "condition",
   /**
    * Mode bar changed.
-   * Ignored command, do not use, exists for type completeness in the parser.
+   * Ignored command, do not use, exists for completeness in the parser.
    */
   _MODE_CHANGE = "modechange",
   /**
-   * Ignored command, do not use, exists for type completeness in the parser.
+   * Ignored command, do not use, exists for completeness in the parser.
    */
   _WAIT = "wait",
   /**
-   * Ignored command, do not use, exists for type completeness in the parser.
+   * Ignored command, do not use, exists for completeness in the parser.
    */
   _IMAGE_CHANGE = "image_change",
   /**
-   * Ignored command, do not use, exists for type completeness in the parser.
+   * Ignored command, do not use, exists for completeness in the parser.
    */
   _DROP = "drop",
   /**
  * Increased the team gauge, think this is just in Versusia.
- * Ignored command, do not use, exists for type completeness in the parser.
+ * Ignored command, do not use, exists for completeness in the parser.
  */
   _GROUP_GAUGE = "group_gauge",
   /**
-* All special boss fight gauges like Seofon's, Versusia's, Agastia's, etc.
-* Ignored command, do not use, exists for type completeness in the parser.
-*/
+  * All special boss fight gauge changes like Seofon's, Versusia's, Agastia's, etc.
+  * Ignored command, do not use, exists for completeness in the parser.
+  */
   _UNIQUE_GAUGE = "unique_gauge",
+  /**
+   * Ignored command, do not use, exists for completeness in the parser.
+   */
+  _LOSE = "lose",
 }
