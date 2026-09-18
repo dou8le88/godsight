@@ -62,6 +62,7 @@ import { GranblueBattleData } from "./gbf/battletypes/battledata";
 import { BattleActionHelper } from "./godsight/battletypes/battleactionhelper";
 import { ResurrectionScenarioData } from "./gbf/battletypes/scenariodata/resurrectionscenariodata";
 import { ResurrectedAction } from "./godsight/battletypes/resurrectedaction";
+import { AttackPhaseTurnScenarioData } from "./gbf/battletypes/scenariodata/attackphaseturnscenariodata";
 
 export class BattleScenarioParser {
   constructor() {
@@ -80,7 +81,7 @@ export class BattleScenarioParser {
     gbfBattleData: GranblueBattleData,
     battleData: GodsightBattleData,
   ): BattleAction[] {
-    return this._parseScenarioData(scenarioData, gbfBattleData, battleData).actions;
+    return this._parseScenarioData(scenarioData, gbfBattleData, battleData, false).actions;
   }
 
   private containsJapaneseRegex = /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u;
@@ -97,8 +98,9 @@ export class BattleScenarioParser {
     scenarioData: GenericScenarioData[],
     gbfBattleData: GranblueBattleData,
     godsightBattleData: GodsightBattleData,
+    isBossAttackPhase: boolean,
     stopOnMainAction?: boolean
-  ): { actions: BattleAction[], lastIndex: number } {
+  ): { actions: BattleAction[], lastIndex: number, isBossAttackPhase: boolean } {
     const actions: BattleAction[] = [];
     let i = 0;
     baseLoop: for (; i < scenarioData.length; i++) {
@@ -124,8 +126,10 @@ export class BattleScenarioParser {
             scenarioData.slice(i + 1),
             gbfBattleData,
             godsightBattleData,
+            isBossAttackPhase,
             true,
           );
+          isBossAttackPhase = subactions.isBossAttackPhase;
           const bossSpecialAttackAction = new BossSpecialAttackAction(
             bossSpecialAttackScenario["name"],
             godsightBattleData["boss"][bossSpecialAttackScenario["pos"]]["name"],
@@ -203,8 +207,10 @@ export class BattleScenarioParser {
             scenarioData.slice(i + 1),
             gbfBattleData,
             godsightBattleData,
+            isBossAttackPhase,
             true,
           );
+          isBossAttackPhase = subactions.isBossAttackPhase;
           if (subactions.actions.length == 0) {
             // Sometimes we have empty ability commands followed by real ones, dunno why, the client is weird.
             // The real ability command should happen next so just break and continue the loop.
@@ -392,8 +398,10 @@ export class BattleScenarioParser {
             scenarioData.slice(i + 1),
             gbfBattleData,
             godsightBattleData,
+            isBossAttackPhase,
             true,
           );
+          isBossAttackPhase = subactions.isBossAttackPhase;
           const firstNormalAttack = subactions.actions.filter(a => a instanceof SingularNormalAttackAction);
           const attackerName = firstNormalAttack.length ?
             firstNormalAttack[0].source == Actor.PLAYER ?
@@ -498,8 +506,10 @@ export class BattleScenarioParser {
             scenarioData.slice(i + 1),
             gbfBattleData,
             godsightBattleData,
+            isBossAttackPhase,
             true,
           );
+          isBossAttackPhase = subactions.isBossAttackPhase;
           const attackerIndex = BattleActionHelper.getCharacterIndexAtPosition(
             godsightBattleData["party"],
             chargedAttackScenario["pos"],
@@ -557,7 +567,9 @@ export class BattleScenarioParser {
             scenarioData.slice(i + 1),
             gbfBattleData,
             godsightBattleData,
+            isBossAttackPhase,
           );
+          isBossAttackPhase = subactions.isBossAttackPhase;
           const fullElixirAction = new FullElixirAction(
             subactions.actions,
           );
@@ -601,6 +613,7 @@ export class BattleScenarioParser {
             scenarioData.slice(i + 1),
             gbfBattleData,
             godsightBattleData,
+            isBossAttackPhase,
           );
           let trueSummonHitCount: number | undefined;
           if (summonScenario["name"]) {
@@ -763,7 +776,13 @@ export class BattleScenarioParser {
           break;
         }
 
-        case ScenarioCommand._TURN: {
+        case ScenarioCommand.TURN: {
+          const attackPhaseTurnScenario = scenario as AttackPhaseTurnScenarioData;
+          if (attackPhaseTurnScenario["mode"] == Actor.BOSS) {
+            isBossAttackPhase = true;
+          } else {
+            console.warn(`Attack phase turn shift for actor ${attackPhaseTurnScenario["mode"]}`);
+          }
           if (stopOnMainAction) {
             break baseLoop;
           }
@@ -826,7 +845,15 @@ export class BattleScenarioParser {
           break;
         }
 
-        // TODO: what is this
+        // May be able to limit how many EOT actions are grouped together
+        // via checking for a wait after the boss's attack phase.
+        case ScenarioCommand._WAIT:
+          if (isBossAttackPhase && stopOnMainAction) {
+            break baseLoop;
+          }
+          break;
+
+
         case ScenarioCommand.RESURRECTION_AVAILABLE:
           break;
 
@@ -841,7 +868,6 @@ export class BattleScenarioParser {
         case ScenarioCommand._SCREEN_EFFECT:
         case ScenarioCommand._BGM:
         case ScenarioCommand._MODE_CHANGE:
-        case ScenarioCommand._WAIT:
         case ScenarioCommand._IMAGE_CHANGE:
         case ScenarioCommand._DROP:
         case ScenarioCommand._GROUP_GAUGE:
@@ -860,6 +886,7 @@ export class BattleScenarioParser {
     return {
       lastIndex: i,
       actions,
+      isBossAttackPhase,
     };
   }
 

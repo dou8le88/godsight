@@ -133,6 +133,12 @@ export enum ScenarioCommand {
 
   RESURRECTION = "resurrection",
 
+  /**
+   * Signals the shift from actions by one Actor (e.g., the player) to that of another (e.g., the boss).
+   * Currently only seen this between the end of the player's attack phase and the start of the boss's.
+   */
+  TURN = "turn",
+
   // TODO: Charm, Can't Act, etc.
 
   /**
@@ -140,10 +146,6 @@ export enum ScenarioCommand {
    * Not directly processed but instead used by other actions.
    */
   _BATTLE_LOG = "battlelog",
-  /**
-   * Ignored command, do not use, exists for completeness in the parser.
-   */
-  _TURN = "turn",
   /**
    * Ignored command, do not use, exists for completeness in the parser.
    */
