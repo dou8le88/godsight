@@ -867,6 +867,7 @@ export class BattleScenarioParser {
         case ScenarioCommand._CONDITION:
         case ScenarioCommand._SCREEN_EFFECT:
         case ScenarioCommand._BGM:
+        case ScenarioCommand._BACKGROUND_CHANGE:
         case ScenarioCommand._MODE_CHANGE:
         case ScenarioCommand._IMAGE_CHANGE:
         case ScenarioCommand._DROP:

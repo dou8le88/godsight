@@ -151,6 +151,10 @@ export enum ScenarioCommand {
    */
   _BGM = "bgm",
   /**
+   * Ignored command, do not use, exists for completeness in the parser.
+   */
+  _BACKGROUND_CHANGE = "bg_change",
+  /**
    * A screen effect was activated.
    * Used for chain bursts or Fated Chains as well as some other actions, but
    * we don't use it directly.
