@@ -122,7 +122,7 @@ export default function GodsightPanel() {
 
         const existingTurnActions = currentTurn["turnActions"];
 
-        const newActions = battleScenarioParser.parseScenarioData(data["scenario"], data, raid);
+        const newActions = data["scenario"] ? battleScenarioParser.parseScenarioData(data["scenario"], data, raid) : [];
         const newTurnData = battleScenarioParser.processTurnActionData(newActions, raid["party"]);
 
         // Merge previous actions and stats into the new stuff.
@@ -215,14 +215,25 @@ export default function GodsightPanel() {
               case "auto_setting":
               case "special_skill_setting":
               case "user_battle_log":
+              case "multi_battle_log":
               case "stamp_list":
               case "vote_abort.json":
               case "showed_vote_result.json":
               case "guard_setting.json":
               case "chat_result.json":
+              case "0.json":
+              case "1.json":
+              case "2.json":
+              case "3.json":
+              case "4.json":
+              case "5.json":
+              case "6.json":
+              case "7.json":
+              case "8.json":
+              case "9.json":
                 return;
               default:
-                if (endpoint && !isNaN(Number(endpoint))) {
+                if (endpoint !== undefined && !isNaN(Number(endpoint))) {
                   // Battle-specific settings, endpoint is like /rest/raid/setting/123456
                 } else {
                   if (content.length) {

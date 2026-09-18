@@ -626,7 +626,7 @@ export class BattleScenarioParser {
                 trueSummonHitCount = Number(matchResult.at(-1)!);;
               }
             } else {
-              console.error(`Unable to find summon matching ${name}!`);
+              console.error(`Unable to find summon matching ${summonScenario["name"]}!`);
             }
           }
           const summonAction = new SummonAction(
