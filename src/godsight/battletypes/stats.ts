@@ -97,17 +97,17 @@ export class StatsUpdateHelper {
   }
 
   static mergeStats(other: Stats, into: Stats): void {
-    into["hitCount"] += other["hitCount"];
-    into["debuffsInflictedCount"] += other["debuffsInflictedCount"];
-    into["healingReceived"] += other["healingReceived"];
-    into["dotDamage"] += other["dotDamage"];
-
-    GameElementHelper.getAllElements().forEach(element => {
-      into["normalAttackDamage"][element] += other["normalAttackDamage"][element];
-      into["skillDamage"][element] += other["skillDamage"][element];
-      into["chargedAttackDamage"][element] += other["chargedAttackDamage"][element];
-      into["otherDamage"][element] += other["otherDamage"][element];
-      into["damageTaken"][element] += other["damageTaken"][element];
+    (Object.keys(into) as (keyof Stats)[]).forEach(key => {
+      if (typeof into[key] === "number" && typeof other[key] === "number") {
+        (into as unknown as Record<string, number>)[key] += other[key];
+      } else if (typeof into[key] === "object" && typeof other[key] === "object") {
+        GameElementHelper.getAllElements().forEach(element => {
+          (into as unknown as Record<string, DamageByElement>)[key][element] +=
+            (other as unknown as Record<string, DamageByElement>)[key][element];
+        });
+      } else {
+        console.error(`Mismatched types for Stats field ${key}: got other: ${other[key]} and into: ${into[key]}`);
+      }
     });
   }
 }
