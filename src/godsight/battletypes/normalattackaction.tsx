@@ -11,6 +11,7 @@ export class NormalAttackAction extends BattleAction {
 
   constructor(
     public attackerName: string,
+    public isCounter: boolean,
     public subactions: BattleAction[],
   ) {
     super();
@@ -34,7 +35,7 @@ export class NormalAttackAction extends BattleAction {
   getDescription(key: number): JSX.Element {
     const attacks = this.subactions.filter(a => a instanceof SingularNormalAttackAction);
     const attackCount = attacks.length;
-    const attackWording = (this.attackCountWording[attackCount] || "made unknown attacks!");
+    const attackWording = this.isCounter ? "executed a counter" : (this.attackCountWording[attackCount] || "made unknown attacks");
 
     return (
       <div key={key} className="action-description">{this.attackerName} {attackWording}!
@@ -61,6 +62,7 @@ export class NormalAttackAction extends BattleAction {
     if (actionType == ActionType.NORMAL_ATTACK) {
       return new NormalAttackAction(
         assertNotNullOrUndefined(json["attackerName"] as string),
+        assertNotNullOrUndefined(json["isCounter"] as boolean),
         (json["subactions"] as Record<string, unknown>[]).map(action => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],

@@ -85,7 +85,11 @@ export class BattleScenarioParser {
   }
 
   private containsJapaneseRegex = /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u;
-  private summonHitCountRegex = /(\d+)-hit/g;
+  private summonHitCountRegex = /(\d+)-hit/;
+
+  private filteredAbilityNames = [
+    "Paralyze effect to a foe",
+  ];
 
   /**
    * Parses game battle scenario data.
@@ -99,12 +103,16 @@ export class BattleScenarioParser {
     gbfBattleData: GranblueBattleData,
     godsightBattleData: GodsightBattleData,
     isBossAttackPhase: boolean,
-    stopOnMainAction?: boolean
+    stopOnMainAction?: boolean,
+    stopOnTheseActions?: ScenarioCommand[],
   ): { actions: BattleAction[], lastIndex: number, isBossAttackPhase: boolean } {
     const actions: BattleAction[] = [];
     let i = 0;
     baseLoop: for (; i < scenarioData.length; i++) {
       const scenario = scenarioData[i];
+      if (stopOnTheseActions && stopOnTheseActions.includes(scenario["cmd"])) {
+        break baseLoop;
+      }
       switch (scenario["cmd"]) {
 
         case ScenarioCommand.BOSS_STATUS:
@@ -176,7 +184,7 @@ export class BattleScenarioParser {
           );
           // handle not getting any bar (due to debuffs, already being at max, etc.)
           // or diamondless enemies getting funny calcs.
-          if (meterChangedAction.change != 0 && meterChangedAction.change < 1000) {
+          if (meterChangedAction.change != 0 && Math.abs(meterChangedAction.change) < 1000) {
             actions.push(meterChangedAction);
           }
           break;
@@ -193,6 +201,9 @@ export class BattleScenarioParser {
         }
 
         case ScenarioCommand.DEATH: {
+          if (stopOnMainAction) {
+            break baseLoop;
+          }
           const deathScenario = scenario as DeathScenarioData;
           actions.push(this.handleDeathScenario(godsightBattleData, deathScenario));
           break;
@@ -248,7 +259,11 @@ export class BattleScenarioParser {
             }
           }
           abilityAction.subactions = abilityAction.subactions.filter(a => !(a instanceof WindowEffectAction));
-          if (!this.containsJapaneseRegex.test(abilityAction.name)) {
+
+          if (
+            !this.containsJapaneseRegex.test(abilityAction.name) &&
+            !this.filteredAbilityNames.includes(abilityAction.name)
+          ) {
             if (abilityAction.name != "") {
               actions.push(abilityAction);
             } else {
@@ -268,6 +283,22 @@ export class BattleScenarioParser {
             // let the subactions be independent.
             actions.push(...abilityAction.subactions);
           }
+
+          if (
+            abilityAction.subactions.find(a => a instanceof SingularNormalAttackAction) &&
+            !abilityAction.subactions.find(a => a instanceof NormalAttackAction)
+          ) {
+            // This ability happened in the middle of a normal attack sequence.
+            // This probably only happens with Soldier bullets.
+            const attacks = abilityAction.subactions.filter(a => a instanceof SingularNormalAttackAction);
+            abilityAction.subactions = abilityAction.subactions.filter(a => !(a instanceof SingularNormalAttackAction));
+            attacks.forEach(a => {
+              if (!actions.includes(a)) {
+                actions.push(a);
+              }
+            });
+          }
+
           // Skip ahead past actions we already included as subactions.
           i += subactions.lastIndex;
           break;
@@ -399,17 +430,23 @@ export class BattleScenarioParser {
             gbfBattleData,
             godsightBattleData,
             isBossAttackPhase,
-            true,
+            false,
+            [
+              ScenarioCommand.NORMAL_ATTACK_START,
+              ScenarioCommand.NORMAL_ATTACK_END,
+              ScenarioCommand.DEATH,
+            ],
           );
           isBossAttackPhase = subactions.isBossAttackPhase;
-          const firstNormalAttack = subactions.actions.filter(a => a instanceof SingularNormalAttackAction);
-          const attackerName = firstNormalAttack.length ?
-            firstNormalAttack[0].source == Actor.PLAYER ?
-              godsightBattleData["party"]["members"][firstNormalAttack[0].attackerIndex]["name"] :
-              godsightBattleData["boss"][firstNormalAttack[0].attackerIndex]["name"] :
+          const firstNormalAttack = subactions.actions.find(a => a instanceof SingularNormalAttackAction);
+          const attackerName = firstNormalAttack ?
+            firstNormalAttack.source == Actor.PLAYER ?
+              godsightBattleData["party"]["members"][firstNormalAttack.attackerIndex]["name"] :
+              godsightBattleData["boss"][firstNormalAttack.attackerIndex]["name"] :
             "Unknown";
           const normalAttackAction = new NormalAttackAction(
             attackerName,
+            firstNormalAttack ? firstNormalAttack.isCounter : false,
             subactions.actions,
           );
           actions.push(normalAttackAction);
@@ -439,9 +476,11 @@ export class BattleScenarioParser {
               godsightBattleData["party"],
               singularNormalAttackScenario["pos"],
             ) : singularNormalAttackScenario["pos"];
+          const isCounter = !!singularNormalAttackScenario["motion"];
           const singularNormalAttackAction = new SingularNormalAttackAction(
             singularNormalAttackScenario["from"],
             attackerIndex,
+            isCounter,
             godsightBattleData["party"]["partyMemberCount"],
             damageArray.map(damage => {
               const receiverIndex = singularNormalAttackScenario["from"] == Actor.PLAYER ?
@@ -469,6 +508,8 @@ export class BattleScenarioParser {
                 } else {
                   damageElement = GameElement.NULL_PLAIN;
                 }
+              } else if (isCounter) {
+                damageElement = singularNormalAttackScenario["color"];
               } else {
                 damageElement = GameElement.NULL_PLAIN;
               }
@@ -626,7 +667,7 @@ export class BattleScenarioParser {
                 trueSummonHitCount = Number(matchResult.at(-1)!);;
               }
             } else {
-              console.error(`Unable to find summon matching ${summonScenario["name"]}!`);
+              console.log(`Unable to find summon matching ${summonScenario["name"]}! Hitcount may be inaccurate!`);
             }
           }
           const summonAction = new SummonAction(
@@ -857,8 +898,19 @@ export class BattleScenarioParser {
         case ScenarioCommand.RESURRECTION_AVAILABLE:
           break;
 
-        case ScenarioCommand._BATTLE_LOG:
+        case ScenarioCommand._BATTLE_LOG: {
+          const nextScenario = scenarioData[i + 1];
+          if (nextScenario && nextScenario["cmd"] == ScenarioCommand._WAIT) {
+            const battleLogScenario = scenario as BattleLogScenarioData;
+            const standbyAction = new StandbyAction(
+              "Placeholder",
+              true,
+              battleLogScenario["body"],
+            );
+            actions.push(standbyAction);
+          }
           break;
+        }
 
         // All of these commands are recognized but ignored.
         case ScenarioCommand._POTIONS_CHANGED:
@@ -876,6 +928,7 @@ export class BattleScenarioParser {
         case ScenarioCommand._LOSE:
         case ScenarioCommand._INFORMATION:
         case ScenarioCommand._MOTION:
+        case ScenarioCommand._SUMMON_CUTIN:
         case undefined:
           break;
         default:

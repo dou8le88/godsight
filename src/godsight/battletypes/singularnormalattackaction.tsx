@@ -6,6 +6,7 @@ import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { JSX } from "react/jsx-runtime";
 import { BattleActionHelper } from "./battleactionhelper";
 import { assertNotNullOrUndefined } from "../../util/assert";
+import { GameElementValue } from "../../gbf/battletypes/scenariodata/mechanics/element";
 
 export class SingularNormalAttackAction extends BattleAction {
   public actionType: ActionType = ActionType.SINGULAR_NORMAL_ATTACK;
@@ -14,6 +15,7 @@ export class SingularNormalAttackAction extends BattleAction {
   constructor(
     public source: Actor,
     public attackerIndex: number,
+    public isCounter: boolean,
     public partySize: number,
     public damageInstances: DamageInstance[],
   ) {
@@ -67,6 +69,7 @@ export class SingularNormalAttackAction extends BattleAction {
       return new SingularNormalAttackAction(
         assertNotNullOrUndefined(json["source"] as Actor),
         assertNotNullOrUndefined(json["attackerIndex"] as number),
+        assertNotNullOrUndefined(json["isCounter"] as boolean),
         assertNotNullOrUndefined(json["partySize"] as number),
         assertNotNullOrUndefined(json["damageInstances"] as DamageInstance[]),
       );
