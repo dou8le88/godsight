@@ -2,9 +2,9 @@
 
 Godsight is a free browser extension intended to be used with the browser game [Granblue Fantasy](https://game.granbluefantasy.jp/). It reads game actions sent to the client from the server and processes them into useful information, breakdowns, charts, etc.
 
-## Granblue Fantasy TOS Compatibility
+## Granblue Fantasy ToS Compatibility
 
-This extension does not modify any code in the game itself. It does not inject any scripts, and it uses a separate UI in your developer tools (F12/Ctrl+Shift+I) to display all of its information. As such, it should be fully TOS-compatible.
+This extension does not modify any code in the game itself. It does not inject any scripts, and it uses a separate UI in your developer tools (F12/Ctrl+Shift+I) to display all of its information. An explicit aim for this extension was to be ToS-compatible by any "reasonable" definition. That said, the ToS is pretty broad about external tools, and while that's likely intended for things that give you an actual gameplay advantage, like a bot or UI modifications, it's probably best to avoid associating your account with this tool in videos or screenshots. Some game developers are *very* strict with these things. :/
 
 ## Warnings
 
@@ -45,14 +45,18 @@ This project is currently under active development.
     - [x] CHAIN_BURST
     - [x] HP_CHANGED
     - [x] DEATH
-    - [ ] REPLACE_CHARACTER
+    - [x] REPLACE_CHARACTER
     - [x] WON_BATTLE
     - [x] FULL_ELIXIR
     - [ ] Disabling effects on characters and bosses (Can't Act, Charm, Weakened, etc.)
     - [ ] Other
 - [x] Basic UI with party member portraits
 - [x] Basic battle summary describing the outcomes of actions.
-- [ ] Select a portrait to view that character's specific battle contributions.
-- [ ] More detailed result display: hitcounts (total/by damage type), debuffs applied count, etc.
-- [ ] Pie chart - damage by type.
-- [ ] Average damage per action name/type.
+- [x] More detailed result display: hitcounts (total/by damage type), debuffs applied count, etc.
+    - [ ] Stats variant that just shows before-boss-action stuff ("omen-cancel-contributing stats")
+- [ ] DPS/DPT view
+    - [ ] Current DPS/DPT
+    - [ ] Last turn damage
+    - [ ] Individual character DPS/DPT
+    - [ ] Damage distribution pie graphs
+    - [ ] Average damage per action name/type.
