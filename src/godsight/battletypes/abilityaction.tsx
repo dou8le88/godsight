@@ -35,7 +35,7 @@ export class AbilityAction extends BattleAction {
       );
     } else {
       return (
-        <div className="action-description"> {this.sourceName} activated {this.name}!
+        <div key={key} className="action-description"> {this.sourceName} activated {this.name}!
           {
             this.subactions.map((subaction, idx) => (
               subaction.getDescription(idx)
