@@ -202,6 +202,7 @@ body,
         align-items: center;
         border: 1px solid #CCC;
         border-radius: 5px;
+        user-select: none;
 
         .delete-button {
             color: white;
