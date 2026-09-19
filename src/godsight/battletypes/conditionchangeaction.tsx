@@ -37,13 +37,13 @@ export class ConditionChangeAction extends BattleAction {
     const dispelledStatuses = allStatuses.filter(s => s.dispelled);
 
     const gainedStatusesJsx: React.ReactNode[] | null = gainedStatuses.map((status, idx) => (
-      <span key={idx}>
+      <span className="status-wrapper" key={idx}>
         <span className="status-text">{status.name}</span> {status.icon && !this.iconlessStatusEffects.includes(status.icon) ? <img className="status-icon" src={BattleActionHelper.getStatusUrl(status.icon)} /> : <></>}
       </span>
     )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, ", ", cur], null);
 
     const dispelledStatusesJsx: React.ReactNode[] | null = dispelledStatuses.map((status, idx) => (
-      <span key={idx}>
+      <span className="status-wrapper" key={idx}>
         <span className="status-text">{status.name}</span> <img className="status-icon" src={BattleActionHelper.getStatusUrl(status.icon)} />
       </span>
     )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, ", ", cur], null);
