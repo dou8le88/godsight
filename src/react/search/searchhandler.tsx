@@ -17,6 +17,11 @@ export default function SearchHandler() {
 
         if (!visible) {
           setVisible(true);
+          const newQuery = window.getSelection()?.toString() || "";
+          setQuery({ query: newQuery });
+          if (searchRef.current) {
+            searchRef.current.value = newQuery;
+          }
         } else {
           if (document.activeElement && document.activeElement == searchRef.current) {
             setVisible(false);
@@ -144,50 +149,44 @@ export default function SearchHandler() {
   }
 
   return (
-    <>
-      {visible ?
-        <div id="custom-search-container">
-          <div className="search-icon">🔎︎</div>
-          <input
-            id="custom-search-input"
-            ref={searchRef}
-            type="search"
-            onInput={(e) => setQueryDebounced(e.currentTarget.value)}
-            onKeyDown={(e) => {
-              if (e.key == "Enter") {
-                if (matchingActions.some(a => !document.body.contains(a)) || getMatchingActions().length != matchingActions.length) {
-                  setQueryDebounced(query.query);
-                } else {
-                  if (e.shiftKey) {
-                    selectPrevious();
-                  } else {
-                    selectNext();
-                  }
-                }
-              } else if (e.key == "Escape") {
-                if (searchRef.current && searchRef.current.value == "") {
-                  setVisible(false);
-                  e.preventDefault();
-                  e.stopPropagation();
-                }
+    <div id="custom-search-container" style={{ "display": visible ? "flex" : "none" }}>
+      <div className="search-icon">🔎︎</div>
+      <input
+        id="custom-search-input"
+        ref={searchRef}
+        type="search"
+        onInput={(e) => setQueryDebounced(e.currentTarget.value)}
+        onKeyDown={(e) => {
+          if (e.key == "Enter") {
+            if (matchingActions.some(a => !document.body.contains(a)) || getMatchingActions().length != matchingActions.length) {
+              setQueryDebounced(query.query);
+            } else {
+              if (e.shiftKey) {
+                selectPrevious();
+              } else {
+                selectNext();
               }
-            }}
-          />
-          <div id="custom-search-result">
-            {matchingActions.length > 0 ?
-              <>{currentActionIndex + 1} of {matchingActions.length}</> :
-              <></>
             }
-          </div>
-          <div className="button-container">
-            <div className="button" onClick={() => selectPrevious()}>⮝</div>
-            <div className="button" onClick={() => selectNext()}>⮟</div>
-            <div className="button" onClick={() => { setVisible(false); setQuery({ query: "" }); }}>X</div>
-          </div>
-        </div> :
-        <>
-        </>
-      }
-    </>
+          } else if (e.key == "Escape") {
+            if (searchRef.current && searchRef.current.value == "") {
+              setVisible(false);
+              e.preventDefault();
+              e.stopPropagation();
+            }
+          }
+        }}
+      />
+      <div id="custom-search-result">
+        {matchingActions.length > 0 ?
+          <>{currentActionIndex + 1} of {matchingActions.length}</> :
+          <></>
+        }
+      </div>
+      <div className="button-container">
+        <div className="button" onClick={() => selectPrevious()}>⮝</div>
+        <div className="button" onClick={() => selectNext()}>⮟</div>
+        <div className="button" onClick={() => { setVisible(false); setQuery({ query: "" }); }}>X</div>
+      </div>
+    </div>
   );
 }

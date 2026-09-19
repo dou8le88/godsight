@@ -210,6 +210,11 @@ export default function GodsightPanel() {
                 // Restarting a trial battle
                 retryBattleHandler();
                 return;
+
+              case "multi_member_info":
+                // Contains info about honors, might be useful.
+                break;
+
               // Misc configuration endpoints that don't contain battle info.
               case "setting":
               case "auto_setting":
@@ -217,6 +222,7 @@ export default function GodsightPanel() {
               case "user_battle_log":
               case "multi_battle_log":
               case "stamp_list":
+              case "get_union_summon_lock":
               case "vote_abort.json":
               case "showed_vote_result.json":
               case "guard_setting.json":
@@ -296,11 +302,11 @@ export default function GodsightPanel() {
           ) : (
             <>
               {allBattles.length > 0 ? (
-                <>
+                <div className="battle-summary-wrapper">
                   {allBattles.map(battle =>
                     <BattleSummary key={battle["raidId"]} battleData={battle} onClick={() => setSelectedBattle(String(battle["raidId"]))} deleteEntry={() => storageManager.deleteBattle(battle["raidId"])} />
                   )}
-                </>
+                </div>
               ) : (
                 <div>No battles recorded. Start a raid battle, or refresh an active raid to start recording data.</div>
               )}
