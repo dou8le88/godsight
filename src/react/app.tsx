@@ -310,7 +310,7 @@ export default function GodsightPanel() {
                   )}
                 </div>
               ) : (
-                <div>No battles recorded. Start a raid battle, or refresh an active raid to start recording data.</div>
+                <div className="empty-battle-list-banner">No battles recorded. Start a raid battle, or refresh an active raid to start recording data.</div>
               )}
             </>
           )}
