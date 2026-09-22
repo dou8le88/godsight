@@ -63,6 +63,7 @@ import { BattleActionHelper } from "./godsight/battletypes/battleactionhelper";
 import { ResurrectionScenarioData } from "./gbf/battletypes/scenariodata/resurrectionscenariodata";
 import { ResurrectedAction } from "./godsight/battletypes/resurrectedaction";
 import { AttackPhaseTurnScenarioData } from "./gbf/battletypes/scenariodata/attackphaseturnscenariodata";
+import { AttackAccuracyResult } from "./gbf/battletypes/scenariodata/mechanics/attackaccuracyresult";
 
 export class BattleScenarioParser {
   constructor() {
@@ -536,13 +537,13 @@ export class BattleScenarioParser {
           }
           const chargedAttackScenario = scenario as ChargedAttackScenarioData;
           const wasCriticalHit = new Map<GameElementValue, boolean>();
-          const allSplitChargedAttackDamage = chargedAttackScenario["list"].flatMap(l => l["damage"]);
+          const allSplitChargedAttackDamage = (chargedAttackScenario["list"] || []).flatMap(l => l["damage"]);
           allSplitChargedAttackDamage.forEach(d => {
             if (d["critical"]) {
               wasCriticalHit.set(d["attr"], true);
             }
           });
-          const hpAfterDamage = allSplitChargedAttackDamage.at(-1)!["hp"];
+          const hpAfterDamage = allSplitChargedAttackDamage.length ? allSplitChargedAttackDamage.at(-1)!["hp"] : undefined;
           const subactions = this._parseScenarioData(
             scenarioData.slice(i + 1),
             gbfBattleData,
@@ -568,7 +569,7 @@ export class BattleScenarioParser {
             attackerName,
             chargedAttackScenario["target"],
             godsightBattleData["party"]["partyMemberCount"],
-            chargedAttackScenario["total"].map(damage => {
+            (chargedAttackScenario["total"] || []).map(damage => {
               const damageTotal = ChargedAttackDamageInstanceHelper.getTotal(damage);
               const receiverIndex = damage["pos"];
               const receiverName = BattleActionHelper.getActorName(
@@ -584,7 +585,7 @@ export class BattleScenarioParser {
                 "receiverIndex": receiverIndex,
                 "receiverName": receiverName,
                 "receiverHpAfterDamage": hpAfterDamage,
-                "miss": damageTotal > 0 ? 0 : 2,
+                "miss": damageTotal > 0 ? AttackAccuracyResult.HIT : AttackAccuracyResult.DODGE,
                 "guarded": false,
               } as DamageInstance;
             }),
@@ -690,10 +691,8 @@ export class BattleScenarioParser {
                 "receiverHpAfterDamage": damage["hp"],
                 "critical": damage["critical"],
                 "guarded": damage["guard"],
-                // TODO: test this.
-                // I feel like it should be possible for summons to miss vs e.g. Siete unchallenged
-                // but maybe that just shows up as damage = 0.
-                "miss": 0,
+                // Summon "misses" just show up as damage value 0, so they technically can't miss.
+                "miss": AttackAccuracyResult.HIT,
               } as DamageInstance;
             }),
             subactions.actions,
@@ -899,8 +898,20 @@ export class BattleScenarioParser {
           break;
 
         case ScenarioCommand._BATTLE_LOG: {
+          // This can be used for charm/can't act type effects, but is also used for other stuff,
+          // so we try to narrow it down based on patterns.
           const nextScenario = scenarioData[i + 1];
-          if (nextScenario && nextScenario["cmd"] == ScenarioCommand._WAIT) {
+          const prevScenario = scenarioData[i - 1];
+          if (isBossAttackPhase && (
+            (nextScenario && nextScenario["cmd"] == ScenarioCommand._WAIT) ||
+            (prevScenario && prevScenario["cmd"] == ScenarioCommand._SCREEN_EFFECT && (prevScenario as ScreenEffectScenarioData)["to"] == Actor.BOSS)
+          )) {
+            if (nextScenario["cmd"] == ScenarioCommand.BOSS_SPECIAL_ATTACK) {
+              break;
+            }
+            if (stopOnMainAction) {
+              break baseLoop;
+            }
             const battleLogScenario = scenario as BattleLogScenarioData;
             const standbyAction = new StandbyAction(
               "Placeholder",
@@ -911,6 +922,9 @@ export class BattleScenarioParser {
           }
           break;
         }
+
+        case ScenarioCommand.BACKLINE_STATUS:
+          break;
 
         // All of these commands are recognized but ignored.
         case ScenarioCommand._POTIONS_CHANGED:
