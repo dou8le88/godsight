@@ -1,8 +1,7 @@
-/**
- * TODO: verify these
- */
 export enum AttackAccuracyResult {
   HIT = 0,
-  DODGE = 1,
-  MISS = 2,
+  MISS = 1,
+  UNKNOWN = 2,
+  NO_EFFECT = 3,
+  DODGE = 4,
 }

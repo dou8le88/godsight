@@ -1,3 +1,4 @@
+import { AttackAccuracyResult } from "../../gbf/battletypes/scenariodata/mechanics/attackaccuracyresult"
 import { GameElementValue } from "../../gbf/battletypes/scenariodata/mechanics/element"
 
 export interface DamageInstance {
@@ -5,9 +6,9 @@ export interface DamageInstance {
   "receiverName": string,
   "receiverIndex": number,
   "value": number,
-  "receiverHpAfterDamage": number,
+  "receiverHpAfterDamage"?: number,
   "critical": boolean,
-  "miss": number,
+  "miss": AttackAccuracyResult | boolean,
   "guarded": boolean
 }
 

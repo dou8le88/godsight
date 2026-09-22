@@ -139,6 +139,13 @@ export enum ScenarioCommand {
    */
   TURN = "turn",
 
+  /**
+   * Updates the status of the backline, e.g. when a boss special
+   * hits backline allies like Seofon's Carro Magnifico.
+   */
+  BACKLINE_STATUS = "status_back",
+
+
   // TODO: Charm, Can't Act, etc.
 
   /**

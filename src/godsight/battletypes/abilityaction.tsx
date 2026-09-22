@@ -87,7 +87,7 @@ export class AbilityAction extends BattleAction {
   static override fromJSON(json: Record<string, unknown>): AbilityAction | undefined {
     const actionType = json["actionType"];
     if (actionType == ActionType.ACTIVATED_ABILITY) {
-      return new AbilityAction(
+      const action = new AbilityAction(
         assertNotNullOrUndefined(json["name"] as string),
         assertNotNullOrUndefined(json["actor"] as Actor),
         assertNotNullOrUndefined(json["sourceName"] as string),
@@ -97,6 +97,10 @@ export class AbilityAction extends BattleAction {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],
       );
+      if (json["overrideMessage"]) {
+        action.overrideMessage = json["overrideMessage"] as string;
+      }
+      return action;
     } else {
       console.error(`AbilityAction.fromJSON called on ${json}`);
       return undefined;

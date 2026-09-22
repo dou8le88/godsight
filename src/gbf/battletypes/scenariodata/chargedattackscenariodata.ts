@@ -14,8 +14,8 @@ export interface ChargedAttackScenarioData extends GenericScenarioData {
   "chain": string,
   "count": number,
   "attr": GameElementValue,
-  "total": ChargedAttackDamageInstance[],
-  "list": ChargedAttackPartitionedDamage[],
+  "total"?: ChargedAttackDamageInstance[],
+  "list"?: ChargedAttackPartitionedDamage[],
 }
 
 export interface ChargedAttackPartitionedDamage {

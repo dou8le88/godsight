@@ -21,9 +21,9 @@ export class StandbyAction extends BattleAction {
   }
 
   getDescription(key: number): JSX.Element {
-    let message = `${this.actorName} couldn't attack!`;
+    let message = `${this.actorName} can't attack!`;
     if (this.battleMessage) {
-      message = `${this.battleMessage} They couldn't attack!`;
+      message = `${this.battleMessage} They can't attack!`;
     }
 
     return (

@@ -70,8 +70,17 @@ export class ConditionChangeAction extends BattleAction {
       );
     }
 
+    let finalMissedStatusesJsx = <></>;
+    if (this.missCount > 0) {
+      finalMissedStatusesJsx = (
+        <>
+          {this.missCount} status effects missed!
+        </>
+      );
+    }
+
     return (
-      <div key={key} className="action-description">{finalDispelledStatusesJsx} {finalGainedStatusJsx}
+      <div key={key} className="action-description">{finalDispelledStatusesJsx} {finalGainedStatusJsx} {finalMissedStatusesJsx}
       </div>
     );
   }

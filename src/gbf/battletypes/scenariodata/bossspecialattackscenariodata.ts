@@ -35,9 +35,6 @@ export interface BossSpecialAttackDamageInstance {
    */
   "hp": number,
   "critical": boolean,
-  /**
-   * TODO: Expanded boolean with 0/1/2, for different types of missing?
-   */
   "miss": AttackAccuracyResult,
   "guard": boolean,
 }
