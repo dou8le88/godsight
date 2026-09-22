@@ -23,7 +23,7 @@ export default function SearchHandler() {
             searchRef.current.value = newQuery;
           }
         } else {
-          if (document.activeElement && document.activeElement == searchRef.current) {
+          if (document.activeElement && document.activeElement == searchRef.current && window.getSelection()?.toString() == query.query) {
             setVisible(false);
             setQuery({ query: "" });
           } else {
@@ -49,7 +49,7 @@ export default function SearchHandler() {
     return () => {
       window.removeEventListener('keydown', listener, true);
     };
-  }, [visible]);
+  }, [visible, query]);
 
   useEffect(() => {
     if (visible && searchRef.current) {
@@ -75,7 +75,7 @@ export default function SearchHandler() {
     const allActions = document.querySelectorAll(".action-container");
     allActions.forEach(actionContainer => {
       if (actionContainer.checkVisibility()) {
-        const regex = new RegExp(query.query, 'i');
+        const regex = new RegExp(RegExp.escape(query.query), 'i');
         if (query.query != "" && regex.test(actionContainer.textContent)) {
           newMatchingActions.unshift(actionContainer);
         }
