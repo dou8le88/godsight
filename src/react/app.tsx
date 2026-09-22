@@ -212,6 +212,7 @@ export default function GodsightPanel() {
                 return;
 
               case "multi_member_info":
+              case "mvp_info":
                 // Contains info about honors, might be useful.
                 break;
 
@@ -227,6 +228,7 @@ export default function GodsightPanel() {
               case "showed_vote_result.json":
               case "guard_setting.json":
               case "chat_result.json":
+              case "check_set_time_limit.json":
               case "0.json":
               case "1.json":
               case "2.json":
