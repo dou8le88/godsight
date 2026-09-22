@@ -110,4 +110,16 @@ export class StatsUpdateHelper {
       }
     });
   }
+
+  static divideStatsBy(stats: Stats, by: number): void {
+    (Object.keys(stats) as (keyof Stats)[]).forEach(key => {
+      if (typeof stats[key] === "number") {
+        (stats as unknown as Record<string, number>)[key] /= by;
+      } else if (typeof stats[key] === "object") {
+        GameElementHelper.getAllElements().forEach(element => {
+          (stats as unknown as Record<string, DamageByElement>)[key][element] /= by;
+        });
+      }
+    });
+  }
 }

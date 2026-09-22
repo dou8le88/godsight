@@ -1213,7 +1213,7 @@ export class BattleScenarioParser {
       "questId": startData["quest_id"],
       "IsCoopRaid": startData["is_coopraid"],
       "isHost": startData["is_host"],
-      "currentTurn": startData["turn"],
+      "currentTurn": Number(startData["turn"]),
       /**
        * We only receive commands that tell us about increases to this value and not the current value.
        */
