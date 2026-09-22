@@ -57,7 +57,7 @@ export class AbilityAction extends BattleAction {
     switch (this.actor) {
       case Actor.PLAYER: {
         // The subactions have no way to associate certain general stats with
-        // a specific character, so we must do it here for now. TODO: fix.
+        // a specific character, so we must do it here.
         const subactionHitCount = allUpdates["generalStats"]["hitCount"];
         const subactionDebuffs = allUpdates["generalStats"]["debuffsInflictedCount"];
         const subactionSkillDamage = allUpdates["generalStats"]["skillDamage"];

@@ -67,16 +67,6 @@ export class GodsightStorageManager {
     }
 
     this.fireChangeListeners();
-
-    // TODO: handle external updates via multiple windows opened at once?
-    // Seems like more trouble than it's worth.
-    // chrome.storage.local.onChanged.addListener((changes) => {
-    //   if (changes[key]) {
-    //     const storageChanges = changes[key];
-    //   } else {
-    //     console.warn(`Unhandled storage changes in ${Object.keys(changes)}`);
-    //   }
-    // });
   }
 
   /**

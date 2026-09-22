@@ -65,9 +65,6 @@ export interface WaveData {
 
 export interface PartyFormationData {
   "type": "player", //always?
-  /**
-   * TODO: check if actually the total quantity of party members
-   */
   "number": number,
   "param": PartyMemberData[],
 }
@@ -89,9 +86,6 @@ export interface PartyMemberData {
   "pid_image": string,
   "hpmax": number,
   "hp": number,
-  /**
-   * TODO: Numerical boolean (0/1) for if the character is danchou?
-   */
   "leader": number,
   /**
    * CA/ougi meter.
@@ -143,7 +137,7 @@ export interface BossFormationData {
   "modechange": "1",
   "modegauge": number,
   /**
-   * TODO: Difficulty, I guess?
+   * Difficulty in number of stars in the raid host UI.
    */
   "star": number,
   "param": BossData[],

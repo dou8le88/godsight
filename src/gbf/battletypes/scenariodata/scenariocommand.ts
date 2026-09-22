@@ -33,7 +33,6 @@ export enum ScenarioCommand {
   /**
    * Current boss status, such as HP, charge diamonds, etc.
    * Includes changing the boss's name if necessary (e.g., Hexa).
-   * TODO: Omen status?
    */
   BOSS_STATUS = "boss_gauge",
   /**
@@ -126,9 +125,6 @@ export enum ScenarioCommand {
    */
   STANDBY = "standby",
 
-  /**
-   * TODO: what does it mean
-   */
   RESURRECTION_AVAILABLE = "resurrection_available",
 
   RESURRECTION = "resurrection",
@@ -144,9 +140,6 @@ export enum ScenarioCommand {
    * hits backline allies like Seofon's Carro Magnifico.
    */
   BACKLINE_STATUS = "status_back",
-
-
-  // TODO: Charm, Can't Act, etc.
 
   /**
    * Sometimes contains useful information about certain actions, such as attacking under the effects of Confusion.

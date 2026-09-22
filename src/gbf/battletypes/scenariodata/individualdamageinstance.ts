@@ -16,10 +16,7 @@ export interface SkillOrDebuffDamageInstance {
   "hp": number,
   "color": GameElementValue,
   "critical": boolean,
-  /**
-   * TODO: Expanded boolean with 0/1/2, for different types of missing?
-   */
-  "miss": AttackAccuracyResult,
+  "miss": AttackAccuracyResult | boolean,
   "guard": boolean,
   "pos": number,
 }

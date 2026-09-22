@@ -38,7 +38,7 @@ export class DamageAction extends BattleAction {
       case Actor.BOSS:
         // Since other commands all seem to directly associate damage dealt with the command, the only
         // time DamageAction comes up seems to be with skill damage.
-        // Currently we have no way to associate a source character with this damage and have to do it in AbilityAction. TODO: fix that.
+        // Currently we have no way to associate a source character with this damage and have to do it in AbilityAction.
         this.instances.forEach(instance => {
           if (this.endOfTurnDamage) {
             update["generalStats"]["dotDamage"] += instance["value"];

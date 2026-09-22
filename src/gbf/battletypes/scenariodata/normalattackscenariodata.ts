@@ -33,9 +33,6 @@ export interface NormalAttackDamage {
    */
   "hp": number,
   "critical": boolean,
-  /**
-   * TODO: Expanded boolean with 0/1/2, for different types of missing?
-   */
   "miss": AttackAccuracyResult,
   "color"?: GameElementValue,
   "attr"?: GameElementValue,

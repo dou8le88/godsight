@@ -37,7 +37,7 @@ export class MultihitDamageAction extends BattleAction {
       case Actor.BOSS:
         // Since other commands all seem to directly associate damage dealt with the command, the only
         // time MultihitDamageAction comes up seems to be with skill damage.
-        // Currently we have no way to associate a source character with this damage and have to do it in AbilityAction. TODO: fix that.
+        // Currently we have no way to associate a source character with this damage and have to do it in AbilityAction.
         this.hits.forEach(instance => {
           // Boss-targeted DamageActions are always skill damage *ONLY BECAUSE*
           // other damage types directly associate their damage with their commands.
