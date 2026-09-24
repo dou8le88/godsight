@@ -64,7 +64,7 @@ export default function GodsightPanel() {
       const godsightBattleData = battleScenarioParser.parseStartData(data);
       const raidId = godsightBattleData["raidId"];
 
-      const existingRaid = godsightStorage.battles[raidId];
+      const existingRaid = godsightStorage["battles"][raidId];
 
       if (existingRaid) {
         // An existing raid means that the new battleData shouldn't have any actions in it.
