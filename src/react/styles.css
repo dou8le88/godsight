@@ -277,7 +277,7 @@ body,
 
 .stats-list {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     width: 200px;
     border: 1px solid #c2c2c2;
     border-radius: 5px;
@@ -286,18 +286,36 @@ body,
     position: sticky;
     top: 5px;
 
-    .stat-label {
-        font-weight: bold;
+    &.for-character {
+        width: 270px;
+        align-items: center;
+        column-gap: 10px;
+        padding-left: 10px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        padding-right: 10px;
     }
 
-    .stats-header {
-        font-size: 16px;
-        font-weight: bold;
+    .stats-container {
+        display: flex;
+        flex-direction: column;
         width: 100%;
-        border-bottom: 1px solid #5E5E5E;
-        margin-bottom: 5px;
-        padding-bottom: 5px;
+
+        .stat-label {
+            font-weight: bold;
+        }
+
+        .stats-header {
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            border-bottom: 1px solid #5E5E5E;
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+        }
     }
+
+
 }
 
 .battle-stats-summary-container {
@@ -305,6 +323,102 @@ body,
     flex-direction: row;
     justify-content: center;
     column-gap: 20px;
+    flex-wrap: balance;
+}
+
+.divider {
+    width: 95%;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+/*
+* Cloning a lot of Granblue's CSS here to imitate the UI.
+* Particularly the element icons.
+*/
+.avatar-container {
+    width: 49px;
+    height: 100px;
+    position: relative;
+    cursor: pointer;
+
+    &:nth-child(4) {
+        margin-right: 10px;
+
+        &::after {
+            width: 1px;
+            height: 90px;
+            background-color: white;
+            content: "";
+            display: block;
+            position: absolute;
+            right: -8px;
+            bottom: 5px;
+            cursor: default;
+        }
+    }
+
+    &:nth-child(n+5) {
+        .mask {
+            display: block;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            z-index: 20;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+    }
+
+    .portrait {
+        width: 49px;
+    }
+
+    .mask {
+        display: none;
+    }
+
+    .element-icon {
+        display: block;
+        position: absolute;
+        top: 1px;
+        right: 1px;
+        z-index: 15;
+        background-size: 64px 574px;
+        width: 13px;
+        height: 13px;
+        background-image: url(https://prd-game-a-granbluefantasy.akamaized.net/assets_en/img/sprite/v3/ui/icon/type-s1079abba8e.png);
+        background-repeat: no-repeat;
+
+        &.icon-attribute-0 {
+            background-position: 0 -430px;
+        }
+
+        &.icon-attribute-1 {
+            background-position: 0 -497px;
+        }
+
+        &.icon-attribute-2 {
+            background-position: 0 -545px;
+        }
+
+        &.icon-attribute-3 {
+            background-position: 0 -446px;
+        }
+
+        &.icon-attribute-4 {
+            background-position: 0 -513px;
+        }
+
+        &.icon-attribute-5 {
+            background-position: 0 -561px;
+        }
+
+        &.icon-attribute-6 {
+            background-position: 0 -529px;
+        }
+    }
 }
 
 .battle-info {
@@ -330,95 +444,6 @@ body,
         margin-top: 20px;
         justify-content: center;
         column-gap: 5px;
-
-        /*
-         * Cloning a lot of Granblue's CSS here to imitate the UI.
-         * Particularly the element icons.
-         */
-        .avatar-container {
-            width: 49px;
-            height: 100px;
-            position: relative;
-            cursor: pointer;
-
-            &:nth-child(4) {
-                margin-right: 10px;
-
-                &::after {
-                    width: 1px;
-                    height: 90px;
-                    background-color: white;
-                    content: "";
-                    display: block;
-                    position: absolute;
-                    right: -8px;
-                    bottom: 5px;
-                    cursor: default;
-                }
-            }
-
-            &:nth-child(n+5) {
-                .mask {
-                    display: block;
-                    position: absolute;
-                    top: 0px;
-                    left: 0px;
-                    z-index: 20;
-                    width: 100%;
-                    height: 100%;
-                    background-color: rgba(0, 0, 0, 0.4);
-                }
-            }
-
-            .portrait {
-                width: 49px;
-            }
-
-            .mask {
-                display: none;
-            }
-
-            .element-icon {
-                display: block;
-                position: absolute;
-                top: 1px;
-                right: 1px;
-                z-index: 15;
-                background-size: 64px 574px;
-                width: 13px;
-                height: 13px;
-                background-image: url(https://prd-game-a-granbluefantasy.akamaized.net/assets_en/img/sprite/v3/ui/icon/type-s1079abba8e.png);
-                background-repeat: no-repeat;
-
-                &.icon-attribute-0 {
-                    background-position: 0 -430px;
-                }
-
-                &.icon-attribute-1 {
-                    background-position: 0 -497px;
-                }
-
-                &.icon-attribute-2 {
-                    background-position: 0 -545px;
-                }
-
-                &.icon-attribute-3 {
-                    background-position: 0 -446px;
-                }
-
-                &.icon-attribute-4 {
-                    background-position: 0 -513px;
-                }
-
-                &.icon-attribute-5 {
-                    background-position: 0 -561px;
-                }
-
-                &.icon-attribute-6 {
-                    background-position: 0 -529px;
-                }
-            }
-        }
     }
 
     .turn-container {

@@ -7,13 +7,11 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
   if (!battleData) {
     return <div>No battle data available yet.</div>;
   } else {
-    const frontliners = battleData["party"]["frontline"].map(
-      partyMemberIndex => battleData["party"]["members"][partyMemberIndex]
-    );
+    const frontliners = battleData["party"]["frontline"];
 
-    const backliners = battleData["party"]["backline"].map(
-      partyMemberIndex => battleData["party"]["members"][partyMemberIndex]
-    );
+    const backliners = battleData["party"]["backline"];
+
+    const entireParty = frontliners.concat(backliners);
 
     const turnSet = new Set(Object.keys(battleData["turnData"]).map(t => Number(t)));
     turnSet.add(battleData["currentTurn"]);
@@ -39,21 +37,34 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
     const turnsWithData = currenTurnHasActions ? (turns.filter(t => t != 0)).length : turns.length - 1;
     const damagePerTurnStats = structuredClone(totalStats);
 
-    StatsUpdateHelper.divideStatsBy(damagePerTurnStats, turnsWithData);
+    StatsUpdateHelper.divideStatsBy(damagePerTurnStats, turnsWithData || 1);
 
     return (
-      <div className="battle-stats-summary-container">
-        <StatsShower stats={totalStats} header={"Totals"} />
-        <StatsShower stats={damagePerTurnStats} header={"Damage Per Turn"} />
-        <StatsShower
-          stats={previousTurnStats}
-          header={`Previous Turn (${previousTurnNumber})`}
-        />
-        <StatsShower
-          stats={currentTurnStats}
-          header={`Current Turn (${battleData["currentTurn"]})`}
-        />
-      </div>
+      <>
+        <div className="battle-stats-summary-container">
+          <StatsShower stats={totalStats} header={"Totals"} />
+          <StatsShower stats={damagePerTurnStats} header={"Damage Per Turn"} />
+          <StatsShower
+            stats={previousTurnStats}
+            header={`Previous Turn (${previousTurnNumber})`}
+          />
+          <StatsShower
+            stats={currentTurnStats}
+            header={`Current Turn (${battleData["currentTurn"]})`}
+          />
+        </div>
+        <hr className="divider" />
+        <div className="battle-stats-summary-container">
+          {entireParty.map((charIdx) => (
+            <StatsShower
+              key={charIdx}
+              stats={battleData["battleStats"]["characterStats"][charIdx]}
+              header={battleData["party"]["members"][charIdx]["name"]}
+              character={battleData["party"]["members"][charIdx]}
+            />
+          ))}
+        </div>
+      </>
     );
   }
 }

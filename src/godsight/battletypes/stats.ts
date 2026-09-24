@@ -77,14 +77,14 @@ export class StatsUpdateHelper {
     });
 
     firstCharacters.map(characterIndex => {
-      const characterStats = output["characterStats"][characterIndex];
+      const characterStats = first["characterStats"][characterIndex];
       const outputCharacterStats = output["characterStats"][characterIndex];
 
       this.mergeStats(characterStats, outputCharacterStats);
     });
 
     secondCharacters.map(characterIndex => {
-      const characterStats = output["characterStats"][characterIndex];
+      const characterStats = second["characterStats"][characterIndex];
       const outputCharacterStats = output["characterStats"][characterIndex];
 
       this.mergeStats(characterStats, outputCharacterStats);
