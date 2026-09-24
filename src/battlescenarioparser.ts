@@ -207,6 +207,14 @@ export class BattleScenarioParser {
           }
           const deathScenario = scenario as DeathScenarioData;
           actions.push(this.handleDeathScenario(godsightBattleData, deathScenario));
+          if (deathScenario["to"] == Actor.PLAYER) {
+            const deadCharacterIdx = BattleActionHelper.getActorIndex(
+              godsightBattleData["party"],
+              deathScenario["to"],
+              deathScenario["pos"],
+            );
+            godsightBattleData["party"]["members"][deadCharacterIdx]["alive"] = false;
+          }
           break;
         }
 
@@ -616,6 +624,17 @@ export class BattleScenarioParser {
             subactions.actions,
           );
           actions.push(fullElixirAction);
+          // Full elixirs inherently reset the party order to what it was at battle start
+          // and do not produce individual REPLACE_CHARACTER commands.
+          const initialFormation = godsightBattleData["party"]["members"].map((_, idx) => idx);
+          const frontline = initialFormation.slice(0, 4);
+          const backline = initialFormation.slice(4);
+          godsightBattleData["party"]["frontline"] = frontline;
+          godsightBattleData["party"]["backline"] = backline;
+          godsightBattleData["party"]["members"].forEach(char => {
+            char["alive"] = true;
+          });
+
           break baseLoop;
         }
 
@@ -880,8 +899,16 @@ export class BattleScenarioParser {
             ),
             resurrectionScenario["name"],
           );
-          // TODO: handle party formation changes due to resurrection.
           actions.push(resurrectedAction);
+
+          // TODO: handle party formation changes due to resurrection.
+          const characterIndex = BattleActionHelper.getActorIndex(
+            godsightBattleData["party"],
+            Actor.PLAYER,
+            resurrectionScenario["pos"],
+          );
+
+          godsightBattleData["party"]["members"][characterIndex]["alive"] = true;
           break;
         }
 
@@ -1239,6 +1266,18 @@ export class BattleScenarioParser {
       battleData["currentTurn"] = 0;
       const actions = this.parseScenarioData(startData["scenario"], startData, battleData);
       battleData["turnData"][0] = this.processTurnActionData(actions, party);
+
+      // Update stats.
+      StatsUpdateHelper.mergeStats(
+        battleData["turnData"][0]["turnStats"],
+        battleData["battleStats"]["generalStats"]
+      );
+      Object.keys(battleData["turnData"][0]["characterCurrentTurnStats"]).forEach(characterIndex => {
+        StatsUpdateHelper.mergeStats(
+          battleData["turnData"][0]["characterCurrentTurnStats"][characterIndex],
+          battleData["battleStats"]["characterStats"][characterIndex],
+        );
+      });
     }
 
     return battleData;

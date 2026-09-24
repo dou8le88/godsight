@@ -70,6 +70,7 @@ export default function GodsightPanel() {
         // An existing raid means that the new battleData shouldn't have any actions in it.
         godsightBattleData["turnData"] = existingRaid["turnData"];
         godsightBattleData["honors"] = existingRaid["honors"];
+        godsightBattleData["battleStats"] = existingRaid["battleStats"];
       }
 
       if ("updateTurnTo" in godsightBattleData) {

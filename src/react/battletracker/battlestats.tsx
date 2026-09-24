@@ -11,8 +11,6 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
 
     const backliners = battleData["party"]["backline"];
 
-    const entireParty = frontliners.concat(backliners);
-
     const turnSet = new Set(Object.keys(battleData["turnData"]).map(t => Number(t)));
     turnSet.add(battleData["currentTurn"]);
     const turns = [...turnSet.values()].sort((a, b) => a - b);
@@ -41,6 +39,7 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
 
     return (
       <>
+        <div className="battle-metadata">Raid #{battleData["raidId"]}: vs {battleData["boss"][0]["name"]}</div>
         <div className="battle-stats-summary-container">
           <StatsShower stats={totalStats} header={"Totals"} />
           <StatsShower stats={damagePerTurnStats} header={"Damage Per Turn"} />
@@ -55,12 +54,23 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
         </div>
         <hr className="divider" />
         <div className="battle-stats-summary-container">
-          {entireParty.map((charIdx) => (
+          {frontliners.map((charIdx) => (
             <StatsShower
               key={charIdx}
               stats={battleData["battleStats"]["characterStats"][charIdx]}
               header={battleData["party"]["members"][charIdx]["name"]}
               character={battleData["party"]["members"][charIdx]}
+            />
+          ))}
+        </div>
+        <div className="battle-stats-summary-container">
+          {backliners.map((charIdx) => (
+            <StatsShower
+              key={charIdx}
+              stats={battleData["battleStats"]["characterStats"][charIdx]}
+              header={battleData["party"]["members"][charIdx]["name"]}
+              character={battleData["party"]["members"][charIdx]}
+              backline={true}
             />
           ))}
         </div>

@@ -2,10 +2,11 @@ import { GodsightPartyMemberData } from "../../godsight/battletypes/partyformati
 import { Stats } from "../../godsight/battletypes/stats";
 import Avatar from "./avatar";
 
-export function StatsShower({ stats, header, character }: {
+export function StatsShower({ stats, header, character, backline }: {
   stats: Stats,
   header?: string,
-  character?: GodsightPartyMemberData
+  character?: GodsightPartyMemberData,
+  backline?: boolean,
 }) {
   const totalNormalAttackDamage = Math.round(Object.keys(stats["normalAttackDamage"]).map(element => {
     return stats["normalAttackDamage"][element];
@@ -38,7 +39,7 @@ export function StatsShower({ stats, header, character }: {
     <div className={character ? "stats-list for-character" : "stats-list"}>
       {character ?
         <>
-          <Avatar key={character["characterId"]} characterData={character} />
+          <Avatar key={character["characterId"]} characterData={character} backline={backline} />
         </> :
         <></>
       }

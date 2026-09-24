@@ -286,6 +286,10 @@ body,
     position: sticky;
     top: 5px;
 
+    &.clickable {
+        cursor: pointer;
+    }
+
     &.for-character {
         width: 270px;
         align-items: center;
@@ -340,7 +344,6 @@ body,
     width: 49px;
     height: 100px;
     position: relative;
-    cursor: pointer;
 
     &:nth-child(4) {
         margin-right: 10px;
@@ -358,7 +361,8 @@ body,
         }
     }
 
-    &:nth-child(n+5) {
+    &:nth-child(n+5),
+    &.backline-or-dead {
         .mask {
             display: block;
             position: absolute;

@@ -1,6 +1,9 @@
 import { GodsightPartyMemberData } from "../../godsight/battletypes/partyformationdata";
 
-export default function Avatar({ characterData }: { characterData: GodsightPartyMemberData }) {
+export default function Avatar({ characterData, backline }: {
+  characterData: GodsightPartyMemberData,
+  backline?: boolean,
+}) {
 
   const avatarUrl = function (avatarId: string, isMC: boolean) {
     if (isMC) {
@@ -11,7 +14,7 @@ export default function Avatar({ characterData }: { characterData: GodsightParty
   }
 
   return (
-    <div className="avatar-container">
+    <div className={backline || !characterData["alive"] ? "avatar-container backline-or-dead" : "avatar-container"}>
       <img className="portrait" src={avatarUrl(characterData["portraitImageId"], characterData["isMC"])} />
       <div className={`element-icon icon-attribute-${characterData["element"]}`} />
       <div className="mask" />
