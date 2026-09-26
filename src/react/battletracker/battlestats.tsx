@@ -1,7 +1,11 @@
+import { useState } from "react";
 import { GodsightBattleData } from "../../godsight/battletypes/battledata";
 import { RetreatAction } from "../../godsight/battletypes/retreataction";
 import { StatsUpdateHelper } from "../../godsight/battletypes/stats";
 import { StatsShower } from "./statsshower";
+import { StatsView } from "./statsview";
+import { DeepDivePieGraph } from "./deepdive";
+import { Breakdown } from "./breakdown";
 
 export function BattleStats({ battleData }: { battleData: GodsightBattleData | undefined }) {
   if (!battleData) {
@@ -37,43 +41,113 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
 
     StatsUpdateHelper.divideStatsBy(damagePerTurnStats, turnsWithData || 1);
 
+    const [selectedStatsView, setSelectedStatsView] = useState<StatsView | undefined>(undefined);
+    const [selectedCharacter, setSelectedCharacter] = useState<number>(0);
+
+    const views = {
+      [StatsView.TOTAL]: totalStats,
+      [StatsView.DPT]: damagePerTurnStats,
+      [StatsView.CURRENT_TURN]: currentTurnStats,
+      [StatsView.PREV_TURN]: damagePerTurnStats,
+      [StatsView.CHARACTER]: battleData["battleStats"]["characterStats"],
+    };
+    const viewNames = {
+      [StatsView.TOTAL]: "Party Damage Breakdown",
+      [StatsView.DPT]: "Damage Per Turn Breakdown",
+      [StatsView.CURRENT_TURN]: "Current Turn Breakdown",
+      [StatsView.PREV_TURN]: "Previous Turn Breakdown",
+      [StatsView.CHARACTER]: `${battleData["party"]["members"][selectedCharacter]["name"]}'s Damage Breakdown`,
+    };
+
+    const [selectedBreakdown, setSelectedBreakdown] = useState(Breakdown.BY_TYPE);
+
     return (
       <>
         <div className="battle-metadata">Raid #{battleData["raidId"]}: vs {battleData["boss"][0]["name"]}</div>
-        <div className="battle-stats-summary-container">
-          <StatsShower stats={totalStats} header={"Totals"} />
-          <StatsShower stats={damagePerTurnStats} header={"Damage Per Turn"} />
-          <StatsShower
-            stats={previousTurnStats}
-            header={`Previous Turn (${previousTurnNumber})`}
-          />
-          <StatsShower
-            stats={currentTurnStats}
-            header={`Current Turn (${battleData["currentTurn"]})`}
-          />
-        </div>
-        <hr className="divider" />
-        <div className="battle-stats-summary-container">
-          {frontliners.map((charIdx) => (
-            <StatsShower
-              key={charIdx}
-              stats={battleData["battleStats"]["characterStats"][charIdx]}
-              header={battleData["party"]["members"][charIdx]["name"]}
-              character={battleData["party"]["members"][charIdx]}
-            />
-          ))}
-        </div>
-        <div className="battle-stats-summary-container">
-          {backliners.map((charIdx) => (
-            <StatsShower
-              key={charIdx}
-              stats={battleData["battleStats"]["characterStats"][charIdx]}
-              header={battleData["party"]["members"][charIdx]["name"]}
-              character={battleData["party"]["members"][charIdx]}
-              backline={true}
-            />
-          ))}
-        </div>
+        {selectedStatsView !== undefined ?
+          <>
+            <div className="breakdown-name">{viewNames[selectedStatsView]}</div>
+            <div className="breakdown-header">
+              <div className="exit-breakdown-button" onClick={() => setSelectedStatsView(undefined)}>X</div>
+            </div>
+            <div className="breakdown-selector-container">
+              <div
+                className={selectedBreakdown == Breakdown.BY_TYPE ? "breakdown-option selected" : "breakdown-option"}
+                onClick={() => setSelectedBreakdown(Breakdown.BY_TYPE)}
+              >Type</div>
+              <div
+                className={selectedBreakdown == Breakdown.BY_TURN ? "breakdown-option selected" : "breakdown-option"}
+                onClick={() => setSelectedBreakdown(Breakdown.BY_TURN)}
+              >Turn</div>
+              <div
+                className={selectedBreakdown == Breakdown.BY_ELEMENT ? "breakdown-option selected" : "breakdown-option"}
+                onClick={() => setSelectedBreakdown(Breakdown.BY_ELEMENT)}
+              >Element</div>
+            </div>
+            {selectedBreakdown == Breakdown.BY_TYPE || selectedBreakdown == Breakdown.BY_ELEMENT ?
+              <DeepDivePieGraph
+                stats={selectedStatsView == StatsView.CHARACTER ?
+                  views[selectedStatsView][selectedCharacter] : views[selectedStatsView]}
+                breakdown={selectedBreakdown}
+              /> :
+              <></>
+            }
+          </> :
+          <>
+            <div className="battle-stats-summary-container">
+              <StatsShower
+                stats={totalStats}
+                header={"Totals"}
+                onClick={() => setSelectedStatsView(StatsView.TOTAL)}
+              />
+              <StatsShower
+                stats={damagePerTurnStats}
+                header={"Damage Per Turn"}
+                onClick={() => setSelectedStatsView(StatsView.DPT)}
+              />
+              <StatsShower
+                stats={previousTurnStats}
+                header={`Previous Turn (${previousTurnNumber})`}
+                onClick={() => setSelectedStatsView(StatsView.PREV_TURN)}
+              />
+              <StatsShower
+                stats={currentTurnStats}
+                header={`Current Turn (${battleData["currentTurn"]})`}
+                onClick={() => setSelectedStatsView(StatsView.CURRENT_TURN)}
+              />
+            </div>
+            <hr className="divider" />
+            <div className="battle-stats-summary-container">
+              {frontliners.map((charIdx) => (
+                <StatsShower
+                  key={charIdx}
+                  stats={battleData["battleStats"]["characterStats"][charIdx]}
+                  header={battleData["party"]["members"][charIdx]["name"]}
+                  character={battleData["party"]["members"][charIdx]}
+                  onClick={() => {
+                    setSelectedStatsView(StatsView.CHARACTER);
+                    setSelectedCharacter(charIdx);
+                  }}
+                />
+              ))}
+            </div>
+            <div className="battle-stats-summary-container">
+              {backliners.map((charIdx) => (
+                <StatsShower
+                  key={charIdx}
+                  stats={battleData["battleStats"]["characterStats"][charIdx]}
+                  header={battleData["party"]["members"][charIdx]["name"]}
+                  character={battleData["party"]["members"][charIdx]}
+                  backline={true}
+                  onClick={() => {
+                    setSelectedStatsView(StatsView.CHARACTER);
+                    setSelectedCharacter(charIdx);
+                  }}
+                />
+              ))}
+            </div>
+          </>
+        }
       </>
     );
   }

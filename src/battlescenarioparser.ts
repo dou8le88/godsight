@@ -398,7 +398,7 @@ export class BattleScenarioParser {
 
         case ScenarioCommand.DAMAGE_DEALT_MULTIHIT: {
           const multihitDamageScenario = scenario as MultihitDamageScenarioData;
-          const instances: DamageInstance[] = multihitDamageScenario["list"].flat(1).map(hit => {
+          const instances: DamageInstance[] = (multihitDamageScenario["list"] || []).flat(1).map(hit => {
             const receiverIndex = multihitDamageScenario["to"] == Actor.PLAYER ?
               BattleActionHelper.getCharacterIndexAtPosition(
                 godsightBattleData["party"],
@@ -778,7 +778,7 @@ export class BattleScenarioParser {
             i += 1;
           } else if (chainBurstDamageScenario["cmd"] == ScenarioCommand.DAMAGE_DEALT_MULTIHIT) {
             const multihitDamageScenario = chainBurstDamageScenario as MultihitDamageScenarioData;
-            chainBurstAction.damageInstances = multihitDamageScenario["list"].flat(1).map(d => {
+            chainBurstAction.damageInstances = (multihitDamageScenario["list"] || []).flat(1).map(d => {
               const receiverIndex = d["pos"];
               const receiverName = BattleActionHelper.getActorName(
                 godsightBattleData["boss"],

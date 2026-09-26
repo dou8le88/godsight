@@ -2,11 +2,12 @@ import { GodsightPartyMemberData } from "../../godsight/battletypes/partyformati
 import { Stats } from "../../godsight/battletypes/stats";
 import Avatar from "./avatar";
 
-export function StatsShower({ stats, header, character, backline }: {
+export function StatsShower({ stats, header, character, backline, onClick }: {
   stats: Stats,
   header?: string,
   character?: GodsightPartyMemberData,
   backline?: boolean,
+  onClick?: () => void,
 }) {
   const totalNormalAttackDamage = Math.round(Object.keys(stats["normalAttackDamage"]).map(element => {
     return stats["normalAttackDamage"][element];
@@ -35,8 +36,16 @@ export function StatsShower({ stats, header, character, backline }: {
     totalOtherDamage +
     dotDamage;
 
+  let className = "stats-list";
+  if (character) {
+    className += " for-character";
+  }
+  if (onClick) {
+    className += " clickable";
+  }
+
   return (
-    <div className={character ? "stats-list for-character" : "stats-list"}>
+    <div className={className} {...(onClick && { "onClick": () => onClick() })}>
       {character ?
         <>
           <Avatar key={character["characterId"]} characterData={character} backline={backline} />
