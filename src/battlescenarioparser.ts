@@ -64,6 +64,7 @@ import { ResurrectionScenarioData } from "./gbf/battletypes/scenariodata/resurre
 import { ResurrectedAction } from "./godsight/battletypes/resurrectedaction";
 import { AttackPhaseTurnScenarioData } from "./gbf/battletypes/scenariodata/attackphaseturnscenariodata";
 import { AttackAccuracyResult } from "./gbf/battletypes/scenariodata/mechanics/attackaccuracyresult";
+import { SkillOrDebuffDamageInstance } from "./gbf/battletypes/scenariodata/individualdamageinstance";
 
 export class BattleScenarioParser {
   constructor() {
@@ -398,7 +399,15 @@ export class BattleScenarioParser {
 
         case ScenarioCommand.DAMAGE_DEALT_MULTIHIT: {
           const multihitDamageScenario = scenario as MultihitDamageScenarioData;
-          const instances: DamageInstance[] = (multihitDamageScenario["list"] || []).flat(1).map(hit => {
+          let damageArray: SkillOrDebuffDamageInstance[] = [];
+          // For some reason, damage can come as nested arrays,
+          // or as object literals that are kind of just sparse arrays...
+          if (Array.isArray(multihitDamageScenario["list"])) {
+            damageArray = multihitDamageScenario["list"].flat(1);
+          } else {
+            damageArray = Object.values(multihitDamageScenario["list"]).flat(1);
+          }
+          const instances: DamageInstance[] = damageArray.map(hit => {
             const receiverIndex = multihitDamageScenario["to"] == Actor.PLAYER ?
               BattleActionHelper.getCharacterIndexAtPosition(
                 godsightBattleData["party"],
@@ -778,7 +787,15 @@ export class BattleScenarioParser {
             i += 1;
           } else if (chainBurstDamageScenario["cmd"] == ScenarioCommand.DAMAGE_DEALT_MULTIHIT) {
             const multihitDamageScenario = chainBurstDamageScenario as MultihitDamageScenarioData;
-            chainBurstAction.damageInstances = (multihitDamageScenario["list"] || []).flat(1).map(d => {
+            let damageArray: SkillOrDebuffDamageInstance[] = [];
+            // For some reason, damage can come as nested arrays,
+            // or as object literals that are kind of just sparse arrays...
+            if (Array.isArray(multihitDamageScenario["list"])) {
+              damageArray = multihitDamageScenario["list"].flat(1);
+            } else {
+              damageArray = Object.values(multihitDamageScenario["list"]).flat(1);
+            }
+            chainBurstAction.damageInstances = damageArray.map(d => {
               const receiverIndex = d["pos"];
               const receiverName = BattleActionHelper.getActorName(
                 godsightBattleData["boss"],

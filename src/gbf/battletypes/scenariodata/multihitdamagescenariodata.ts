@@ -8,5 +8,5 @@ export interface MultihitDamageScenarioData extends GenericScenarioData {
   "cmd": ScenarioCommand.DAMAGE_DEALT_MULTIHIT,
   "color": GameElementValue,
   "to": Actor,
-  "list": SkillOrDebuffDamageInstance[][],
+  "list": SkillOrDebuffDamageInstance[][] | Record<number, SkillOrDebuffDamageInstance[]>,
 }
