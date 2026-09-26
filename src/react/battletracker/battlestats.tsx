@@ -4,8 +4,9 @@ import { RetreatAction } from "../../godsight/battletypes/retreataction";
 import { StatsUpdateHelper } from "../../godsight/battletypes/stats";
 import { StatsShower } from "./statsshower";
 import { StatsView } from "./statsview";
-import { DeepDivePieGraph } from "./deepdive";
+import { DeepDivePieGraph } from "./deepdivepiegraph";
 import { Breakdown } from "./breakdown";
+import { TimeSeries } from "./timeseries";
 
 export function BattleStats({ battleData }: { battleData: GodsightBattleData | undefined }) {
   if (!battleData) {
@@ -48,12 +49,12 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
       [StatsView.TOTAL]: totalStats,
       [StatsView.DPT]: damagePerTurnStats,
       [StatsView.CURRENT_TURN]: currentTurnStats,
-      [StatsView.PREV_TURN]: damagePerTurnStats,
+      [StatsView.PREV_TURN]: previousTurnStats,
       [StatsView.CHARACTER]: battleData["battleStats"]["characterStats"],
     };
     const viewNames = {
       [StatsView.TOTAL]: "Party Damage Breakdown",
-      [StatsView.DPT]: "Damage Per Turn Breakdown",
+      [StatsView.DPT]: "Average DPT Breakdown",
       [StatsView.CURRENT_TURN]: "Current Turn Breakdown",
       [StatsView.PREV_TURN]: "Previous Turn Breakdown",
       [StatsView.CHARACTER]: `${battleData["party"]["members"][selectedCharacter]["name"]}'s Damage Breakdown`,
@@ -75,10 +76,12 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
                 className={selectedBreakdown == Breakdown.BY_TYPE ? "breakdown-option selected" : "breakdown-option"}
                 onClick={() => setSelectedBreakdown(Breakdown.BY_TYPE)}
               >Type</div>
-              <div
-                className={selectedBreakdown == Breakdown.BY_TURN ? "breakdown-option selected" : "breakdown-option"}
-                onClick={() => setSelectedBreakdown(Breakdown.BY_TURN)}
-              >Turn</div>
+              {selectedStatsView != StatsView.CURRENT_TURN && selectedStatsView != StatsView.PREV_TURN ?
+                <div
+                  className={selectedBreakdown == Breakdown.BY_TURN ? "breakdown-option selected" : "breakdown-option"}
+                  onClick={() => setSelectedBreakdown(Breakdown.BY_TURN)}
+                >Turn</div> : <></>
+              }
               <div
                 className={selectedBreakdown == Breakdown.BY_ELEMENT ? "breakdown-option selected" : "breakdown-option"}
                 onClick={() => setSelectedBreakdown(Breakdown.BY_ELEMENT)}
@@ -89,8 +92,15 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
                 stats={selectedStatsView == StatsView.CHARACTER ?
                   views[selectedStatsView][selectedCharacter] : views[selectedStatsView]}
                 breakdown={selectedBreakdown}
-              /> :
-              <></>
+              /> : selectedBreakdown == Breakdown.BY_TURN ?
+                <>
+                  <TimeSeries
+                    battleData={battleData}
+                    view={selectedStatsView}
+                    characterIndex={selectedCharacter}
+                  />
+                </> :
+                <></>
             }
           </> :
           <>
@@ -102,18 +112,28 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
               />
               <StatsShower
                 stats={damagePerTurnStats}
-                header={"Damage Per Turn"}
+                header={"Average DPT"}
                 onClick={() => setSelectedStatsView(StatsView.DPT)}
               />
               <StatsShower
                 stats={previousTurnStats}
                 header={`Previous Turn (${previousTurnNumber})`}
-                onClick={() => setSelectedStatsView(StatsView.PREV_TURN)}
+                onClick={() => {
+                  setSelectedStatsView(StatsView.PREV_TURN);
+                  if (selectedBreakdown == Breakdown.BY_TURN) {
+                    setSelectedBreakdown(Breakdown.BY_TYPE);
+                  }
+                }}
               />
               <StatsShower
                 stats={currentTurnStats}
                 header={`Current Turn (${battleData["currentTurn"]})`}
-                onClick={() => setSelectedStatsView(StatsView.CURRENT_TURN)}
+                onClick={() => {
+                  setSelectedStatsView(StatsView.CURRENT_TURN);
+                  if (selectedBreakdown == Breakdown.BY_TURN) {
+                    setSelectedBreakdown(Breakdown.BY_TYPE);
+                  }
+                }}
               />
             </div>
             <hr className="divider" />

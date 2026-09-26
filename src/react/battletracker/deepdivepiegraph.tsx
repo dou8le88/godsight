@@ -1,9 +1,15 @@
 
-import { PieSectorShapeProps, useActiveTooltipDataPoints, useIsTooltipActive, Sector, PieChart, Pie, Legend, PieLabelRenderProps } from "recharts";
+import { PieSectorShapeProps, useActiveTooltipDataPoints, useIsTooltipActive, Sector, PieChart, Pie, Legend, PieLabelRenderProps, Tooltip } from "recharts";
 import { Stats } from "../../godsight/battletypes/stats";
 import { Breakdown } from "./breakdown";
-import { GameElement, GameElementHelper, GameElementValue, NumericGameElement } from "../../gbf/battletypes/scenariodata/mechanics/element";
-import { identity } from "../../util/functional";
+import { GameElement, GameElementHelper, NumericGameElement } from "../../gbf/battletypes/scenariodata/mechanics/element";
+import { DamageTypeColors } from "./damagetypecolors";
+import { CSSProperties } from "react";
+
+const tooltipStyle: CSSProperties = {
+  backgroundColor: "#282828",
+  color: "#B4D3E0",
+};
 
 function byTypeBreakdown(stats: Stats) {
   const totalNormalAttackDamage = Math.round(Object.keys(stats["normalAttackDamage"]).map(element => {
@@ -41,33 +47,33 @@ function byTypeBreakdown(stats: Stats) {
       data.push({
         name: "NA",
         value: totalNormalAttackDamage,
-        fill: '#EC4266',
+        fill: DamageTypeColors.NORMAL_ATTACK,
       });
-      damageTypeSectorColors.push("#EC4266");
+      damageTypeSectorColors.push(DamageTypeColors.NORMAL_ATTACK);
     }
     if (totalChargedAttackDamage > 0) {
       data.push({
         name: "CA",
         value: totalChargedAttackDamage,
-        fill: '#FCD671',
+        fill: DamageTypeColors.CHARGED_ATTACK,
       });
-      damageTypeSectorColors.push("#FCD671");
+      damageTypeSectorColors.push(DamageTypeColors.CHARGED_ATTACK);
     }
     if (totalSkillDamage > 0) {
       data.push({
         name: "Skill",
         value: totalSkillDamage,
-        fill: '#2388B6',
+        fill: DamageTypeColors.SKILL,
       });
-      damageTypeSectorColors.push("#2388B6");
+      damageTypeSectorColors.push(DamageTypeColors.SKILL);
     }
     if (totalOtherDamage > 0) {
       data.push({
         name: "Other",
         value: totalOtherDamage,
-        fill: '#B3B3B3',
+        fill: DamageTypeColors.OTHER,
       });
-      damageTypeSectorColors.push("#B3B3B3");
+      damageTypeSectorColors.push(DamageTypeColors.OTHER);
     }
 
     return [data, damageTypeSectorColors];
@@ -97,6 +103,9 @@ function byTypeBreakdown(stats: Stats) {
   };
 
   const customLabel = (props: PieLabelRenderProps) => {
+    if (props.percent !== undefined && props.percent < 0.02) {
+      return null;
+    }
     const percent = ((props.value / totalDamage) * 100).toFixed(0);
     return `${props.value.toLocaleString()} (${percent}%)`;
   };
@@ -118,9 +127,14 @@ function byTypeBreakdown(stats: Stats) {
             shape={CustomColors}
             label={customLabel}
             labelLine={false}
+            minAngle={2}
           >
           </Pie>
-          <Legend iconType="circle" />
+          <Tooltip
+            contentStyle={tooltipStyle}
+            formatter={(a) => `${a?.toLocaleString()} (${((Number(a) / totalDamage) * 100).toFixed(0)}%)`}
+          />
+          <Legend iconType="circle" itemSorter={null} />
         </PieChart>
       </div>
     </>
@@ -163,7 +177,7 @@ function byElementBreakdown(stats: Stats) {
         const color = GameElementHelper.getElementColor(elt);
         data.push({
           name: GameElementHelper.getPrettyElementName(elt),
-          value: elementTotals[elt],
+          value: Math.round(elementTotals[elt]),
           fill: color,
         });
         damageElementSectorColors.push(color);
@@ -197,6 +211,9 @@ function byElementBreakdown(stats: Stats) {
   };
 
   const customLabel = (props: PieLabelRenderProps) => {
+    if (props.percent !== undefined && props.percent < 0.02) {
+      return null;
+    }
     const percent = ((props.value / totalDamage) * 100).toFixed(0);
     return `${props.value.toLocaleString()} (${percent}%)`;
   };
@@ -218,9 +235,14 @@ function byElementBreakdown(stats: Stats) {
             shape={CustomColors}
             label={customLabel}
             labelLine={false}
+            minAngle={2}
           >
           </Pie>
-          <Legend iconType="circle" />
+          <Tooltip
+            contentStyle={tooltipStyle}
+            formatter={(a) => `${a?.toLocaleString()} (${((Number(a) / totalDamage) * 100).toFixed(0)}%)`}
+          />
+          <Legend iconType="circle" itemSorter={null} />
         </PieChart>
       </div>
     </>
