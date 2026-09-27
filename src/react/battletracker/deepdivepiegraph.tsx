@@ -255,6 +255,8 @@ export function DeepDivePieGraph({ stats, breakdown }: { stats: Stats, breakdown
       return byTypeBreakdown(stats);
     case Breakdown.BY_ELEMENT:
       return byElementBreakdown(stats);
+    case Breakdown.BY_CHARACTER:
+      return <>Character breakdown not supported for this view.</>
     case Breakdown.BY_TURN:
       return <>Turn breakdown not supported for this view.</>
   }

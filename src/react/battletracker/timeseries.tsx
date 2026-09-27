@@ -12,10 +12,12 @@ interface ByTypeChartData {
   skillDamage: number,
   chargedAttackDamage: number,
   otherDamage: number,
+  totalDamage: number,
 }
 
 interface ByElementChartData {
   turn: string,
+  total: number,
   [GameElement.NULL_PLAIN]: number,
   [GameElement.FIRE]: number,
   [GameElement.WATER]: number,
@@ -56,6 +58,7 @@ function totalDamageByElementTimeSeries(battleData: GodsightBattleData) {
     const allElements = GameElementHelper.getAllElements();
     const elementTotals: ByElementChartData = {
       turn: `${statsByTurn.turn}`,
+      total: 0,
     } as ByElementChartData;
 
     allElements.forEach(elt => {
@@ -64,11 +67,16 @@ function totalDamageByElementTimeSeries(battleData: GodsightBattleData) {
 
     allElements.forEach(elt => {
       elementTotals[elt] += statsByTurn.stats["normalAttackDamage"][elt];
+      elementTotals["total"] += statsByTurn.stats["normalAttackDamage"][elt];
       elementTotals[elt] += statsByTurn.stats["chargedAttackDamage"][elt];
+      elementTotals["total"] += statsByTurn.stats["chargedAttackDamage"][elt];
       elementTotals[elt] += statsByTurn.stats["skillDamage"][elt];
+      elementTotals["total"] += statsByTurn.stats["skillDamage"][elt];
       elementTotals[elt] += statsByTurn.stats["otherDamage"][elt];
+      elementTotals["total"] += statsByTurn.stats["otherDamage"][elt];
       if (elt == GameElement.NULL_PLAIN) {
         elementTotals[elt] += statsByTurn.stats["dotDamage"];
+        elementTotals["total"] += statsByTurn.stats["dotDamage"];
       }
     });
 
@@ -81,13 +89,15 @@ function totalDamageByElementTimeSeries(battleData: GodsightBattleData) {
     return { ...acc, ...cur };
   }, {});
 
-  const CustomTooltip = ({ active, payload, label }: TooltipContentProps) => {
+  const CustomTooltip = ({ active, payload, label, activeIndex }: TooltipContentProps) => {
     if (active && payload && payload.length) {
       // Filter out items with a value of 0 (and optionally null/undefined)
       const filteredPayload = payload.filter((item) => item.value !== 0 && item.value != null);
 
       // If everything is filtered out, render nothing
       if (filteredPayload.length === 0) return null;
+
+      const totalDamage = data[Number(activeIndex)]["total"];
 
       return (
         <div
@@ -100,7 +110,7 @@ function totalDamageByElementTimeSeries(battleData: GodsightBattleData) {
           <p className="label">Turn {label}</p>
           {filteredPayload.map((entry, index) => (
             <p key={`item-${index}`} style={{ color: labelColors[entry.name as keyof typeof labelColors] }}>
-              {entry.name}: {entry.value?.toLocaleString()}
+              {entry.name}: {entry.value?.toLocaleString()} ({((Number(entry.value) / totalDamage) * 100).toFixed(0)}%)
             </p>
           ))}
         </div>
@@ -193,7 +203,7 @@ function totalDamageByTypeTimeSeries(battleData: GodsightBattleData) {
     };
   });
 
-  const data = allTurnStats.map(statsByTurn => {
+  const data: ByTypeChartData[] = allTurnStats.map(statsByTurn => {
     const totalNormalAttackDamage = Math.round(Object.keys(statsByTurn.stats["normalAttackDamage"]).map(element => {
       return statsByTurn.stats["normalAttackDamage"][element];
     }).reduce((prev, cur) => prev + cur, 0));
@@ -216,6 +226,7 @@ function totalDamageByTypeTimeSeries(battleData: GodsightBattleData) {
       skillDamage: totalSkillDamage,
       chargedAttackDamage: totalChargedAttackDamage,
       otherDamage: totalOtherDamage,
+      totalDamage: totalNormalAttackDamage + totalSkillDamage + totalChargedAttackDamage + totalOtherDamage + statsByTurn["stats"]["dotDamage"],
     };
   });
 
@@ -226,13 +237,15 @@ function totalDamageByTypeTimeSeries(battleData: GodsightBattleData) {
     "Other": DamageTypeColors.OTHER,
   };
 
-  const CustomTooltip = ({ active, payload, label }: TooltipContentProps) => {
+  const CustomTooltip = ({ active, payload, label, activeIndex }: TooltipContentProps) => {
     if (active && payload && payload.length) {
       // Filter out items with a value of 0 (and optionally null/undefined)
       const filteredPayload = payload.filter((item) => item.value !== 0 && item.value != null);
 
       // If everything is filtered out, render nothing
       if (filteredPayload.length === 0) return null;
+
+      const totalDamage = data[Number(activeIndex)]["totalDamage"];
 
       return (
         <div
@@ -245,7 +258,7 @@ function totalDamageByTypeTimeSeries(battleData: GodsightBattleData) {
           <p className="label">Turn {label}</p>
           {filteredPayload.map((entry, index) => (
             <p key={`item-${index}`} style={{ color: labelColors[entry.name as keyof typeof labelColors] }}>
-              {entry.name}: {entry.value?.toLocaleString()}
+              {entry.name}: {entry.value?.toLocaleString()} ({((Number(entry.value) / totalDamage) * 100).toFixed(0)}%)
             </p>
           ))}
         </div>
@@ -299,6 +312,7 @@ export function TimeSeries({
 
   switch (view) {
     case StatsView.CHARACTER:
+      // TODO: this
       viewResult = (
         <>Character view.</>
       );
