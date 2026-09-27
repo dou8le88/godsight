@@ -104,7 +104,7 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
                 >Character</div> :
                 <></>
               }
-              {selectedStatsView != StatsView.CURRENT_TURN && selectedStatsView != StatsView.PREV_TURN ?
+              {selectedStatsView != StatsView.CURRENT_TURN && selectedStatsView != StatsView.PREV_TURN && selectedStatsView != StatsView.DPT ?
                 <div
                   className={selectedBreakdown == Breakdown.BY_TURN ? "breakdown-option selected" : "breakdown-option"}
                   onClick={() => setSelectedBreakdown(Breakdown.BY_TURN)}
@@ -130,6 +130,7 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
             }
           </> :
           <>
+            <div className="battle-stats-instructions">Click any tile for visualizations.</div>
             <div className="battle-stats-summary-container">
               <StatsShower
                 stats={totalStats}
@@ -139,7 +140,12 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
               <StatsShower
                 stats={damagePerTurnStats}
                 header={"Average DPT"}
-                onClick={() => setSelectedStatsView(StatsView.DPT)}
+                onClick={() => {
+                  setSelectedStatsView(StatsView.DPT)
+                  if (selectedBreakdown == Breakdown.BY_TURN) {
+                    setSelectedBreakdown(Breakdown.BY_TYPE);
+                  }
+                }}
               />
               <StatsShower
                 stats={previousTurnStats}

@@ -123,6 +123,7 @@ function totalDamageByElementTimeSeries(battleData: GodsightBattleData) {
             border: "1px solid #c2c2c2"
           }}>
           <p className="label">Turn {label}</p>
+          <p className="label">Total: {totalDamage.toLocaleString()}</p>
           {filteredPayload.map((entry, index) => (
             <p key={`item-${index}`} style={{ color: labelColors[entry.name as keyof typeof labelColors] }}>
               {entry.name}: {entry.value?.toLocaleString()} ({((Number(entry.value) / totalDamage) * 100).toFixed(0)}%)
@@ -271,6 +272,7 @@ function totalDamageByTypeTimeSeries(battleData: GodsightBattleData) {
             border: "1px solid #c2c2c2"
           }}>
           <p className="label">Turn {label}</p>
+          <p className="label">Total: {totalDamage.toLocaleString()}</p>
           {filteredPayload.map((entry, index) => (
             <p key={`item-${index}`} style={{ color: labelColors[entry.name as keyof typeof labelColors] }}>
               {entry.name}: {entry.value?.toLocaleString()} ({((Number(entry.value) / totalDamage) * 100).toFixed(0)}%)
@@ -348,7 +350,7 @@ function totalDamageByCharacterTimeSeries(battleData: GodsightBattleData) {
       return { ...acc, ...cur };
     }, {});
 
-    const totalDamage = Object.values(characterData).reduce((prev, cur) => prev + cur);
+    const totalDamage = Object.values(characterData).reduce((prev, cur) => prev + cur) + battleData["turnData"][statsByTurn.turn]["turnStats"]["dotDamage"];
 
     return {
       turn: `${statsByTurn.turn}`,
@@ -372,6 +374,7 @@ function totalDamageByCharacterTimeSeries(battleData: GodsightBattleData) {
             border: "1px solid #c2c2c2"
           }}>
           <p className="label">Turn {label}</p>
+          <p className="label">Total: {totalDamage.toLocaleString()}</p>
           {payload.map((entry, index) => (
             entry.value !== 0 && entry.value != null ?
               <p key={`item-${index}`} style={{ color: CharacterColors[index] }}>

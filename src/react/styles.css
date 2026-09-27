@@ -332,6 +332,14 @@ body,
 
 }
 
+.battle-stats-instructions {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    color: #A6C3CF;
+    margin-bottom: 10px;
+}
+
 .battle-stats-summary-container {
     display: flex;
     flex-direction: row;
