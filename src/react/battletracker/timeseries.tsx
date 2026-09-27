@@ -5,6 +5,7 @@ import { DamageTypeColors } from "./damagetypecolors";
 import { useState } from "react";
 import { Breakdown } from "./breakdown";
 import { GameElement, GameElementHelper } from "../../gbf/battletypes/scenariodata/mechanics/element";
+import { CharacterColors } from "./charactercolors";
 
 interface ByTypeChartData {
   turn: string,
@@ -28,6 +29,12 @@ interface ByElementChartData {
   [GameElement.DESTRUCTION]: number,
 }
 
+interface ByCharacterChartData {
+  turn: string,
+  totalDamage: number,
+  [key: number]: number,
+}
+
 const ByType = createHorizontalChart<ByTypeChartData, string, number>()({
   BarChart,
   Bar,
@@ -37,6 +44,14 @@ const ByType = createHorizontalChart<ByTypeChartData, string, number>()({
 });
 
 const ByElement = createHorizontalChart<ByElementChartData, string, number>()({
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+});
+
+const ByCharacter = createHorizontalChart<ByCharacterChartData, string, number>()({
   BarChart,
   Bar,
   XAxis,
@@ -297,6 +312,115 @@ function totalDamageByTypeTimeSeries(battleData: GodsightBattleData) {
   );
 }
 
+function totalDamageByCharacterTimeSeries(battleData: GodsightBattleData) {
+  const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t));
+  const allCharacters = Array.from({ length: battleData["party"]["members"].length }, (_, idx) => idx);
+
+  const allTurnStats = allTurns.map(t => {
+    return {
+      turn: t,
+      stats: battleData["turnData"][t]["characterCurrentTurnStats"],
+    };
+  });
+
+  const data: ByCharacterChartData[] = allTurnStats.map(statsByTurn => {
+    const characterData = allCharacters.map(charIdx => {
+      const totalNormalAttackDamage = Math.round(Object.keys(statsByTurn.stats[charIdx]["normalAttackDamage"]).map(element => {
+        return statsByTurn.stats[charIdx]["normalAttackDamage"][element];
+      }).reduce((prev, cur) => prev + cur, 0));
+
+      const totalChargedAttackDamage = Math.round(Object.keys(statsByTurn.stats[charIdx]["chargedAttackDamage"]).map(element => {
+        return statsByTurn.stats[charIdx]["chargedAttackDamage"][element];
+      }).reduce((prev, cur) => prev + cur, 0));
+
+      const totalSkillDamage = Math.round(Object.keys(statsByTurn.stats[charIdx]["skillDamage"]).map(element => {
+        return statsByTurn.stats[charIdx]["skillDamage"][element];
+      }).reduce((prev, cur) => prev + cur, 0));
+
+      const totalOtherDamage = Math.round(Object.keys(statsByTurn.stats[charIdx]["otherDamage"]).map(element => {
+        return statsByTurn.stats[charIdx]["otherDamage"][element];
+      }).reduce((prev, cur) => prev + cur, 0));
+
+      return {
+        [charIdx]: totalNormalAttackDamage + totalChargedAttackDamage + totalSkillDamage + totalOtherDamage,
+      };
+    }).reduce((acc, cur) => {
+      return { ...acc, ...cur };
+    }, {});
+
+    const totalDamage = Object.values(characterData).reduce((prev, cur) => prev + cur);
+
+    return {
+      turn: `${statsByTurn.turn}`,
+      totalDamage,
+      ...characterData,
+    };
+  });
+
+  const CustomTooltip = ({ active, payload, label, activeIndex }: TooltipContentProps) => {
+    if (active && payload && payload.length) {
+
+      const numericIndex = Number(activeIndex);
+      const totalDamage = data[numericIndex]["totalDamage"];
+
+      return (
+        <div
+          className="custom-tooltip"
+          style={{
+            backgroundColor: '#282828',
+            padding: '10px',
+            border: "1px solid #c2c2c2"
+          }}>
+          <p className="label">Turn {label}</p>
+          {payload.map((entry, index) => (
+            entry.value !== 0 && entry.value != null ?
+              <p key={`item-${index}`} style={{ color: CharacterColors[index] }}>
+                {entry.name}: {entry.value?.toLocaleString()} ({((Number(entry.value) / totalDamage) * 100).toFixed(0)}%)
+              </p> :
+              <span key={`item-${index}`}></span>
+          ))}
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  return (
+    <ByCharacter.BarChart
+      style={{ width: '100%', maxWidth: '700px', maxHeight: '70vh', aspectRatio: 1.618 }}
+      responsive
+      data={data}
+      margin={{
+        top: 20,
+        right: 0,
+        left: 0,
+        bottom: 5,
+      }}
+    >
+      <CartesianGrid />
+      <ByCharacter.XAxis dataKey="turn" niceTicks="snap125" />
+      <ByCharacter.YAxis width="auto" niceTicks="snap125" />
+      <Tooltip
+        labelFormatter={(label) => `Turn ${label}`}
+        formatter={(a) => a?.toLocaleString()}
+        content={CustomTooltip}
+      />
+      <Legend itemSorter={null} />
+      {allCharacters.map(charIdx => (
+        <ByCharacter.Bar
+          key={charIdx}
+          name={battleData["party"]["members"][charIdx]["name"]}
+          dataKey={charIdx}
+          stackId="turn"
+          fill={CharacterColors[charIdx]}
+        />
+      ))}
+
+    </ByCharacter.BarChart>
+  );
+}
+
 export function TimeSeries({
   battleData,
   view,
@@ -312,10 +436,11 @@ export function TimeSeries({
 
   switch (view) {
     case StatsView.CHARACTER:
-      // TODO: this
-      viewResult = (
-        <>Character view.</>
-      );
+      if (selectedBreakdown == Breakdown.BY_TYPE) {
+        viewResult = <></>;//totalCharacterDamageByTypeTimeSeries(battleData, characterIndex);
+      } else if (selectedBreakdown == Breakdown.BY_ELEMENT) {
+        viewResult = <></>;//totalCharacterDamageByElementTimeSeries(battleData, characterIndex);
+      }
       break;
     case StatsView.DPT:
     case StatsView.TOTAL:
@@ -323,6 +448,8 @@ export function TimeSeries({
         viewResult = totalDamageByTypeTimeSeries(battleData);
       } else if (selectedBreakdown == Breakdown.BY_ELEMENT) {
         viewResult = totalDamageByElementTimeSeries(battleData);
+      } else if (selectedBreakdown == Breakdown.BY_CHARACTER) {
+        viewResult = totalDamageByCharacterTimeSeries(battleData);
       }
       break;
     case StatsView.CURRENT_TURN:
@@ -345,6 +472,13 @@ export function TimeSeries({
           className={selectedBreakdown == Breakdown.BY_ELEMENT ? "breakdown-option selected" : "breakdown-option"}
           onClick={() => setSelectedBreakdown(Breakdown.BY_ELEMENT)}
         >Element</div>
+        {view != StatsView.CHARACTER ?
+          <div
+            className={selectedBreakdown == Breakdown.BY_CHARACTER ? "breakdown-option selected" : "breakdown-option"}
+            onClick={() => setSelectedBreakdown(Breakdown.BY_CHARACTER)}
+          >Character</div> :
+          <></>
+        }
       </div>
       <div className="battle-stats-deepdive">
         {viewResult}

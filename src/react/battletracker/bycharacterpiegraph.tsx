@@ -2,27 +2,12 @@ import { PieChart, Pie, Tooltip, Legend, PieSectorShapeProps, Sector, useActiveT
 import { GodsightBattleData } from "../../godsight/battletypes/battledata";
 import { Stats } from "../../godsight/battletypes/stats";
 import { CSSProperties } from "react";
+import { CharacterColors } from "./charactercolors";
 
 const tooltipStyle: CSSProperties = {
   backgroundColor: "#282828",
   color: "#B4D3E0",
 };
-
-/**
- * Nine colors for nine max party members (in Unlimited raids).
- */
-const characterFillColors = [
-  "#ef476f",
-  "#f78c6b",
-  "#ffd166",
-  "#83d483",
-  "#06d6a0",
-  "#0cb0a9",
-  "#118ab2",
-  "#0c637f",
-  "#073b4c"
-];
-
 
 interface ByCharacterGraphData {
   name: string,
@@ -62,7 +47,7 @@ function byCharacterBreakdown(battleData: GodsightBattleData, characterStats: Re
     return {
       name: charName,
       damage: totalDamage,
-      fill: characterFillColors[charIdx],
+      fill: CharacterColors[charIdx],
     };
   });
 
@@ -85,7 +70,7 @@ function byCharacterBreakdown(battleData: GodsightBattleData, characterStats: Re
       <Sector
         {...props}
         stroke="none"
-        fill={characterFillColors[props.index % characterFillColors.length]}
+        fill={CharacterColors[props.index % CharacterColors.length]}
         fillOpacity={fillOpacity}
         style={{ transition: 'fill-opacity 0.3s ease' }}
       />
