@@ -68,7 +68,7 @@ export default function GodsightPanel() {
       const godsightBattleData = battleScenarioParser.parseStartData(data, settings["mainCharacterNameOverride"]);
       const raidId = godsightBattleData["raidId"];
 
-      const existingRaid = godsightStorage["battles"][raidId];
+      const existingRaid = godsightStorage["battles"].find(b => b["raidId"] == raidId);
 
       if (existingRaid) {
         // An existing raid means that the new battleData shouldn't have any actions in it.
@@ -82,17 +82,17 @@ export default function GodsightPanel() {
         delete godsightBattleData["updateTurnTo"];
       }
 
-      setSelectedBattle(String(raidId));
       storageManager.setBattleData(raidId, godsightBattleData);
+      setSelectedBattle(raidId);
     }
 
-    function withActiveBattle(callback: (battleId: string, raid: GodsightBattleData) => void) {
+    function withActiveBattle(callback: (battleId: number, raid: GodsightBattleData) => void) {
       chrome.devtools.inspectedWindow.eval("window.location.hash", (url: string) => {
         const fragment = url.split("#").at(-1);
-        const battleId = ((fragment || "").match(battleIdRegex) || []).at(-1);
+        const battleId = Number(((fragment || "").match(battleIdRegex) || []).at(-1));
 
-        if (battleId) {
-          const raid = godsightStorage["battles"][battleId];
+        if (!isNaN(battleId)) {
+          const raid = godsightStorage["battles"].find(b => b["raidId"] == battleId);
           if (raid) {
             const raidCopy = structuredClone(raid);
             Object.keys(raidCopy["turnData"]).forEach(turnNumber => {
@@ -279,12 +279,10 @@ export default function GodsightPanel() {
     };
   }, [onGbfPage, godsightStorage, settings]);
 
-  const allBattles = Object.keys(godsightStorage["battles"]).map(battleId => {
-    return godsightStorage["battles"][battleId];
-  }).sort((a, b) => {
+  const allBattles = godsightStorage["battles"].sort((a, b) => {
     return b["lastUpdated"] - a["lastUpdated"];
   });
-  const [selectedBattle, setSelectedBattle] = useState<string | undefined>(undefined);
+  const [selectedBattle, setSelectedBattle] = useState<number | undefined>(undefined);
 
   const [showConfig, setShowConfig] = useState(false);
 
@@ -314,7 +312,7 @@ export default function GodsightPanel() {
         <>
           {selectedBattle ? (
             <>
-              <BattleTracker battleData={godsightStorage["battles"][selectedBattle]} />
+              <BattleTracker battleData={godsightStorage["battles"].find(b => b["raidId"] == selectedBattle)} />
               <SearchHandler />
             </>
           ) : (
@@ -322,7 +320,7 @@ export default function GodsightPanel() {
               {allBattles.length > 0 ? (
                 <div className="battle-summary-wrapper">
                   {allBattles.map(battle =>
-                    <BattleSummary key={battle["raidId"]} battleData={battle} onClick={() => setSelectedBattle(String(battle["raidId"]))} deleteEntry={() => storageManager.deleteBattle(battle["raidId"])} />
+                    <BattleSummary key={battle["raidId"]} battleData={battle} onClick={() => setSelectedBattle(battle["raidId"])} deleteEntry={() => storageManager.deleteBattle(battle["raidId"])} />
                   )}
                 </div>
               ) : (

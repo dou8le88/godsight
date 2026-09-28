@@ -7,7 +7,7 @@ export class GodsightStorageManager {
   private static instance: GodsightStorageManager;
 
   private storageCache: GodsightStorage = {
-    "battles": {},
+    "battles": [],
   };
 
   private lastSetPromise = new Promise<void>((resolve) => resolve(undefined));
@@ -38,9 +38,8 @@ export class GodsightStorageManager {
   }
 
   private cloneAndRehydrateStorage() {
-    this.storageCache = structuredClone(this.storageCache);
-    Object.keys(this.storageCache["battles"]).forEach(key => {
-      const battle = this.storageCache["battles"][key];
+    this.storageCache = structuredClone(this.storageCache)
+    this.storageCache["battles"].forEach(battle => {
       this.rehydrateTurns(battle);
     });
   }
@@ -51,10 +50,8 @@ export class GodsightStorageManager {
     if (existingData[GodsightStorageManager.godsightStorageKey]) {
       const storage = JSON.parse(existingData[GodsightStorageManager.godsightStorageKey]!) as GodsightStorage;
 
-      Object.keys(storage["battles"]).forEach(battle => {
-        const battleJson = storage["battles"][battle];
-
-        this.rehydrateTurns(battleJson);
+      storage["battles"].forEach(battle => {
+        this.rehydrateTurns(battle);
       });
 
       this.storageCache = storage;
@@ -109,19 +106,17 @@ export class GodsightStorageManager {
     return this.storageCache;
   }
 
-  public getBattleData(battleId: number): GodsightBattleData | undefined {
-    return this.storageCache["battles"][battleId];
-  }
-
   public setBattleData(battleId: number, battleData: GodsightBattleData) {
     this.cloneAndRehydrateStorage();
-    this.storageCache["battles"][battleId] = battleData;
+    this.storageCache["battles"] = this.storageCache["battles"].filter(b => b["raidId"] != battleId);
+    this.storageCache["battles"].unshift(battleData);
     this.updateUnderlyingStorageAndNotify();
   }
 
   public deleteBattle(battleId: string | number) {
     this.cloneAndRehydrateStorage();
-    delete this.storageCache["battles"][battleId];
+    const battlesWithoutBattleId = this.storageCache["battles"].filter(b => b["raidId"] != battleId);
+    this.storageCache["battles"] = battlesWithoutBattleId;
     this.updateUnderlyingStorageAndNotify();
   }
 }
