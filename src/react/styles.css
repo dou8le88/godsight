@@ -126,12 +126,27 @@ body,
             column-gap: 10px;
             align-items: center;
 
+            .config-description {
+                width: 300px;
+                margin: 5px;
+                padding: 5px;
+                text-align: end;
+            }
+
             .config-text-input {
                 background-color: #3C3C3C;
                 color: #C7C7C7;
                 width: 150px;
-                height: 22px;
+                height: 25px;
                 border: none;
+                padding: 5px;
+            }
+
+            .config-select-input {
+                background-color: #3C3C3C;
+                color: #C7C7C7;
+                width: 150px;
+                height: 25px;
                 padding: 5px;
             }
         }
