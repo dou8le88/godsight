@@ -11,6 +11,7 @@ import { StatsUpdateHelper } from "../godsight/battletypes/stats";
 import { GodsightBattleData } from "../godsight/battletypes/battledata";
 import SearchHandler from "./search/searchhandler";
 import { BattleActionHelper } from "../godsight/battletypes/battleactionhelper";
+import { Config } from "./config/config";
 
 export default function GodsightPanel() {
   const validHosts = [
@@ -282,6 +283,8 @@ export default function GodsightPanel() {
   });
   const [selectedBattle, setSelectedBattle] = useState<string | undefined>(undefined);
 
+  const [showConfig, setShowConfig] = useState(false);
+
   const manifest = chrome.runtime.getManifest();
   return (
     <>
@@ -293,6 +296,15 @@ export default function GodsightPanel() {
           Godsight version {manifest["version"]}
         </a>
       </div>
+      <div className="toolbar">
+        <div className="icon config-icon" onClick={() => setShowConfig(true)}>⚙</div>
+      </div>
+      {showConfig ?
+        <>
+          <Config onExit={() => setShowConfig(false)} />
+        </> :
+        <></>
+      }
       {!onGbfPage ? (
         <WrongWebsiteBanner />
       ) : (
