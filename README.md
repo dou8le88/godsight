@@ -20,43 +20,18 @@ The only code that interfaces with the devtools APIs is in [/src/devtools.ts](/s
 
 This project is currently under active development.
 
-- [x] Initial boilerplate and placeholder stuff to make a devtools panel show up.
-- [x] Schema types for common battle actions.
 - [x] Listen to browser navigation and disable response parsing if on other webpages, and enable it when on the GBF website.
 - [x] Display a banner in the Godsight panel when on other websites, and show the normal UI when navigating to the game.
 - [x] Parse response bodies to determine command schemas.
 - [x] Handle commands and relevant battle data.
-    - [x] ABILITY
-    - [x] WINDOW_EFFECT
-    - [x] BUFF_AND_DEBUFF_CHANGED
-    - [x] MESSAGE
-    - [x] BOSS_HP
-    - [x] DAMAGE_DEALT
-    - [x] DAMAGE_DEALT_MULTIHIT
-    - [x] HONORS_GAINED
-    - [x] FATED_CHAIN_GAUGE_CHANGE
-    - [x] SUMMON
-    - [x] HEALING
-    - [x] BOSS_SPECIAL_ATTACK
-    - [x] CA_METER_CHANGED
-    - [x] NORMAL_ATTACK
-    - [x] CHARACTER_CHARGED_ATTACK
-    - [x] MC_CHARGED_ATTACK
-    - [x] CHAIN_BURST
-    - [x] HP_CHANGED
-    - [x] DEATH
-    - [x] REPLACE_CHARACTER
-    - [x] WON_BATTLE
-    - [x] FULL_ELIXIR
-    - [ ] Disabling effects on characters and bosses (Can't Act, Charm, Weakened, etc.)
-    - [ ] Other
 - [x] Basic UI with party member portraits
 - [x] Basic battle summary describing the outcomes of actions.
 - [x] More detailed result display: hitcounts (total/by damage type), debuffs applied count, etc.
     - [ ] Stats variant that just shows before-boss-action stuff ("omen-cancel-contributing stats")
-- [ ] DPS/DPT view
-    - [ ] Current DPS/DPT
-    - [ ] Last turn damage
-    - [ ] Individual character DPS/DPT
-    - [ ] Damage distribution pie graphs
-    - [ ] Average damage per action name/type.
+- [X] DPS/DPT view
+    - [X] Current DPS/DPT
+    - [X] Last turn damage
+    - [X] Individual character DPS/DPT
+    - [X] Damage distribution pie graphs
+    - [X] Damage distribution by turn bar graphs
+    - [ ] Damage info per action.
