@@ -12,6 +12,9 @@ export function Config({ onExit }: { onExit: () => void }) {
   const defaultBattleViewOptions = Object.values(DefaultBattleView);
   const defaultBattleViewRef = useRef<HTMLSelectElement>(null);
 
+  const maxRememberedBattlesRef = useRef<HTMLInputElement>(null);
+  const minRememberedBattles = 5;
+
   return (
     <>
       <div className="config-overlay-mask"></div>
@@ -73,6 +76,31 @@ export function Config({ onExit }: { onExit: () => void }) {
                 </option>
               ))}
             </select>
+          </div>
+          <div className="config-option">
+            <label htmlFor="max-remembered-battles" className="config-description">
+              Max remembered battles:
+            </label>
+            <input
+              id="max-remembered-battles"
+              className="config-text-input"
+              type="number"
+              value={settings["maxRememberedBattles"]}
+              min={minRememberedBattles}
+              ref={maxRememberedBattlesRef}
+              onChange={() => {
+                if (maxRememberedBattlesRef.current) {
+                  const value = Number(maxRememberedBattlesRef.current.value);
+
+                  if (!isNaN(value) && value >= minRememberedBattles) {
+                    settingsManager.updateSingleSetting(
+                      "maxRememberedBattles",
+                      value,
+                    );
+                  }
+                }
+              }}
+            />
           </div>
         </div>
       </div>

@@ -82,7 +82,7 @@ export default function GodsightPanel() {
         delete godsightBattleData["updateTurnTo"];
       }
 
-      storageManager.setBattleData(raidId, godsightBattleData);
+      storageManager.setBattleData(raidId, godsightBattleData, settings["maxRememberedBattles"]);
       setSelectedBattle(raidId);
     }
 
@@ -160,7 +160,7 @@ export default function GodsightPanel() {
           delete raid["updateTurnTo"];
         }
 
-        storageManager.setBattleData(Number(battleId), raid);
+        storageManager.setBattleData(Number(battleId), raid, settings["maxRememberedBattles"]);
       });
     }
 
@@ -279,9 +279,7 @@ export default function GodsightPanel() {
     };
   }, [onGbfPage, godsightStorage, settings]);
 
-  const allBattles = godsightStorage["battles"].sort((a, b) => {
-    return b["lastUpdated"] - a["lastUpdated"];
-  });
+  const allBattles = godsightStorage["battles"];
   const [selectedBattle, setSelectedBattle] = useState<number | undefined>(undefined);
 
   const [showConfig, setShowConfig] = useState(false);

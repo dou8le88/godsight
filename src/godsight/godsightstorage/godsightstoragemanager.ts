@@ -106,10 +106,13 @@ export class GodsightStorageManager {
     return this.storageCache;
   }
 
-  public setBattleData(battleId: number, battleData: GodsightBattleData) {
+  public setBattleData(battleId: number, battleData: GodsightBattleData, maxRememberedBattles: number) {
     this.cloneAndRehydrateStorage();
     this.storageCache["battles"] = this.storageCache["battles"].filter(b => b["raidId"] != battleId);
     this.storageCache["battles"].unshift(battleData);
+    if (this.storageCache["battles"].length > maxRememberedBattles) {
+      this.storageCache["battles"].pop();
+    }
     this.updateUnderlyingStorageAndNotify();
   }
 

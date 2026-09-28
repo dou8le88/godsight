@@ -2,6 +2,7 @@ export interface GodsightSettings {
   "mainCharacterNameOverride": string,
   "defaultBattleView": DefaultBattleView,
   "lastSelectedBattleView"?: BattleViewTab,
+  "maxRememberedBattles": number,
 }
 
 export enum DefaultBattleView {
@@ -18,4 +19,5 @@ export enum BattleViewTab {
 export const DefaultSettings: GodsightSettings = {
   "mainCharacterNameOverride": "MC",
   "defaultBattleView": DefaultBattleView.LAST_SELECTION,
+  "maxRememberedBattles": 10,
 };

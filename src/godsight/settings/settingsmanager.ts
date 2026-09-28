@@ -30,6 +30,15 @@ export class SettingsManager {
     if (existingData[SettingsManager.settingsKey]) {
       const settings = JSON.parse(existingData[SettingsManager.settingsKey]!) as GodsightSettings;
 
+      const settingsKeys = Object.keys(DefaultSettings) as unknown as (keyof GodsightSettings)[];
+
+      // Initialize any new config values with their defaults.
+      settingsKeys.forEach((key: keyof GodsightSettings) => {
+        if (!(key in settings)) {
+          (settings as unknown as Record<string, unknown>)[key] = DefaultSettings[key];
+        }
+      });
+
       this.settingsCache = settings;
     } else {
       await chrome.storage.local.set({ [SettingsManager.settingsKey]: JSON.stringify(this.settingsCache) }).catch(reason => {
