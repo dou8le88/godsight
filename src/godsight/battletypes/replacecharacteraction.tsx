@@ -18,7 +18,7 @@ export class ReplaceCharacterAction extends BattleAction {
   getDescription(key: number): JSX.Element {
 
     return (
-      <div key={key} className="action-description">{this.characterName} was replaced by {
+      <div key={key} className="action-description">{this.characterName} swapped with {
         this.replacementCharacterName
       }!
       </div>

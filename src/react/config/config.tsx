@@ -1,4 +1,12 @@
+import { useRef } from "react";
+import { SettingsManager } from "../../godsight/settings/settingsmanager";
+import { useGodsightSettings } from "../../godsight/settings/usegodsightsettings";
+
 export function Config({ onExit }: { onExit: () => void }) {
+  const settingsManager = SettingsManager.getInstance();
+  const settings = useGodsightSettings();
+
+  const mainCharacterNameRef = useRef<HTMLInputElement>(null);
 
   return (
     <>
@@ -13,7 +21,25 @@ export function Config({ onExit }: { onExit: () => void }) {
           </div>
         </div>
         <div className="config-body">
-          Config options here.
+          <div className="config-option">
+            <label className="config-description">
+              Override MC name (leave blank to use ingame name):
+            </label>
+            <input
+              className="config-text-input"
+              type="text"
+              placeholder="Same as ingame name"
+              ref={mainCharacterNameRef}
+              value={settings["mainCharacterNameOverride"]}
+              onChange={() => {
+                if (mainCharacterNameRef.current) {
+                  settingsManager.updateSingleSetting(
+                    "mainCharacterNameOverride",
+                    mainCharacterNameRef.current.value
+                  );
+                }
+              }} />
+          </div>
         </div>
       </div>
     </>

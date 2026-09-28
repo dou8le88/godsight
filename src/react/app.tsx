@@ -4,7 +4,7 @@ import { GranblueBattleData } from "../gbf/battletypes/battledata";
 import { StartData } from "../gbf/battletypes/startdata";
 import BattleTracker from "./battletracker/battletracker";
 import { BattleScenarioParser } from "../battlescenarioparser";
-import { useGodsightStorage } from "./battletracker/usegodsightstorage";
+import { useGodsightStorage } from "../godsight/godsightstorage/usegodsightstorage";
 import { GodsightStorageManager } from "../godsight/godsightstorage/godsightstoragemanager";
 import BattleSummary from "./battletracker/battlesummary";
 import { StatsUpdateHelper } from "../godsight/battletypes/stats";
@@ -12,6 +12,7 @@ import { GodsightBattleData } from "../godsight/battletypes/battledata";
 import SearchHandler from "./search/searchhandler";
 import { BattleActionHelper } from "../godsight/battletypes/battleactionhelper";
 import { Config } from "./config/config";
+import { useGodsightSettings } from "../godsight/settings/usegodsightsettings";
 
 export default function GodsightPanel() {
   const validHosts = [
@@ -55,6 +56,8 @@ export default function GodsightPanel() {
   const battleScenarioParser = new BattleScenarioParser();
   const godsightStorage = useGodsightStorage();
 
+  const settings = useGodsightSettings();
+
   // Only listen for network requests when we're inspecting GBF.
   useEffect(() => {
     if (!onGbfPage) return;
@@ -62,7 +65,7 @@ export default function GodsightPanel() {
     function startDataHandler(data: StartData, endpoint: string) {
       console.info(`Got start data for ${endpoint}`);
 
-      const godsightBattleData = battleScenarioParser.parseStartData(data);
+      const godsightBattleData = battleScenarioParser.parseStartData(data, settings["mainCharacterNameOverride"]);
       const raidId = godsightBattleData["raidId"];
 
       const existingRaid = godsightStorage["battles"][raidId];
@@ -274,7 +277,7 @@ export default function GodsightPanel() {
     return () => {
       chrome.devtools.network.onRequestFinished.removeListener(onRequestFinishedListener);
     };
-  }, [onGbfPage, godsightStorage]);
+  }, [onGbfPage, godsightStorage, settings]);
 
   const allBattles = Object.keys(godsightStorage["battles"]).map(battleId => {
     return godsightStorage["battles"][battleId];

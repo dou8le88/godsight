@@ -1,6 +1,5 @@
 import { BattleActionHelper } from "../battletypes/battleactionhelper";
 import { GodsightBattleData } from "../battletypes/battledata";
-import { defaultSettings, GodsightSettings } from "../godsightsettings";
 import { GodsightStorage } from "./battlestorage";
 
 export class GodsightStorageManager {
@@ -8,7 +7,6 @@ export class GodsightStorageManager {
   private static instance: GodsightStorageManager;
 
   private storageCache: GodsightStorage = {
-    "settings": defaultSettings,
     "battles": {},
   };
 
@@ -124,12 +122,6 @@ export class GodsightStorageManager {
   public deleteBattle(battleId: string | number) {
     this.cloneAndRehydrateStorage();
     delete this.storageCache["battles"][battleId];
-    this.updateUnderlyingStorageAndNotify();
-  }
-
-  public setSettings(settings: GodsightSettings) {
-    this.cloneAndRehydrateStorage();
-    this.storageCache["settings"] = settings;
     this.updateUnderlyingStorageAndNotify();
   }
 }

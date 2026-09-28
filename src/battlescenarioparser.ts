@@ -1224,14 +1224,20 @@ export class BattleScenarioParser {
     return actions;
   }
 
-  public parseStartData(startData: StartData): GodsightBattleData {
+  public parseStartData(startData: StartData, mainCharacterNameOverride: string): GodsightBattleData {
     const party = {
       "partyMemberCount": startData["player"]["number"],
       "frontline": startData["formation"].map(idx => Number(idx)),
       "backline": startData["back_formation"].map(idx => Number(idx)),
       "members": startData["player"]["param"].map(character => {
+        const isMC = Boolean(character["leader"]);
+        let name = character["name"];
+        if (isMC && mainCharacterNameOverride) {
+          name = mainCharacterNameOverride;
+        }
+
         return {
-          "name": character["name"],
+          "name": name,
           "characterId": String(character["setting_id"]),
           "isMC": Boolean(character["leader"]),
           /**

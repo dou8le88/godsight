@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react';
-import { GodsightStorageManager } from '../../godsight/godsightstorage/godsightstoragemanager';
-import { GodsightStorage } from '../../godsight/godsightstorage/battlestorage';
+import { GodsightStorageManager } from './godsightstoragemanager';
+import { GodsightStorage } from './battlestorage';
 
 const godsightStorageManager = GodsightStorageManager.getInstance();
 
