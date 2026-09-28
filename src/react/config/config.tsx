@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { SettingsManager } from "../../godsight/settings/settingsmanager";
 import { useGodsightSettings } from "../../godsight/settings/usegodsightsettings";
 import { DefaultBattleView } from "../../godsight/settings/godsightsettings";
@@ -14,6 +14,22 @@ export function Config({ onExit }: { onExit: () => void }) {
 
   const maxRememberedBattlesRef = useRef<HTMLInputElement>(null);
   const minRememberedBattles = 5;
+
+  useEffect(() => {
+    const listener = (e: KeyboardEvent) => {
+      if (e.key == "Escape") {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        onExit();
+      }
+    };
+    window.addEventListener("keydown", listener, true);
+
+    return () => {
+      window.removeEventListener("keydown", listener, true);
+    };
+  }, []);
 
   return (
     <>
