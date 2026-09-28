@@ -10,6 +10,10 @@ import { identity } from "../../util/functional";
 import { BattleActionParser } from "./battleactionparser";
 
 export class BattleActionHelper {
+  static IconlessStatusEffects = [
+    "1047",
+  ];
+
   static getRehydratedActions(battleActions: BattleAction[]): BattleAction[] {
     const rehydratedActions: (BattleAction | undefined)[] = [];
 

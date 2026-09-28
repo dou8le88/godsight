@@ -22,10 +22,6 @@ export class ConditionChangeAction extends BattleAction {
     super();
   }
 
-  private iconlessStatusEffects = [
-    "1047",
-  ];
-
   getDescription(key: number): JSX.Element {
     const allStatuses = [
       ...this.buffs,
@@ -38,7 +34,7 @@ export class ConditionChangeAction extends BattleAction {
 
     const gainedStatusesJsx: React.ReactNode[] | null = gainedStatuses.map((status, idx) => (
       <span className="status-wrapper" key={idx}>
-        <span className="status-text">{status.name}</span> {status.icon && !this.iconlessStatusEffects.includes(status.icon) ? <img className="status-icon" src={BattleActionHelper.getStatusUrl(status.icon)} /> : <></>}
+        <span className="status-text">{status.name}</span> {status.icon && !BattleActionHelper.IconlessStatusEffects.includes(status.icon) ? <img className="status-icon" src={BattleActionHelper.getStatusUrl(status.icon)} /> : <></>}
       </span>
     )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, ", ", cur], null);
 
