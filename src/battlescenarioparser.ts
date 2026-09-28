@@ -329,6 +329,9 @@ export class BattleScenarioParser {
           const newCharacter = Number(replaceCharacterScenario["npc"]);
           const entireFormation = godsightBattleData["party"]["frontline"].concat(godsightBattleData["party"]["backline"]);
           const currentCharacterAtPos = entireFormation[position];
+          if (newCharacter == currentCharacterAtPos) {
+            break;
+          }
           const oldPositionOfNewCharacter = entireFormation.findIndex(c => c == newCharacter);
           const replaceCharacterAction = new ReplaceCharacterAction(
             PartyFormationHelper.getNameOfCharacterInPosition(
