@@ -283,9 +283,24 @@ export class BattleScenarioParser {
                 abilityAction.overrideMessage = battleLogScenario["body"];
                 actions.push(abilityAction);
               } else {
-                // No known way (yet) to make sense of this Ability command, so just
-                // let the subactions be independent.
-                actions.push(...abilityAction.subactions);
+                const maybeDamageSubaction = abilityAction.subactions.find(a =>
+                  a instanceof DamageAction || a instanceof MultihitDamageAction || a instanceof ConditionChangeAction
+                );
+                if (maybeDamageSubaction) {
+                  // Unfortunately, if we elevated the subactions to main actions,
+                  // we would lose context about the actor who caused the damage/debuffs.
+                  // Very unfortunately, it seems that certain effects can be
+                  // inconsistently named even in the same battle, so we end up
+                  // with no name for something that *should* be displaying a name.
+                  // E.g., Echidna will sometimes not have a name for the skill
+                  // damage from her "Primal Beast of Motherhood" passive.
+                  abilityAction.name = "Unnamed Ability";
+                  actions.push(abilityAction);
+                } else {
+                  // No known way (yet) to make sense of this Ability command, so just
+                  // let the subactions be independent.
+                  actions.push(...abilityAction.subactions);
+                }
               }
             }
           } else {
