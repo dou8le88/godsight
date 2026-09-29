@@ -9,7 +9,7 @@ import { FatedChainGaugeScenarioData } from "./gbf/battletypes/scenariodata/fate
 import { FormChangeScenarioData } from "./gbf/battletypes/scenariodata/formchangescenariodata";
 import { GenericScenarioData } from "./gbf/battletypes/scenariodata/genericscenariodata";
 import { HonorsGainedScenarioData } from "./gbf/battletypes/scenariodata/honorsgainedscenariodata";
-import { GameElement, GameElementValue } from "./gbf/battletypes/scenariodata/mechanics/element";
+import { GameElement, GameElementHelper, GameElementValue } from "./gbf/battletypes/scenariodata/mechanics/element";
 import { StatusType } from "./gbf/battletypes/scenariodata/mechanics/statustype";
 import { Actor } from "./gbf/battletypes/scenariodata/mechanics/actor";
 import { MessageScenarioData } from "./gbf/battletypes/scenariodata/messagescenariodata";
@@ -158,7 +158,7 @@ export class BattleScenarioParser {
                 instance["pos"],
               );
               const damageInstance: DamageInstance = {
-                "element": "attr" in instance && instance["attr"] !== "" ? instance["attr"] : GameElement.NULL_PLAIN,
+                "element": "attr" in instance && instance["attr"] !== "" ? GameElementHelper.getNumericGameElement(instance["attr"]) : GameElement.NULL_PLAIN,
                 "receiverIndex": receiverIndex,
                 "receiverName": receiverName,
                 "value": instance["value"],
@@ -402,7 +402,7 @@ export class BattleScenarioParser {
                 "receiverIndex": receiverIndex,
                 "receiverName": receiverName,
                 "currentHit": l["attack_num"],
-                "element": "color" in l && l["color"] !== "" ? l["color"] : GameElement.NULL_PLAIN,
+                "element": "color" in l && l["color"] !== "" ? GameElementHelper.getNumericGameElement(l["color"]) : GameElement.NULL_PLAIN,
                 "value": l["value"],
                 "receiverHpAfterDamage": l["hp"],
                 "critical": l["critical"],
@@ -438,7 +438,7 @@ export class BattleScenarioParser {
               hit["pos"],
             );
             return {
-              "element": "color" in hit && hit["color"] !== "" ? hit["color"] : GameElement.NULL_PLAIN,
+              "element": "color" in hit && hit["color"] !== "" ? GameElementHelper.getNumericGameElement(hit["color"]) : GameElement.NULL_PLAIN,
               "receiverIndex": receiverIndex,
               "receiverName": receiverName,
               "value": hit["value"],
@@ -550,7 +550,7 @@ export class BattleScenarioParser {
                 damageElement = GameElement.NULL_PLAIN;
               }
               return {
-                "element": damageElement,
+                "element": GameElementHelper.getNumericGameElement(damageElement),
                 "receiverIndex": receiverIndex,
                 "receiverName": receiverName,
                 "value": damage["value"],
@@ -791,7 +791,7 @@ export class BattleScenarioParser {
                 d["pos"],
               );
               return {
-                "element": "color" in d && d["color"] !== "" ? d["color"] : GameElement.NULL_PLAIN,
+                "element": "color" in d && d["color"] !== "" ? GameElementHelper.getNumericGameElement(d["color"]) : GameElement.NULL_PLAIN,
                 "receiverIndex": receiverIndex,
                 "receiverName": receiverName,
                 "value": d["value"],
@@ -822,7 +822,7 @@ export class BattleScenarioParser {
                 d["pos"],
               );
               return {
-                "element": "color" in d && d["color"] !== "" ? d["color"] : GameElement.NULL_PLAIN,
+                "element": "color" in d && d["color"] !== "" ? GameElementHelper.getNumericGameElement(d["color"]) : GameElement.NULL_PLAIN,
                 "receiverIndex": receiverIndex,
                 "receiverName": receiverName,
                 "value": d["value"],

@@ -6,6 +6,7 @@ import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { JSX } from "react/jsx-runtime";
 import { BattleActionHelper } from "./battleactionhelper";
 import { assertNotNullOrUndefined } from "../../util/assert";
+import { DamageDisplay } from "../settings/godsightsettings";
 
 export class MultihitDamageAction extends BattleAction {
   public actionType: ActionType = ActionType.DAMAGE_DEALT_MULTIHIT;
@@ -19,9 +20,10 @@ export class MultihitDamageAction extends BattleAction {
     super();
   }
 
-  getDescription(key: number): JSX.Element {
+  getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
     const damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(
       this.hits,
+      damageDisplay,
     );
 
     return (

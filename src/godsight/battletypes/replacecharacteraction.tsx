@@ -3,6 +3,7 @@ import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { assertNotNullOrUndefined } from "../../util/assert";
+import { DamageDisplay } from "../settings/godsightsettings";
 
 export class ReplaceCharacterAction extends BattleAction {
   public actionType: ActionType = ActionType.REPLACED_CHARACTER;
@@ -15,7 +16,7 @@ export class ReplaceCharacterAction extends BattleAction {
     super();
   }
 
-  getDescription(key: number): JSX.Element {
+  getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
 
     return (
       <div key={key} className="action-description">{this.characterName} swapped with {

@@ -1,8 +1,8 @@
 import { AttackAccuracyResult } from "../../gbf/battletypes/scenariodata/mechanics/attackaccuracyresult"
-import { GameElementValue } from "../../gbf/battletypes/scenariodata/mechanics/element"
+import { NumericGameElement } from "../../gbf/battletypes/scenariodata/mechanics/element"
 
 export interface DamageInstance {
-  "element": GameElementValue,
+  "element": NumericGameElement,
   "receiverName": string,
   "receiverIndex": number,
   "value": number,

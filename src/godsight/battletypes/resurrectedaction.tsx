@@ -3,6 +3,7 @@ import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { assertNotNullOrUndefined } from "../../util/assert";
+import { DamageDisplay } from "../settings/godsightsettings";
 
 export class ResurrectedAction extends BattleAction {
   public actionType: ActionType = ActionType.RESURRECTED;
@@ -19,7 +20,7 @@ export class ResurrectedAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
-  getDescription(key: number): JSX.Element {
+  getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
     return (
       <div key={key} className="action-description">{this.resurrectedCharacterName} was revived by {this.resurrectionCause}!
       </div>

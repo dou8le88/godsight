@@ -3,6 +3,7 @@ import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { assertNotNullOrUndefined } from "../../util/assert";
+import { DamageDisplay } from "../settings/godsightsettings";
 
 export class WindowEffectAction extends BattleAction {
   public actionType: ActionType = ActionType.WINDOW_EFFECT;
@@ -14,7 +15,7 @@ export class WindowEffectAction extends BattleAction {
     super();
   }
 
-  getDescription(key: number): JSX.Element {
+  getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
     return (
       <div key={key} className="action-description">The window effect {this.name} was activated!
       </div>

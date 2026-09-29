@@ -53,11 +53,11 @@ export class GameElementHelper {
     return Object.values(GameElement);
   }
 
-  static getNumericGameElement(elt: GameElementValue): typeof GameElement[keyof typeof GameElement] {
+  static getNumericGameElement(elt: GameElementValue): NumericGameElement {
     if (elt === "" || elt === undefined || elt === null) {
       return GameElement.NULL_PLAIN;
     } else {
-      return Number(elt) as typeof GameElement[keyof typeof GameElement];
+      return Number(elt) as NumericGameElement;
     }
   }
 

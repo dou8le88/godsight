@@ -152,7 +152,7 @@ body,
                 border: 1px solid #5E5E5E;
                 color: #C7C7C7;
                 width: 150px;
-                height: 25px;
+                height: 28px;
                 padding: 5px;
             }
 
@@ -161,8 +161,12 @@ body,
                 border: 1px solid #5E5E5E;
                 color: #C7C7C7;
                 width: 150px;
-                height: 25px;
+                height: 28px;
                 padding: 5px;
+            }
+
+            .config-explanation {
+                width: 500px;
             }
         }
 
@@ -289,6 +293,13 @@ body,
     &.Heal {
         color: #20B728;
         text-shadow: 1px 1px 2px #101D08;
+    }
+
+    &.gradient {
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+        font-weight: bold;
+        display: inline-block;
     }
 }
 

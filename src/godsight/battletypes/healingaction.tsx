@@ -6,6 +6,7 @@ import { HealingInstance } from "./healinginstance";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { BattleActionHelper } from "./battleactionhelper";
 import { assertNotNullOrUndefined } from "../../util/assert";
+import { DamageDisplay } from "../settings/godsightsettings";
 
 export class HealingAction extends BattleAction {
   public actionType: ActionType = ActionType.HEAL;
@@ -19,7 +20,7 @@ export class HealingAction extends BattleAction {
     super();
   }
 
-  getDescription(key: number): JSX.Element {
+  getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
     const healingJsx = BattleActionHelper.getHealingInstanceJsx(
       this.healingInstances,
     );

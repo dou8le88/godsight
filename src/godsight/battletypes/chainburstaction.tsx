@@ -5,6 +5,7 @@ import { DamageInstance } from "./damageinstance";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { BattleActionHelper } from "./battleactionhelper";
 import { assertNotNullOrUndefined } from "../../util/assert";
+import { DamageDisplay } from "../settings/godsightsettings";
 
 export class ChainBurstAction extends BattleAction {
   public actionType: ActionType = ActionType.CHAIN_BURST;
@@ -19,8 +20,8 @@ export class ChainBurstAction extends BattleAction {
     super();
   }
 
-  getDescription(key: number): JSX.Element {
-    const damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(this.damageInstances);
+  getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
+    const damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(this.damageInstances, damageDisplay);
 
     return (
       <div key={key} className="action-description" > The party activated the chain burst {this.name}!

@@ -1,7 +1,10 @@
 import { useEffect, useRef } from "react";
 import { SettingsManager } from "../../godsight/settings/settingsmanager";
 import { useGodsightSettings } from "../../godsight/settings/usegodsightsettings";
-import { DefaultBattleView } from "../../godsight/settings/godsightsettings";
+import { DamageDisplay, DefaultBattleView } from "../../godsight/settings/godsightsettings";
+import { DamageInstance } from "../../godsight/battletypes/damageinstance";
+import { GameElement } from "../../gbf/battletypes/scenariodata/mechanics/element";
+import { BattleActionHelper } from "../../godsight/battletypes/battleactionhelper";
 
 export function Config({ onExit }: { onExit: () => void }) {
   const settingsManager = SettingsManager.getInstance();
@@ -14,6 +17,138 @@ export function Config({ onExit }: { onExit: () => void }) {
 
   const maxRememberedBattlesRef = useRef<HTMLInputElement>(null);
   const minRememberedBattles = 5;
+
+  const damageDisplayOptions = Object.values(DamageDisplay);
+  const damageDisplayRef = useRef<HTMLSelectElement>(null);
+  const sampleDamageInstances: DamageInstance[] = [{
+    "element": GameElement.NULL_PLAIN,
+    "receiverName": "Old Lignoid",
+    "receiverIndex": 0,
+    "value": 1000000,
+    "critical": true,
+    "miss": 0,
+    "guarded": false,
+  }, {
+    "element": GameElement.NULL_PLAIN,
+    "receiverName": "Old Lignoid",
+    "receiverIndex": 0,
+    "value": 1000000,
+    "critical": true,
+    "miss": 0,
+    "guarded": false,
+  }, {
+    "element": GameElement.FIRE,
+    "receiverName": "Old Lignoid",
+    "receiverIndex": 0,
+    "value": 1000000,
+    "critical": true,
+    "miss": 0,
+    "guarded": false,
+  }, {
+    "element": GameElement.FIRE,
+    "receiverName": "Old Lignoid",
+    "receiverIndex": 0,
+    "value": 1000000,
+    "critical": true,
+    "miss": 0,
+    "guarded": false,
+  }, {
+    "element": GameElement.WATER,
+    "receiverName": "Old Lignoid",
+    "receiverIndex": 0,
+    "value": 1000000,
+    "critical": true,
+    "miss": 0,
+    "guarded": false,
+  }, {
+    "element": GameElement.WATER,
+    "receiverName": "Old Lignoid",
+    "receiverIndex": 0,
+    "value": 1000000,
+    "critical": true,
+    "miss": 0,
+    "guarded": false,
+  }, {
+    "element": GameElement.EARTH,
+    "receiverName": "Old Lignoid",
+    "receiverIndex": 0,
+    "value": 1000000,
+    "critical": true,
+    "miss": 0,
+    "guarded": false,
+  }, {
+    "element": GameElement.EARTH,
+    "receiverName": "Old Lignoid",
+    "receiverIndex": 0,
+    "value": 1000000,
+    "critical": true,
+    "miss": 0,
+    "guarded": false,
+  }, {
+    "element": GameElement.WIND,
+    "receiverName": "Old Lignoid",
+    "receiverIndex": 0,
+    "value": 1000000,
+    "critical": true,
+    "miss": 0,
+    "guarded": false,
+  }, {
+    "element": GameElement.WIND,
+    "receiverName": "Old Lignoid",
+    "receiverIndex": 0,
+    "value": 1000000,
+    "critical": true,
+    "miss": 0,
+    "guarded": false,
+  }, {
+    "element": GameElement.LIGHT,
+    "receiverName": "Old Lignoid",
+    "receiverIndex": 0,
+    "value": 1000000,
+    "critical": true,
+    "miss": 0,
+    "guarded": false,
+  }, {
+    "element": GameElement.LIGHT,
+    "receiverName": "Old Lignoid",
+    "receiverIndex": 0,
+    "value": 1000000,
+    "critical": true,
+    "miss": 0,
+    "guarded": false,
+  }, {
+    "element": GameElement.DARK,
+    "receiverName": "Old Lignoid",
+    "receiverIndex": 0,
+    "value": 1000000,
+    "critical": true,
+    "miss": 0,
+    "guarded": false,
+  }, {
+    "element": GameElement.DARK,
+    "receiverName": "Old Lignoid",
+    "receiverIndex": 0,
+    "value": 1000000,
+    "critical": true,
+    "miss": 0,
+    "guarded": false,
+  }, {
+    "element": GameElement.DESTRUCTION,
+    "receiverName": "Old Lignoid",
+    "receiverIndex": 0,
+    "value": 1000000,
+    "critical": true,
+    "miss": 0,
+    "guarded": false,
+  }, {
+    "element": GameElement.DESTRUCTION,
+    "receiverName": "Old Lignoid",
+    "receiverIndex": 0,
+    "value": 1000000,
+    "critical": true,
+    "miss": 0,
+    "guarded": false,
+  }];
 
   useEffect(() => {
     const listener = (e: KeyboardEvent) => {
@@ -117,6 +252,38 @@ export function Config({ onExit }: { onExit: () => void }) {
                 }
               }}
             />
+          </div>
+          <div className="config-option">
+            <label htmlFor="damage-display" className="config-description">
+              Multi-hit damage display:
+            </label>
+            <select
+              id="damage-display"
+              className="config-select-input"
+              name="damage-display"
+              ref={damageDisplayRef}
+              defaultValue={settings["damageDisplay"]}
+              onChange={() => {
+                if (damageDisplayRef.current) {
+                  settingsManager.updateSingleSetting(
+                    "damageDisplay",
+                    damageDisplayRef.current.value as DamageDisplay,
+                  );
+                }
+              }}
+            >
+              {damageDisplayOptions.map(viewOption => (
+                <option
+                  key={viewOption}
+                  value={viewOption}
+                >
+                  {viewOption}
+                </option>
+              ))}
+            </select>
+            <div className="config-explanation">
+              {BattleActionHelper.getDamageInstanceJsx(sampleDamageInstances, settings["damageDisplay"])}
+            </div>
           </div>
         </div>
       </div>

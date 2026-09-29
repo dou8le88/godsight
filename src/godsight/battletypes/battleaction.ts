@@ -1,6 +1,7 @@
 import { JSX } from "react/jsx-runtime";
 import { ActionType } from "./actiontype";
 import { StatsUpdate } from "./stats";
+import { DamageDisplay } from "../settings/godsightsettings";
 
 export abstract class BattleAction {
   abstract actionType: ActionType;
@@ -8,7 +9,7 @@ export abstract class BattleAction {
 
   abstract getStats(): StatsUpdate;
 
-  abstract getDescription(key: number): JSX.Element;
+  abstract getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   static fromJSON(json: Record<string, unknown>): BattleAction | undefined {

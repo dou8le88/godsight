@@ -3,6 +3,7 @@ import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { assertNotNullOrUndefined } from "../../util/assert";
+import { DamageDisplay } from "../settings/godsightsettings";
 
 export class OmenCancelAction extends BattleAction {
   public actionType: ActionType = ActionType.OMEN_CANCELLED;
@@ -18,7 +19,7 @@ export class OmenCancelAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
-  getDescription(key: number): JSX.Element {
+  getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
     return (
       <div key={key} className="action-description">{this.bossName}&apos;s omen was canceled!
       </div>

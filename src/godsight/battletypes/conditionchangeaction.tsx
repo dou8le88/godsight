@@ -6,6 +6,7 @@ import { ActionType } from "./actiontype";
 import { JSX } from "react/jsx-runtime";
 import { BattleActionHelper } from "./battleactionhelper";
 import { assertNotNullOrUndefined } from "../../util/assert";
+import { DamageDisplay } from "../settings/godsightsettings";
 
 export class ConditionChangeAction extends BattleAction {
   public actionType: ActionType = ActionType.CONDITION_CHANGED;
@@ -22,7 +23,7 @@ export class ConditionChangeAction extends BattleAction {
     super();
   }
 
-  getDescription(key: number): JSX.Element {
+  getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
     const allStatuses = [
       ...this.buffs,
       ...this.debuffs,

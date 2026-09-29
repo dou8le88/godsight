@@ -3,6 +3,7 @@ import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { assertNotNullOrUndefined } from "../../util/assert";
+import { DamageDisplay } from "../settings/godsightsettings";
 
 export class TurnChangeAction extends BattleAction {
   public actionType: ActionType = ActionType.TURN_CHANGE;
@@ -19,7 +20,7 @@ export class TurnChangeAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
-  getDescription(key: number): JSX.Element {
+  getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
     return (
       <div key={key} className="action-description">The turn counter advanced by {this.newTurn - this.currentTurn}!
       </div>

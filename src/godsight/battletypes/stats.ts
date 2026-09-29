@@ -20,7 +20,7 @@ export interface StatsUpdate {
 }
 
 export class StatsUpdateHelper {
-  private static getEmptyElementValues(): DamageByElement {
+  static getEmptyElementValues(): DamageByElement {
     const damageByElement: DamageByElement = {};
 
     GameElementHelper.getAllElements().forEach(element => {

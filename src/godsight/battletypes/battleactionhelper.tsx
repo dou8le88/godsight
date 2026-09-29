@@ -2,12 +2,14 @@ import { JSX } from "react/jsx-runtime";
 import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
 import { DamageInstance } from "./damageinstance";
 import { GodsightPartyFormationData, PartyFormationHelper } from "./partyformationdata";
-import { GameElementHelper, GameElementValue } from "../../gbf/battletypes/scenariodata/mechanics/element";
+import { GameElement, GameElementHelper, GameElementValue, NumericGameElement } from "../../gbf/battletypes/scenariodata/mechanics/element";
 import { HealingInstance } from "./healinginstance";
 import { GodsightBossData } from "./bossdata";
 import { BattleAction } from "./battleaction";
 import { identity } from "../../util/functional";
 import { BattleActionParser } from "./battleactionparser";
+import { DamageDisplay } from "../settings/godsightsettings";
+import { DamageByElement, StatsUpdateHelper } from "./stats";
 
 export class BattleActionHelper {
   static IconlessStatusEffects = [
@@ -52,60 +54,148 @@ export class BattleActionHelper {
   }
 
   // matching elements in styles.css
-  private static elementToColorMap: Record<GameElementValue, string> = {
-    "": "white", // plain
-    0: "white", // plain
-    1: "#D56254", // fire
-    2: "#4EB6FB", // water
-    3: "#A27241", // earth
-    4: "#56A435", // wind
-    5: "#F5BD32", // light
-    6: "#B486DC", // dark
-    98: "#8BFBFE", // destruction
+  private static elementToColorMap: Record<NumericGameElement, string> = {
+    [GameElement.NULL_PLAIN]: "white",
+    [GameElement.FIRE]: "#D56254",
+    [GameElement.WATER]: "#4EB6FB",
+    [GameElement.EARTH]: "#A27241",
+    [GameElement.WIND]: "#56A435",
+    [GameElement.LIGHT]: "#F5BD32",
+    [GameElement.DARK]: "#B486DC",
+    [GameElement.DESTRUCTION]: "#8BFBFE",
   };
 
   static getDamageInstanceJsx(
     damageInstances: DamageInstance[],
+    damageDisplay: DamageDisplay,
     maybeHitCountOverride?: number,
   ): JSX.Element {
     const damageInstancesByRecipient = this.getDamageInstancesGroupedByRecipient(damageInstances);
     const onlyRealDamageInstancesByRecipient: Record<string, DamageInstance[]> = {};
+    const elements = new Set<NumericGameElement>();
     Object.keys(damageInstancesByRecipient).forEach(key => {
       const instances = damageInstancesByRecipient[key];
       const nonZeroInstances = instances.filter(i => i["value"] > 0);
       if (nonZeroInstances.length == 0) {
         nonZeroInstances.push(instances[0]);
       }
+      instances.forEach(i => elements.add(i["element"]));
       onlyRealDamageInstancesByRecipient[key] = nonZeroInstances;
     });
-    return (
-      <>
-        {Object.keys(onlyRealDamageInstancesByRecipient).map(recipient => (
-          <div key={recipient} className="action-description">{recipient} took {onlyRealDamageInstancesByRecipient[recipient].map((instance, idx) => (
-            <span key={idx} className={`element ${GameElementHelper.getPrettyElementName(instance["element"])}`}>{instance["value"].toLocaleString()}</span>
-          )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, " + ", cur], null)
-          } damage! {onlyRealDamageInstancesByRecipient[recipient].length > 1 || (maybeHitCountOverride !== undefined && maybeHitCountOverride > 1) ?
-            <>
-              {onlyRealDamageInstancesByRecipient[recipient].filter(instance => instance["value"] > 0)
-                .every(i => i["element"] == onlyRealDamageInstancesByRecipient[recipient][0]["element"]) ?
-                <>
-                  (Total: <span className={`element ${GameElementHelper.getPrettyElementName(onlyRealDamageInstancesByRecipient[recipient][0]["element"])}`}>{onlyRealDamageInstancesByRecipient[recipient].reduce((prev, cur) => prev + cur["value"], 0).toLocaleString()}</span>)&nbsp;
-                </>
-                :
-                <>
-                  (Total: {onlyRealDamageInstancesByRecipient[recipient].reduce((prev, cur) => prev + cur["value"], 0).toLocaleString()})&nbsp;
-                </>
-              }
+    const colors = [...elements.values().map(element => this.elementToColorMap[element])];
 
-              (Hits: {maybeHitCountOverride ? maybeHitCountOverride : onlyRealDamageInstancesByRecipient[recipient].filter(i => i["value"] > 0).length})
-            </> :
-            <>
-            </>
+    const gradient = colors.join(", ");
+
+    switch (damageDisplay) {
+      case DamageDisplay.SINGLE_NUMBER: {
+        return (
+          <>
+            {Object.keys(onlyRealDamageInstancesByRecipient).map(recipient => (
+              <div key={recipient} className="action-description">{recipient} took&nbsp;
+                <span className="element gradient" style={{
+                  "background": `linear-gradient(to right, ${gradient}) text`,
+                }}>
+                  {onlyRealDamageInstancesByRecipient[recipient].reduce((prev, cur) => prev + cur["value"], 0).toLocaleString()}
+                </span> damage! {
+                  onlyRealDamageInstancesByRecipient[recipient].length > 1 || (maybeHitCountOverride !== undefined && maybeHitCountOverride > 1) ?
+                    <>
+                      (Hits: {maybeHitCountOverride ? maybeHitCountOverride : onlyRealDamageInstancesByRecipient[recipient].filter(i => i["value"] > 0).length})
+                    </> :
+                    <>
+                    </>
+                }
+              </div >
+            ))
             }
-          </div>
-        ))}
-      </>
-    );
+          </>
+        );
+      }
+
+      case DamageDisplay.ONE_PER_ELEMENT: {
+        const totalDamageByElementPerRecipient: Record<string, DamageByElement> = {};
+        Object.keys(onlyRealDamageInstancesByRecipient).forEach(recipient => {
+          const damageInstances = onlyRealDamageInstancesByRecipient[recipient];
+          totalDamageByElementPerRecipient[recipient] = {};
+          damageInstances.forEach(instance => {
+            if (totalDamageByElementPerRecipient[recipient][instance["element"]] == undefined) {
+              totalDamageByElementPerRecipient[recipient][instance["element"]] = instance["value"]
+            } else {
+              totalDamageByElementPerRecipient[recipient][instance["element"]] += instance["value"];
+            }
+          });
+        });
+
+        return (
+          <>
+            {Object.keys(totalDamageByElementPerRecipient).map(recipient => (
+              <div key={recipient} className="action-description">{recipient} took {Object.keys(totalDamageByElementPerRecipient[recipient]).map((element, idx) => (
+                <span key={idx}>
+                  {totalDamageByElementPerRecipient[recipient][element] > 0 ?
+                    <span className={`element ${GameElementHelper.getPrettyElementName(element as GameElementValue)}`}>{totalDamageByElementPerRecipient[recipient][element].toLocaleString()}</span> :
+                    <></>
+                  }
+                </span>
+              )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, " + ", cur], null)
+              } damage! {onlyRealDamageInstancesByRecipient[recipient].length > 1 || (maybeHitCountOverride !== undefined && maybeHitCountOverride > 1) ?
+                <>
+                  {Object.keys(totalDamageByElementPerRecipient[recipient]).length > 1 ?
+                    <>
+                      {onlyRealDamageInstancesByRecipient[recipient].filter(instance => instance["value"] > 0)
+                        .every(i => i["element"] == onlyRealDamageInstancesByRecipient[recipient][0]["element"]) ?
+                        <>
+                          (Total: <span className={`element ${GameElementHelper.getPrettyElementName(onlyRealDamageInstancesByRecipient[recipient][0]["element"])}`}>{onlyRealDamageInstancesByRecipient[recipient].reduce((prev, cur) => prev + cur["value"], 0).toLocaleString()}</span>)&nbsp;
+                        </>
+                        :
+                        <>
+                          (Total: {onlyRealDamageInstancesByRecipient[recipient].reduce((prev, cur) => prev + cur["value"], 0).toLocaleString()})&nbsp;
+                        </>
+                      }
+                    </> :
+                    <></>
+                  }
+
+                  (Hits: {maybeHitCountOverride ? maybeHitCountOverride : onlyRealDamageInstancesByRecipient[recipient].filter(i => i["value"] > 0).length})
+                </> :
+                <>
+                </>
+                }
+              </div>
+            ))}
+          </>
+        );
+      }
+
+      case DamageDisplay.ALL_HITS: {
+        return (
+          <>
+            {Object.keys(onlyRealDamageInstancesByRecipient).map(recipient => (
+              <div key={recipient} className="action-description">{recipient} took {onlyRealDamageInstancesByRecipient[recipient].map((instance, idx) => (
+                <span key={idx} className={`element ${GameElementHelper.getPrettyElementName(instance["element"])}`}>{instance["value"].toLocaleString()}</span>
+              )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, " + ", cur], null)
+              } damage! {onlyRealDamageInstancesByRecipient[recipient].length > 1 || (maybeHitCountOverride !== undefined && maybeHitCountOverride > 1) ?
+                <>
+                  {onlyRealDamageInstancesByRecipient[recipient].filter(instance => instance["value"] > 0)
+                    .every(i => i["element"] == onlyRealDamageInstancesByRecipient[recipient][0]["element"]) ?
+                    <>
+                      (Total: <span className={`element ${GameElementHelper.getPrettyElementName(onlyRealDamageInstancesByRecipient[recipient][0]["element"])}`}>{onlyRealDamageInstancesByRecipient[recipient].reduce((prev, cur) => prev + cur["value"], 0).toLocaleString()}</span>)&nbsp;
+                    </>
+                    :
+                    <>
+                      (Total: {onlyRealDamageInstancesByRecipient[recipient].reduce((prev, cur) => prev + cur["value"], 0).toLocaleString()})&nbsp;
+                    </>
+                  }
+
+                  (Hits: {maybeHitCountOverride ? maybeHitCountOverride : onlyRealDamageInstancesByRecipient[recipient].filter(i => i["value"] > 0).length})
+                </> :
+                <>
+                </>
+                }
+              </div>
+            ))}
+          </>
+        );
+      }
+    }
   }
 
   static getDamageInstancesGroupedByRecipient(

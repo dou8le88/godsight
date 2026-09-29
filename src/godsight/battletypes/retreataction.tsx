@@ -2,6 +2,7 @@ import { JSX } from "react/jsx-runtime";
 import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
+import { DamageDisplay } from "../settings/godsightsettings";
 
 export class RetreatAction extends BattleAction {
   public actionType: ActionType = ActionType.RETREAT;
@@ -15,7 +16,7 @@ export class RetreatAction extends BattleAction {
   getStats(): StatsUpdate {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
-  getDescription(key: number): JSX.Element {
+  getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
     return (
       <div key={key} className="action-description">The party retreated!
       </div>

@@ -3,6 +3,7 @@ import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { assertNotNullOrUndefined, assertNotUndefined } from "../../util/assert";
+import { DamageDisplay } from "../settings/godsightsettings";
 
 export class StandbyAction extends BattleAction {
   public actionType: ActionType = ActionType.STANDBY;
@@ -20,7 +21,7 @@ export class StandbyAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
-  getDescription(key: number): JSX.Element {
+  getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
     let message = `${this.actorName} can't attack!`;
     if (this.battleMessage) {
       message = `${this.battleMessage} They can't attack!`;

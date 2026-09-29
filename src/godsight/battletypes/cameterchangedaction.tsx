@@ -4,6 +4,7 @@ import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { assertNotNullOrUndefined } from "../../util/assert";
+import { DamageDisplay } from "../settings/godsightsettings";
 
 export class CAMeterChangedAction extends BattleAction {
   public actionType: ActionType = ActionType.CA_METER_CHANGED;
@@ -18,7 +19,7 @@ export class CAMeterChangedAction extends BattleAction {
     super();
   }
 
-  getDescription(key: number): JSX.Element {
+  getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
     let changeWord = "";
     if (this.change > 0) {
       changeWord = "gained";
