@@ -179,7 +179,7 @@ function damageByTypeTimeSeries(data: ByTypeChartData[]) {
     >
       <CartesianGrid />
       <ByType.XAxis dataKey="turn" niceTicks="snap125" />
-      <ByType.YAxis width="auto" niceTicks="snap125" />
+      <ByType.YAxis width="auto" niceTicks="snap125" tickFormatter={(value) => Number(value).toLocaleString()} />
       <Tooltip
         labelFormatter={(label) => `Turn ${label}`}
         formatter={(a) => a?.toLocaleString()}
@@ -247,7 +247,7 @@ function damageByElementTimeSeries(data: ByElementChartData[]) {
     >
       <CartesianGrid />
       <ByElement.XAxis dataKey="turn" niceTicks="snap125" />
-      <ByElement.YAxis width="auto" niceTicks="snap125" />
+      <ByElement.YAxis width="auto" niceTicks="snap125" tickFormatter={(value) => Number(value).toLocaleString()} />
       <Tooltip
         labelFormatter={(label) => `Turn ${label}`}
         formatter={(a) => a?.toLocaleString()}
@@ -425,7 +425,7 @@ function totalDamageByCharacterTimeSeries(battleData: GodsightBattleData) {
     >
       <CartesianGrid />
       <ByCharacter.XAxis dataKey="turn" niceTicks="snap125" />
-      <ByCharacter.YAxis width="auto" niceTicks="snap125" />
+      <ByCharacter.YAxis width="auto" niceTicks="snap125" tickFormatter={(value) => Number(value).toLocaleString()} />
       <Tooltip
         labelFormatter={(label) => `Turn ${label}`}
         formatter={(a) => a?.toLocaleString()}
