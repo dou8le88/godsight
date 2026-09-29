@@ -74,12 +74,24 @@ body,
     }
 }
 
+@keyframes config-fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
 .config-overlay-mask {
     position: absolute;
     width: 100%;
     height: 100%;
     z-index: 1000;
     background-color: #333333AA;
+
+    animation: config-fadeIn 0.2s forwards;
 }
 
 .config-window {
@@ -93,6 +105,8 @@ body,
     padding: 10px;
     background-color: #282828;
     border: 1px solid #5E5E5E;
+
+    animation: fadeIn 0.2s ease-out forwards;
 
     .config-header {
         width: 100%;
@@ -135,15 +149,16 @@ body,
 
             .config-text-input {
                 background-color: #3C3C3C;
+                border: 1px solid #5E5E5E;
                 color: #C7C7C7;
                 width: 150px;
                 height: 25px;
-                border: none;
                 padding: 5px;
             }
 
             .config-select-input {
                 background-color: #3C3C3C;
+                border: 1px solid #5E5E5E;
                 color: #C7C7C7;
                 width: 150px;
                 height: 25px;
