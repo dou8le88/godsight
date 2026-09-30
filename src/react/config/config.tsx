@@ -194,8 +194,8 @@ export function Config({ onExit }: { onExit: () => void }) {
                   type="text"
                   placeholder="Same as ingame name"
                   ref={mainCharacterNameRef}
-                  value={settings["mainCharacterNameOverride"]}
-                  onChange={() => {
+                  defaultValue={settings["mainCharacterNameOverride"]}
+                  onBlur={() => {
                     if (mainCharacterNameRef.current) {
                       settingsManager.updateSingleSetting(
                         "mainCharacterNameOverride",
@@ -248,22 +248,32 @@ export function Config({ onExit }: { onExit: () => void }) {
                   id="max-remembered-battles"
                   className="config-text-input"
                   type="number"
-                  value={settings["maxRememberedBattles"]}
-                  min={minRememberedBattles}
+                  defaultValue={settings["maxRememberedBattles"]}
                   ref={maxRememberedBattlesRef}
-                  onChange={() => {
+                  onBlur={() => {
                     if (maxRememberedBattlesRef.current) {
                       const value = Number(maxRememberedBattlesRef.current.value);
 
-                      if (!isNaN(value) && value >= minRememberedBattles) {
-                        settingsManager.updateSingleSetting(
-                          "maxRememberedBattles",
-                          value,
-                        );
+                      if (!isNaN(value)) {
+                        if (value >= minRememberedBattles) {
+                          settingsManager.updateSingleSetting(
+                            "maxRememberedBattles",
+                            value,
+                          );
+                        } else {
+                          maxRememberedBattlesRef.current.value = `${minRememberedBattles}`;
+                          settingsManager.updateSingleSetting(
+                            "maxRememberedBattles",
+                            minRememberedBattles,
+                          );
+                        }
                       }
                     }
                   }}
                 />
+              </td>
+              <td className="config-explanation">
+                Minimum 5. Changes to this value take effect the next time a battle is recorded.
               </td>
             </tr>
             <tr className="config-option">
@@ -332,7 +342,7 @@ export function Config({ onExit }: { onExit: () => void }) {
               </td>
               <td className="config-explanation">
                 Switch to Raid - Immediately change the inspected battle to the newly-loaded battle.<br />
-                Notify - Show a notification with a clickable button to inspect the battle.<br />
+                Notify - Show an in-panel notification with a clickable button to inspect the battle.<br />
                 No Action - do nothing when loading into a raid.
               </td>
             </tr>
