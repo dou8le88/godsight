@@ -11,7 +11,7 @@ import { ByCharacterPieGraph } from "./bycharacterpiegraph";
 
 export function BattleStats({ battleData }: { battleData: GodsightBattleData | undefined }) {
   if (!battleData) {
-    return <div>No battle data available yet.</div>;
+    return <div>No battle data available yet, or battle data was deleted.</div>;
   } else {
     const frontliners = battleData["party"]["frontline"];
 

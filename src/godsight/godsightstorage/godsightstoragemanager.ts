@@ -111,7 +111,7 @@ export class GodsightStorageManager {
     this.storageCache["battles"] = this.storageCache["battles"].filter(b => b["raidId"] != battleId);
     this.storageCache["battles"].unshift(battleData);
     if (this.storageCache["battles"].length > maxRememberedBattles) {
-      this.storageCache["battles"].pop();
+      this.storageCache["battles"] = this.storageCache["battles"].slice(0, maxRememberedBattles);
     }
     this.updateUnderlyingStorageAndNotify();
   }
