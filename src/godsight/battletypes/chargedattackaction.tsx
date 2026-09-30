@@ -48,16 +48,18 @@ export class ChargedAttackAction extends BattleAction {
     if (this.target == Actor.BOSS) {
       this.damageTotals.forEach(instance => {
         update["generalStats"]["chargedAttackDamage"][instance["element"]] += instance["value"];
+        update["characterStats"][this.attackerIndex]["chargedAttackDamage"][instance["element"]] += instance["value"];
         if (this.beforeBossTurn) {
           update["beforeBossTurnStats"]["chargedAttackDamage"][instance["element"]] += instance["value"];
+          update["characterBeforeBossTurnStats"][this.attackerIndex]["chargedAttackDamage"][instance["element"]] += instance["value"];
         }
-        update["characterStats"][this.attackerIndex]["chargedAttackDamage"][instance["element"]] += instance["value"];
         if (instance["value"] > 0) {
           update["generalStats"]["hitCount"] += 1;
+          update["characterStats"][this.attackerIndex]["hitCount"] += 1;
           if (this.beforeBossTurn) {
             update["beforeBossTurnStats"]["hitCount"] += 1;
+            update["characterBeforeBossTurnStats"][this.attackerIndex]["hitCount"] += 1;
           }
-          update["characterStats"][this.attackerIndex]["hitCount"] += 1;
         }
       });
       const subactionStatsUpdates = this.subactions.map(action => action.getStats());

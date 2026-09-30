@@ -51,10 +51,11 @@ export class BossSpecialAttackAction extends BattleAction {
       if (this.target == Actor.PLAYER) {
         const damage = instance["value"];
         update["generalStats"]["damageTaken"][instance["element"]] += damage;
+        update["characterStats"][instance["receiverIndex"]]["damageTaken"][instance["element"]] += damage;
         if (this.beforeBossTurn) {
           update["beforeBossTurnStats"]["damageTaken"][instance["element"]] += damage;
+          update["characterBeforeBossTurnStats"][instance["receiverIndex"]]["damageTaken"][instance["element"]] += damage;
         }
-        update["characterStats"][instance["receiverIndex"]]["damageTaken"][instance["element"]] += damage;
       }
     });
     const subactionStatsUpdates = this.subactions.map(action => action.getStats());

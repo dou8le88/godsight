@@ -63,10 +63,11 @@ export class DamageAction extends BattleAction {
         // Boss "skill damage" can occur in certain raids like Macutanmacar or Esoteric Mastery Trial.
         this.instances.forEach(instance => {
           update["generalStats"]["damageTaken"][instance["element"]] += instance["value"];
+          update["characterStats"][instance["receiverIndex"]]["damageTaken"][instance["element"]] += instance["value"];
           if (this.beforeBossTurn) {
             update["beforeBossTurnStats"]["damageTaken"][instance["element"]] += instance["value"];
+            update["characterBeforeBossTurnStats"][instance["receiverIndex"]]["damageTaken"][instance["element"]] += instance["value"];
           }
-          update["characterStats"][instance["receiverIndex"]]["damageTaken"][instance["element"]] += instance["value"];
         });
         break;
       default:

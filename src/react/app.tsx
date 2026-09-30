@@ -195,6 +195,7 @@ export default function GodsightPanel() {
             "turnStats": StatsUpdateHelper.getEmptyStats(),
             "beforeBossTurnStats": StatsUpdateHelper.getEmptyStats(),
             "characterCurrentTurnStats": {},
+            "characterBeforeBossTurnStats": {},
             "turnActions": [],
           };
 
@@ -223,6 +224,10 @@ export default function GodsightPanel() {
           StatsUpdateHelper.mergeStats(
             currentTurn["characterCurrentTurnStats"][characterIndex],
             newTurnData["characterCurrentTurnStats"][characterIndex],
+          );
+          StatsUpdateHelper.mergeStats(
+            currentTurn["characterBeforeBossTurnStats"][characterIndex],
+            newTurnData["characterBeforeBossTurnStats"][characterIndex],
           );
         });
 

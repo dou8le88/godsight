@@ -48,28 +48,31 @@ export class SummonAction extends BattleAction {
 
     this.damageInstances.forEach(instance => {
       update["generalStats"]["otherDamage"][instance["element"]] += instance["value"];
-      if (this.beforeBossTurn) {
-        update["beforeBossTurnStats"]["otherDamage"][instance["element"]] += instance["value"];
-      }
       // The game considers summon damage to belong to MC
       update["characterStats"][0]["otherDamage"][instance["element"]] += instance["value"];
+      if (this.beforeBossTurn) {
+        update["beforeBossTurnStats"]["otherDamage"][instance["element"]] += instance["value"];
+        update["characterBeforeBossTurnStats"][0]["otherDamage"][instance["element"]] += instance["value"];
+      }
 
       if (instance["value"] > 0) {
         update["generalStats"]["hitCount"] += 1;
+        update["characterStats"][0]["hitCount"] += 1;
         if (this.beforeBossTurn) {
           update["beforeBossTurnStats"]["hitCount"] += 1;
+          update["characterBeforeBossTurnStats"][0]["hitCount"] += 1;
         }
-        update["characterStats"][0]["hitCount"] += 1;
       }
     });
 
     const maybeHitCountOverride = this.trueSummonHitCount;
     if (maybeHitCountOverride !== undefined) {
       update["generalStats"]["hitCount"] = maybeHitCountOverride;
+      update["characterStats"][0]["hitCount"] = maybeHitCountOverride;
       if (this.beforeBossTurn) {
         update["beforeBossTurnStats"]["hitCount"] = maybeHitCountOverride;
+        update["characterBeforeBossTurnStats"][0]["hitCount"] = maybeHitCountOverride;
       }
-      update["characterStats"][0]["hitCount"] = maybeHitCountOverride;
     }
 
     const subactionUpdates = this.subactions.map(action => action.getStats());

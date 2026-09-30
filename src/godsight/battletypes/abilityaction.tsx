@@ -67,9 +67,19 @@ export class AbilityAction extends BattleAction {
 
         allUpdates["characterStats"][this.sourceIndex]["hitCount"] += subactionHitCount;
         allUpdates["characterStats"][this.sourceIndex]["debuffsInflictedCount"] += subactionDebuffs;
+        if (this.beforeBossTurn) {
+          allUpdates["characterBeforeBossTurnStats"][this.sourceIndex]["hitCount"] += subactionHitCount;
+          allUpdates["characterBeforeBossTurnStats"][this.sourceIndex]["debuffsInflictedCount"] += subactionDebuffs;
+        }
         GameElementHelper.getAllElements().forEach(element => {
           allUpdates["characterStats"][this.sourceIndex]["skillDamage"][element] += subactionSkillDamage[element];
           allUpdates["characterStats"][this.sourceIndex]["normalAttackDamage"][element] += subactionNormalAttackDamage[element];
+          if (this.beforeBossTurn) {
+            allUpdates["characterBeforeBossTurnStats"][this.sourceIndex]["skillDamage"][element] +=
+              subactionSkillDamage[element];
+            allUpdates["characterBeforeBossTurnStats"][this.sourceIndex]["normalAttackDamage"][element] +=
+              subactionNormalAttackDamage[element];
+          }
         });
         break;
       }

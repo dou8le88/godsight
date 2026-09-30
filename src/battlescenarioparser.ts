@@ -1369,6 +1369,7 @@ export class BattleScenarioParser {
       "turnStats": totalStats["generalStats"],
       "beforeBossTurnStats": totalStats["beforeBossTurnStats"],
       "characterCurrentTurnStats": totalStats["characterStats"],
+      "characterBeforeBossTurnStats": totalStats["characterBeforeBossTurnStats"],
       "turnActions": battleActions,
     };
   }

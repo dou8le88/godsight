@@ -41,10 +41,11 @@ export class HealingAction extends BattleAction {
     if (this.target == Actor.PLAYER) {
       this.healingInstances.forEach(instance => {
         update["generalStats"]["healingReceived"] += instance["value"];
+        update["characterStats"][instance["receiverIndex"]]["healingReceived"] += instance["value"];
         if (this.beforeBossTurn) {
           update["beforeBossTurnStats"]["healingReceived"] += instance["value"];
+          update["characterBeforeBossTurnStats"][instance["receiverIndex"]]["healingReceived"] += instance["value"];
         }
-        update["characterStats"][instance["receiverIndex"]]["healingReceived"] += instance["value"];
       });
     }
 

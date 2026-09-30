@@ -16,6 +16,7 @@ export type DamageByElement = Record<string | number, number>;
 
 export interface StatsUpdate {
   "characterStats": Record<string | number, Stats>,
+  "characterBeforeBossTurnStats": Record<string | number, Stats>,
   "generalStats": Stats,
   "beforeBossTurnStats": Stats,
 }
@@ -56,8 +57,11 @@ export class StatsUpdateHelper {
       });
     }
 
+    const characterBeforeBossTurnStats = structuredClone(characterStats);
+
     return {
       "characterStats": characterStats,
+      "characterBeforeBossTurnStats": characterBeforeBossTurnStats,
       "generalStats": this.getEmptyStats(),
       "beforeBossTurnStats": this.getEmptyStats(),
     }
@@ -76,20 +80,29 @@ export class StatsUpdateHelper {
 
     allCharacters.forEach(characterIndex => {
       output["characterStats"][characterIndex] = this.getEmptyStats();
+      output["characterBeforeBossTurnStats"][characterIndex] = this.getEmptyStats();
     });
 
     firstCharacters.map(characterIndex => {
       const characterStats = first["characterStats"][characterIndex];
       const outputCharacterStats = output["characterStats"][characterIndex];
 
+      const characterBeforeBossTurnStats = first["characterBeforeBossTurnStats"][characterIndex];
+      const outputCharacterBeforeBossTurnStats = output["characterBeforeBossTurnStats"][characterIndex];
+
       this.mergeStats(characterStats, outputCharacterStats);
+      this.mergeStats(characterBeforeBossTurnStats, outputCharacterBeforeBossTurnStats);
     });
 
     secondCharacters.map(characterIndex => {
       const characterStats = second["characterStats"][characterIndex];
       const outputCharacterStats = output["characterStats"][characterIndex];
 
+      const characterBeforeBossTurnStats = second["characterBeforeBossTurnStats"][characterIndex];
+      const outputCharacterBeforeBossTurnStats = output["characterBeforeBossTurnStats"][characterIndex];
+
       this.mergeStats(characterStats, outputCharacterStats);
+      this.mergeStats(characterBeforeBossTurnStats, outputCharacterBeforeBossTurnStats);
     });
 
     this.mergeStats(first["generalStats"], output["generalStats"]);

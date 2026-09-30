@@ -41,6 +41,11 @@ interface TurnStats {
   stats: Stats,
 }
 
+interface ByCharacterTurnStats {
+  turn: number,
+  stats: Record<string | number, Stats>,
+}
+
 const ByType = createHorizontalChart<ByTypeChartData, string, number>()({
   BarChart,
   Bar,
@@ -122,6 +127,42 @@ function getDamageByElementData(turnStats: TurnStats[]): ByElementChartData[] {
     });
 
     return elementTotals;
+  });
+}
+
+function getDamageByCharacterData(turnStats: ByCharacterTurnStats[], allCharacters: number[]): ByCharacterChartData[] {
+  return turnStats.map(statsByTurn => {
+    const characterData = allCharacters.map(charIdx => {
+      const totalNormalAttackDamage = Math.round(Object.keys(statsByTurn.stats[charIdx]["normalAttackDamage"]).map(element => {
+        return statsByTurn.stats[charIdx]["normalAttackDamage"][element];
+      }).reduce((prev, cur) => prev + cur, 0));
+
+      const totalChargedAttackDamage = Math.round(Object.keys(statsByTurn.stats[charIdx]["chargedAttackDamage"]).map(element => {
+        return statsByTurn.stats[charIdx]["chargedAttackDamage"][element];
+      }).reduce((prev, cur) => prev + cur, 0));
+
+      const totalSkillDamage = Math.round(Object.keys(statsByTurn.stats[charIdx]["skillDamage"]).map(element => {
+        return statsByTurn.stats[charIdx]["skillDamage"][element];
+      }).reduce((prev, cur) => prev + cur, 0));
+
+      const totalOtherDamage = Math.round(Object.keys(statsByTurn.stats[charIdx]["otherDamage"]).map(element => {
+        return statsByTurn.stats[charIdx]["otherDamage"][element];
+      }).reduce((prev, cur) => prev + cur, 0));
+
+      return {
+        [charIdx]: totalNormalAttackDamage + totalChargedAttackDamage + totalSkillDamage + totalOtherDamage,
+      };
+    }).reduce((acc, cur) => {
+      return { ...acc, ...cur };
+    }, {});
+
+    const totalDamage = Object.values(characterData).reduce((prev, cur) => prev + cur);
+
+    return {
+      turn: `${statsByTurn.turn}`,
+      totalDamage,
+      ...characterData,
+    };
   });
 }
 
@@ -306,81 +347,7 @@ function damageByElementTimeSeries(data: ByElementChartData[]) {
   );
 }
 
-function totalDamageByElementTimeSeries(battleData: GodsightBattleData) {
-  const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t));
-
-  const allTurnStats: TurnStats[] = allTurns.map(t => {
-    return {
-      turn: t,
-      stats: battleData["turnData"][t]["turnStats"],
-    };
-  });
-
-  const data = getDamageByElementData(allTurnStats);
-
-  return damageByElementTimeSeries(data);
-}
-
-function totalDamageByTypeTimeSeries(battleData: GodsightBattleData) {
-  const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t));
-
-  const allTurnStats = allTurns.map(t => {
-    return {
-      turn: t,
-      stats: battleData["turnData"][t]["turnStats"],
-    };
-  });
-
-  const data = getDamageByTypeData(allTurnStats);
-
-  return damageByTypeTimeSeries(data);
-}
-
-function totalDamageByCharacterTimeSeries(battleData: GodsightBattleData) {
-  const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t));
-  const allCharacters = Array.from({ length: battleData["party"]["members"].length }, (_, idx) => idx);
-
-  const allTurnStats = allTurns.map(t => {
-    return {
-      turn: t,
-      stats: battleData["turnData"][t]["characterCurrentTurnStats"],
-    };
-  });
-
-  const data: ByCharacterChartData[] = allTurnStats.map(statsByTurn => {
-    const characterData = allCharacters.map(charIdx => {
-      const totalNormalAttackDamage = Math.round(Object.keys(statsByTurn.stats[charIdx]["normalAttackDamage"]).map(element => {
-        return statsByTurn.stats[charIdx]["normalAttackDamage"][element];
-      }).reduce((prev, cur) => prev + cur, 0));
-
-      const totalChargedAttackDamage = Math.round(Object.keys(statsByTurn.stats[charIdx]["chargedAttackDamage"]).map(element => {
-        return statsByTurn.stats[charIdx]["chargedAttackDamage"][element];
-      }).reduce((prev, cur) => prev + cur, 0));
-
-      const totalSkillDamage = Math.round(Object.keys(statsByTurn.stats[charIdx]["skillDamage"]).map(element => {
-        return statsByTurn.stats[charIdx]["skillDamage"][element];
-      }).reduce((prev, cur) => prev + cur, 0));
-
-      const totalOtherDamage = Math.round(Object.keys(statsByTurn.stats[charIdx]["otherDamage"]).map(element => {
-        return statsByTurn.stats[charIdx]["otherDamage"][element];
-      }).reduce((prev, cur) => prev + cur, 0));
-
-      return {
-        [charIdx]: totalNormalAttackDamage + totalChargedAttackDamage + totalSkillDamage + totalOtherDamage,
-      };
-    }).reduce((acc, cur) => {
-      return { ...acc, ...cur };
-    }, {});
-
-    const totalDamage = Object.values(characterData).reduce((prev, cur) => prev + cur) + battleData["turnData"][statsByTurn.turn]["turnStats"]["dotDamage"];
-
-    return {
-      turn: `${statsByTurn.turn}`,
-      totalDamage,
-      ...characterData,
-    };
-  });
-
+function damageByCharacterTimeSeries(battleData: GodsightBattleData, data: ByCharacterChartData[], allCharacters: number[]) {
   const CustomTooltip = ({ active, payload, label, activeIndex }: TooltipContentProps) => {
     if (active && payload && payload.length) {
 
@@ -446,6 +413,52 @@ function totalDamageByCharacterTimeSeries(battleData: GodsightBattleData) {
   );
 }
 
+function totalDamageByElementTimeSeries(battleData: GodsightBattleData) {
+  const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t));
+
+  const allTurnStats: TurnStats[] = allTurns.map(t => {
+    return {
+      turn: t,
+      stats: battleData["turnData"][t]["turnStats"],
+    };
+  });
+
+  const data = getDamageByElementData(allTurnStats);
+
+  return damageByElementTimeSeries(data);
+}
+
+function totalDamageByTypeTimeSeries(battleData: GodsightBattleData) {
+  const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t));
+
+  const allTurnStats = allTurns.map(t => {
+    return {
+      turn: t,
+      stats: battleData["turnData"][t]["turnStats"],
+    };
+  });
+
+  const data = getDamageByTypeData(allTurnStats);
+
+  return damageByTypeTimeSeries(data);
+}
+
+function totalDamageByCharacterTimeSeries(battleData: GodsightBattleData) {
+  const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t));
+  const allCharacters = Array.from({ length: battleData["party"]["members"].length }, (_, idx) => idx);
+
+  const allTurnStats = allTurns.map(t => {
+    return {
+      turn: t,
+      stats: battleData["turnData"][t]["characterCurrentTurnStats"],
+    };
+  });
+
+  const data: ByCharacterChartData[] = getDamageByCharacterData(allTurnStats, allCharacters);
+
+  return damageByCharacterTimeSeries(battleData, data, allCharacters);
+}
+
 function totalCharacterDamageByTypeTimeSeries(battleData: GodsightBattleData, characterIndex: number) {
   const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t));
 
@@ -474,6 +487,52 @@ function totalCharacterDamageByElementTimeSeries(battleData: GodsightBattleData,
   const data = getDamageByElementData(allTurnStats);
 
   return damageByElementTimeSeries(data);
+}
+
+function omenContributingDamageByTypeTimeSeries(battleData: GodsightBattleData) {
+  const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t));
+
+  const allTurnStats = allTurns.map(t => {
+    return {
+      turn: t,
+      stats: battleData["turnData"][t]["beforeBossTurnStats"],
+    };
+  });
+
+  const data = getDamageByTypeData(allTurnStats);
+
+  return damageByTypeTimeSeries(data);
+}
+
+function omenContributingDamageByElementTimeSeries(battleData: GodsightBattleData) {
+  const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t));
+
+  const allTurnStats = allTurns.map(t => {
+    return {
+      turn: t,
+      stats: battleData["turnData"][t]["beforeBossTurnStats"],
+    };
+  });
+
+  const data = getDamageByElementData(allTurnStats);
+
+  return damageByElementTimeSeries(data);
+}
+
+function omenContributingDamageByCharacterTimeSeries(battleData: GodsightBattleData) {
+  const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t));
+  const allCharacters = Array.from({ length: battleData["party"]["members"].length }, (_, idx) => idx);
+
+  const allTurnStats = allTurns.map(t => {
+    return {
+      turn: t,
+      stats: battleData["turnData"][t]["characterBeforeBossTurnStats"],
+    };
+  });
+
+  const data = getDamageByCharacterData(allTurnStats, allCharacters);
+
+  return damageByCharacterTimeSeries(battleData, data, allCharacters);
 }
 
 export function TimeSeries({
@@ -505,6 +564,15 @@ export function TimeSeries({
         viewResult = totalDamageByElementTimeSeries(battleData);
       } else if (selectedBreakdown == Breakdown.BY_CHARACTER) {
         viewResult = totalDamageByCharacterTimeSeries(battleData);
+      }
+      break;
+    case StatsView.PREV_TURN_BEFORE_BOSS_ACTION:
+      if (selectedBreakdown == Breakdown.BY_TYPE) {
+        viewResult = omenContributingDamageByTypeTimeSeries(battleData);
+      } else if (selectedBreakdown == Breakdown.BY_ELEMENT) {
+        viewResult = omenContributingDamageByElementTimeSeries(battleData);
+      } else if (selectedBreakdown == Breakdown.BY_CHARACTER) {
+        viewResult = omenContributingDamageByCharacterTimeSeries(battleData);
       }
       break;
     case StatsView.CURRENT_TURN:

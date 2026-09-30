@@ -36,11 +36,12 @@ export class ChainBurstAction extends BattleAction {
 
     this.damageInstances.forEach(instance => {
       update["generalStats"]["otherDamage"][instance["element"]] += instance["value"];
-      if (this.beforeBossTurn) {
-        update["beforeBossTurnStats"]["otherDamage"][instance["element"]] += instance["value"];
-      }
       // Chain burst is considered "MC's" damage by the game.
       update["characterStats"][0]["otherDamage"][instance["element"]] += instance["value"];
+      if (this.beforeBossTurn) {
+        update["beforeBossTurnStats"]["otherDamage"][instance["element"]] += instance["value"];
+        update["characterBeforeBossTurnStats"][0]["otherDamage"][instance["element"]] += instance["value"];
+      }
       if (instance["value"] > 0) {
         update["generalStats"]["hitCount"] += 1;
         if (this.beforeBossTurn) {
