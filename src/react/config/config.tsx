@@ -273,7 +273,7 @@ export function Config({ onExit }: { onExit: () => void }) {
                 />
               </td>
               <td className="config-explanation">
-                Minimum 5. Changes to this value take effect the next time a battle is recorded.
+                Minimum 5. Changes to this value take effect the next time battle data is recorded.
               </td>
             </tr>
             <tr className="config-option">

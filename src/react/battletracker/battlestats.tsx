@@ -86,7 +86,7 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
 
     return (
       <>
-        <div className="battle-metadata">Raid #{battleData["raidId"]}: vs {battleData["boss"][0]["name"]}</div>
+        <div className="battle-metadata">Vs. {battleData["boss"][0]["name"]}</div>
         {selectedStatsView !== undefined ?
           <>
             <div className="breakdown-name">{viewNames[selectedStatsView]}</div>

@@ -7,7 +7,6 @@ export default function BattleSummary({ battleData, onClick, deleteEntry }: { ba
 
   return (
     <div className="battle-summary-container" onClick={onClick}>
-      <div className="raid-id">{battleData["raidId"]}</div>
       <div className="versus">Vs. {battleData["boss"][0]["name"]}</div>
       <div className="last-updated">Last updated: {prettyUpdateTime}</div>
       <div className="delete-button" onClick={(e) => { e.stopPropagation(); deleteEntry() }}>Delete</div>

@@ -430,6 +430,14 @@ body,
         border-radius: 5px;
         user-select: none;
 
+        .versus {
+            width: 300px;
+        }
+
+        .last-updated {
+            width: 300px;
+        }
+
         .delete-button {
             color: white;
             font-weight: bold;
