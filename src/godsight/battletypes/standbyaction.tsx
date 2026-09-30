@@ -12,6 +12,7 @@ export class StandbyAction extends BattleAction {
   constructor(
     public actorName: string,
     public standby: boolean,
+    public beforeBossTurn: boolean,
     public battleMessage: string | null,
   ) {
     super();
@@ -21,6 +22,7 @@ export class StandbyAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
     let message = `${this.actorName} can't attack!`;
     if (this.battleMessage) {
@@ -38,6 +40,7 @@ export class StandbyAction extends BattleAction {
       return new StandbyAction(
         assertNotNullOrUndefined(json["actorName"] as string),
         assertNotNullOrUndefined(json["standby"] as boolean),
+        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
         assertNotUndefined(json["battleMessage"] as string | null),
       );
     } else {

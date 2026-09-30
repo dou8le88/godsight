@@ -145,6 +145,7 @@ export class BattleScenarioParser {
             godsightBattleData["boss"][bossSpecialAttackScenario["pos"]]["name"],
             bossSpecialAttackScenario["target"],
             godsightBattleData["party"]["partyMemberCount"],
+            !isBossAttackPhase,
             (bossSpecialAttackScenario["list"] || []).flatMap(l => l["damage"]).map(instance => {
               const receiverIndex = bossSpecialAttackScenario["target"] == Actor.PLAYER ?
                 BattleActionHelper.getCharacterIndexAtPosition(
@@ -183,6 +184,7 @@ export class BattleScenarioParser {
           const meterChangedAction = this.handleMeterChangeScenario(
             meterChangeScenario,
             godsightBattleData,
+            isBossAttackPhase,
           );
           // handle not getting any bar (due to debuffs, already being at max, etc.)
           // or diamondless enemies getting funny calcs.
@@ -197,6 +199,7 @@ export class BattleScenarioParser {
           const buffDebuffActions = this.handleMessageScenario(
             godsightBattleData,
             buffDebuffChangeScenario,
+            isBossAttackPhase,
           );
           actions.push(...buffDebuffActions);
           break;
@@ -207,7 +210,11 @@ export class BattleScenarioParser {
             break baseLoop;
           }
           const deathScenario = scenario as DeathScenarioData;
-          actions.push(this.handleDeathScenario(godsightBattleData, deathScenario));
+          actions.push(this.handleDeathScenario(
+            godsightBattleData,
+            deathScenario,
+            isBossAttackPhase,
+          ));
           if (deathScenario["to"] == Actor.PLAYER) {
             const deadCharacterIdx = BattleActionHelper.getActorIndex(
               godsightBattleData["party"],
@@ -254,6 +261,7 @@ export class BattleScenarioParser {
             sourceName,
             sourceIndex,
             godsightBattleData["party"]["partyMemberCount"],
+            !isBossAttackPhase,
             subactions.actions,
           );
           // Fix various ways that the Ability command can be supremely unhelpful.
@@ -357,6 +365,7 @@ export class BattleScenarioParser {
               godsightBattleData["party"],
               oldPositionOfNewCharacter,
             ),
+            !isBossAttackPhase,
           );
           actions.push(replaceCharacterAction);
 
@@ -373,6 +382,7 @@ export class BattleScenarioParser {
           const windowScenario = scenario as WindowEffectScenarioData;
           const windowAction = new WindowEffectAction(
             windowScenario["name"],
+            !isBossAttackPhase,
           );
           if (windowAction.name) {
             actions.push(windowAction);
@@ -386,6 +396,7 @@ export class BattleScenarioParser {
             damageDealtScenario["to"],
             godsightBattleData["party"]["partyMemberCount"],
             damageDealtScenario["turn_end"] !== undefined ? damageDealtScenario["turn_end"] : false,
+            !isBossAttackPhase,
             damageDealtScenario["list"].map(l => {
               const receiverIndex = damageDealtScenario["to"] == Actor.PLAYER ?
                 BattleActionHelper.getCharacterIndexAtPosition(
@@ -451,6 +462,7 @@ export class BattleScenarioParser {
           const multihitDamageAction = new MultihitDamageAction(
             multihitDamageScenario["to"],
             godsightBattleData["party"]["partyMemberCount"],
+            !isBossAttackPhase,
             instances,
           );
           actions.push(multihitDamageAction);
@@ -483,6 +495,7 @@ export class BattleScenarioParser {
           const normalAttackAction = new NormalAttackAction(
             attackerName,
             firstNormalAttack ? firstNormalAttack.isCounter : false,
+            !isBossAttackPhase,
             subactions.actions,
           );
           actions.push(normalAttackAction);
@@ -518,6 +531,7 @@ export class BattleScenarioParser {
             attackerIndex,
             isCounter,
             godsightBattleData["party"]["partyMemberCount"],
+            !isBossAttackPhase,
             damageArray.map(damage => {
               const receiverIndex = singularNormalAttackScenario["from"] == Actor.PLAYER ?
                 BattleActionHelper.getCharacterIndexAtPosition(
@@ -604,6 +618,7 @@ export class BattleScenarioParser {
             attackerName,
             chargedAttackScenario["target"],
             godsightBattleData["party"]["partyMemberCount"],
+            !isBossAttackPhase,
             (chargedAttackScenario["total"] || []).map(damage => {
               const damageTotal = ChargedAttackDamageInstanceHelper.getTotal(damage);
               const receiverIndex = damage["pos"];
@@ -648,6 +663,7 @@ export class BattleScenarioParser {
           );
           isBossAttackPhase = subactions.isBossAttackPhase;
           const fullElixirAction = new FullElixirAction(
+            !isBossAttackPhase,
             subactions.actions,
           );
           actions.push(fullElixirAction);
@@ -670,6 +686,7 @@ export class BattleScenarioParser {
           const healingAction = new HealingAction(
             healingScenario["to"],
             godsightBattleData["party"]["partyMemberCount"],
+            !isBossAttackPhase,
             healingScenario["list"].map(h => {
               const receiverIndex = healingScenario["to"] == Actor.PLAYER ?
                 BattleActionHelper.getCharacterIndexAtPosition(
@@ -721,6 +738,7 @@ export class BattleScenarioParser {
             summonScenario["name"],
             BattleActionHelper.getMainCharacterName(godsightBattleData["party"]),
             godsightBattleData["party"]["partyMemberCount"],
+            !isBossAttackPhase,
             summonScenario["list"].flatMap(l => l["damage"]).map(damage => {
               const receiverIndex = damage["pos"];
               const receiverName = BattleActionHelper.getActorName(
@@ -766,6 +784,7 @@ export class BattleScenarioParser {
             chainBurstScenario["chain_num"],
             "Unknown",
             godsightBattleData["party"]["partyMemberCount"],
+            !isBossAttackPhase,
             [],
           );
           // A CHAIN_BURST command should be immediately followed by _SCREEN_EFFECT
@@ -843,7 +862,9 @@ export class BattleScenarioParser {
 
         case ScenarioCommand.RETREAT: {
           godsightBattleData["battleProgressStatus"] = BattleProgressStatus.RETREATED;
-          const retreatAction = new RetreatAction();
+          const retreatAction = new RetreatAction(
+            !isBossAttackPhase,
+          );
           actions.push(retreatAction);
           break baseLoop;
         }
@@ -864,6 +885,7 @@ export class BattleScenarioParser {
           const turnChangeAction = new TurnChangeAction(
             godsightBattleData["currentTurn"],
             Number(turnChangeScenario["turn"]),
+            !isBossAttackPhase,
           );
           godsightBattleData["updateTurnTo"] = turnChangeAction.newTurn;
           actions.push(turnChangeAction);
@@ -890,6 +912,7 @@ export class BattleScenarioParser {
           const omenCancelScenario = scenario as OmenCancelScenarioData;
           const omenCancelAction = new OmenCancelAction(
             godsightBattleData["boss"][omenCancelScenario["pos"]]["name"],
+            !isBossAttackPhase,
           );
           actions.push(omenCancelAction);
           break;
@@ -917,6 +940,7 @@ export class BattleScenarioParser {
               standbyScenario["pos"],
             ),
             standbyScenario["standby"],
+            !isBossAttackPhase,
             battleMessage,
           );
           actions.push(standbyAction);
@@ -933,6 +957,7 @@ export class BattleScenarioParser {
               resurrectionScenario["pos"],
             ),
             resurrectionScenario["name"],
+            !isBossAttackPhase,
           );
           actions.push(resurrectedAction);
 
@@ -978,6 +1003,7 @@ export class BattleScenarioParser {
             const standbyAction = new StandbyAction(
               "Placeholder",
               true,
+              !isBossAttackPhase,
               battleLogScenario["body"],
             );
             actions.push(standbyAction);
@@ -1023,6 +1049,7 @@ export class BattleScenarioParser {
   private handleDeathScenario(
     battleData: GodsightBattleData,
     deathScenario: DeathScenarioData,
+    isBossAttackPhase: boolean,
   ): BattleAction {
     const action = new DeathAction(
       deathScenario["to"],
@@ -1032,6 +1059,7 @@ export class BattleScenarioParser {
         deathScenario["to"],
         deathScenario["pos"],
       ),
+      !isBossAttackPhase,
       typeof deathScenario["index"] === "number" ? deathScenario["index"] : null,
     );
 
@@ -1053,6 +1081,7 @@ export class BattleScenarioParser {
   private handleMeterChangeScenario(
     meterChangeScenario: ChargeAttackMeterChangedScenarioData,
     battleData: GodsightBattleData,
+    isBossAttackPhase: boolean,
   ): CAMeterChangedAction {
     const position = meterChangeScenario["pos"];
     const target = meterChangeScenario["to"];
@@ -1085,6 +1114,7 @@ export class BattleScenarioParser {
       ),
       newValue,
       change,
+      !isBossAttackPhase,
     );
 
     return action;
@@ -1093,6 +1123,7 @@ export class BattleScenarioParser {
   private handleMessageScenario(
     battleData: GodsightBattleData,
     buffDebuffChangeScenario: MessageScenarioData,
+    isBossAttackPhase: boolean,
   ): BattleAction[] {
     const actions: BattleAction[] = [];
     // Buffs and debuffs changed.
@@ -1114,6 +1145,7 @@ export class BattleScenarioParser {
             pos,
           ),
           0,
+          !isBossAttackPhase,
           [],
           [],
           [],
@@ -1179,6 +1211,7 @@ export class BattleScenarioParser {
             Number(pos),
           ),
           0,
+          !isBossAttackPhase,
           [],
           [],
           [],
@@ -1334,6 +1367,7 @@ export class BattleScenarioParser {
 
     return {
       "turnStats": totalStats["generalStats"],
+      "beforeBossTurnStats": totalStats["beforeBossTurnStats"],
       "characterCurrentTurnStats": totalStats["characterStats"],
       "turnActions": battleActions,
     };

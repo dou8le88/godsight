@@ -17,6 +17,7 @@ export class BossSpecialAttackAction extends BattleAction {
     public sourceName: string,
     public target: Actor,
     public partySize: number,
+    public beforeBossTurn: boolean,
     public damageInstances: DamageInstance[],
     public subactions: BattleAction[],
   ) {
@@ -50,6 +51,9 @@ export class BossSpecialAttackAction extends BattleAction {
       if (this.target == Actor.PLAYER) {
         const damage = instance["value"];
         update["generalStats"]["damageTaken"][instance["element"]] += damage;
+        if (this.beforeBossTurn) {
+          update["beforeBossTurnStats"]["damageTaken"][instance["element"]] += damage;
+        }
         update["characterStats"][instance["receiverIndex"]]["damageTaken"][instance["element"]] += damage;
       }
     });
@@ -68,6 +72,7 @@ export class BossSpecialAttackAction extends BattleAction {
         assertNotNullOrUndefined(json["sourceName"] as string),
         assertNotNullOrUndefined(json["target"] as Actor),
         assertNotNullOrUndefined(json["partySize"] as number),
+        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
         assertNotNullOrUndefined(json["damageInstances"] as DamageInstance[]),
         (json["subactions"] as Record<string, unknown>[]).map(action => {
           return BattleActionParser.fromJSON(action);

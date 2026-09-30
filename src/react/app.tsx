@@ -196,7 +196,7 @@ export default function GodsightPanel() {
             "beforeBossTurnStats": StatsUpdateHelper.getEmptyStats(),
             "characterCurrentTurnStats": {},
             "turnActions": [],
-          }
+          };
 
           currentTurn = raid["turnData"][currentTurnNumber];
         }

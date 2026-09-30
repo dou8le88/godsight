@@ -6,6 +6,7 @@ import { DamageDisplay } from "../settings/godsightsettings";
 export abstract class BattleAction {
   abstract actionType: ActionType;
   abstract subactions: BattleAction[];
+  abstract beforeBossTurn: boolean;
 
   abstract getStats(): StatsUpdate;
 

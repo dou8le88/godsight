@@ -16,6 +16,7 @@ export class ConditionChangeAction extends BattleAction {
     public target: Actor,
     public targetName: string,
     public missCount: number,
+    public beforeBossTurn: boolean,
     public buffs: GodsightCondition[],
     public debuffs: GodsightCondition[],
     public unclassified: GodsightCondition[],
@@ -23,6 +24,7 @@ export class ConditionChangeAction extends BattleAction {
     super();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
     const allStatuses = [
       ...this.buffs,
@@ -86,6 +88,9 @@ export class ConditionChangeAction extends BattleAction {
     const update = StatsUpdateHelper.getEmptyStatsUpdate();
     if (this.target == Actor.BOSS) {
       update["generalStats"]["debuffsInflictedCount"] += this.debuffs.length;
+      if (this.beforeBossTurn) {
+        update["beforeBossTurnStats"]["debuffsInflictedCount"] += this.debuffs.length;
+      }
       return update;
     } else {
       return update;
@@ -99,6 +104,7 @@ export class ConditionChangeAction extends BattleAction {
         assertNotNullOrUndefined(json["target"] as Actor),
         assertNotNullOrUndefined(json["targetName"] as string),
         assertNotNullOrUndefined(json["missCount"] as number),
+        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
         assertNotNullOrUndefined(json["buffs"] as GodsightCondition[]),
         assertNotNullOrUndefined(json["debuffs"] as GodsightCondition[]),
         assertNotNullOrUndefined(json["unclassified"] as GodsightCondition[]),

@@ -3,12 +3,14 @@ import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { DamageDisplay } from "../settings/godsightsettings";
+import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class RetreatAction extends BattleAction {
   public actionType: ActionType = ActionType.RETREAT;
   public subactions: BattleAction[] = [];
 
   constructor(
+    public beforeBossTurn: boolean,
   ) {
     super();
   }
@@ -16,6 +18,8 @@ export class RetreatAction extends BattleAction {
   getStats(): StatsUpdate {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
     return (
       <div key={key} className="action-description">The party retreated!
@@ -26,7 +30,9 @@ export class RetreatAction extends BattleAction {
   static override fromJSON(json: Record<string, unknown>): RetreatAction | undefined {
     const actionType = json["actionType"];
     if (actionType == ActionType.RETREAT) {
-      return new RetreatAction();
+      return new RetreatAction(
+        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
+      );
     } else {
       console.error(`RetreatAction.fromJSON called on ${json}`);
       return undefined;

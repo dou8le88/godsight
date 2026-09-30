@@ -18,6 +18,7 @@ export class ChargedAttackAction extends BattleAction {
     public attackerName: string,
     public target: Actor,
     public partySize: number,
+    public beforeBossTurn: boolean,
     public damageTotals: DamageInstance[],
     public subactions: BattleAction[],
   ) {
@@ -47,9 +48,15 @@ export class ChargedAttackAction extends BattleAction {
     if (this.target == Actor.BOSS) {
       this.damageTotals.forEach(instance => {
         update["generalStats"]["chargedAttackDamage"][instance["element"]] += instance["value"];
+        if (this.beforeBossTurn) {
+          update["beforeBossTurnStats"]["chargedAttackDamage"][instance["element"]] += instance["value"];
+        }
         update["characterStats"][this.attackerIndex]["chargedAttackDamage"][instance["element"]] += instance["value"];
         if (instance["value"] > 0) {
           update["generalStats"]["hitCount"] += 1;
+          if (this.beforeBossTurn) {
+            update["beforeBossTurnStats"]["hitCount"] += 1;
+          }
           update["characterStats"][this.attackerIndex]["hitCount"] += 1;
         }
       });
@@ -73,6 +80,7 @@ export class ChargedAttackAction extends BattleAction {
         assertNotNullOrUndefined(json["attackerName"] as string),
         assertNotNullOrUndefined(json["target"] as Actor),
         assertNotNullOrUndefined(json["partySize"] as number),
+        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
         assertNotNullOrUndefined(json["damageTotals"] as DamageInstance[]),
         (json["subactions"] as Record<string, unknown>[]).map(action => {
           return BattleActionParser.fromJSON(action);

@@ -11,10 +11,12 @@ export class WindowEffectAction extends BattleAction {
 
   constructor(
     public name: string,
+    public beforeBossTurn: boolean,
   ) {
     super();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
     return (
       <div key={key} className="action-description">The window effect {this.name} was activated!
@@ -31,6 +33,7 @@ export class WindowEffectAction extends BattleAction {
     if (actionType == ActionType.WINDOW_EFFECT) {
       return new WindowEffectAction(
         assertNotNullOrUndefined(json["name"] as string),
+        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
       );
     } else {
       console.error(`WindowEffectAction.fromJSON called on ${json}`);

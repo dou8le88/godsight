@@ -12,6 +12,7 @@ export class ResurrectedAction extends BattleAction {
   constructor(
     public resurrectedCharacterName: string,
     public resurrectionCause: string,
+    public beforeBossTurn: boolean,
   ) {
     super();
   }
@@ -20,6 +21,7 @@ export class ResurrectedAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
     return (
       <div key={key} className="action-description">{this.resurrectedCharacterName} was revived by {this.resurrectionCause}!
@@ -33,6 +35,7 @@ export class ResurrectedAction extends BattleAction {
       return new ResurrectedAction(
         assertNotNullOrUndefined(json["resurrectedCharacterName"] as string),
         assertNotNullOrUndefined(json["resurrectionCause"] as string),
+        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
       );
     } else {
       console.error(`ResurrectedAction.fromJSON called on ${json}`);

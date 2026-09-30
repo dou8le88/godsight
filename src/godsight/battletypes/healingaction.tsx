@@ -15,11 +15,13 @@ export class HealingAction extends BattleAction {
   constructor(
     public target: Actor,
     public partySize: number,
+    public beforeBossTurn: boolean,
     public healingInstances: HealingInstance[],
   ) {
     super();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
     const healingJsx = BattleActionHelper.getHealingInstanceJsx(
       this.healingInstances,
@@ -39,6 +41,9 @@ export class HealingAction extends BattleAction {
     if (this.target == Actor.PLAYER) {
       this.healingInstances.forEach(instance => {
         update["generalStats"]["healingReceived"] += instance["value"];
+        if (this.beforeBossTurn) {
+          update["beforeBossTurnStats"]["healingReceived"] += instance["value"];
+        }
         update["characterStats"][instance["receiverIndex"]]["healingReceived"] += instance["value"];
       });
     }
@@ -52,6 +57,7 @@ export class HealingAction extends BattleAction {
       return new HealingAction(
         assertNotNullOrUndefined(json["target"] as Actor),
         assertNotNullOrUndefined(json["partySize"] as number),
+        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
         assertNotNullOrUndefined(json["healingInstances"] as HealingInstance[]),
       );
     } else {

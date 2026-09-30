@@ -15,6 +15,7 @@ export class ChainBurstAction extends BattleAction {
     public chainCount: number,
     public name: string,
     public partySize: number,
+    public beforeBossTurn: boolean,
     public damageInstances: DamageInstance[],
   ) {
     super();
@@ -35,10 +36,16 @@ export class ChainBurstAction extends BattleAction {
 
     this.damageInstances.forEach(instance => {
       update["generalStats"]["otherDamage"][instance["element"]] += instance["value"];
+      if (this.beforeBossTurn) {
+        update["beforeBossTurnStats"]["otherDamage"][instance["element"]] += instance["value"];
+      }
       // Chain burst is considered "MC's" damage by the game.
       update["characterStats"][0]["otherDamage"][instance["element"]] += instance["value"];
       if (instance["value"] > 0) {
         update["generalStats"]["hitCount"] += 1;
+        if (this.beforeBossTurn) {
+          update["beforeBossTurnStats"]["hitCount"] += 1;
+        }
         update["characterStats"][0]["hitCount"] += 1;
       }
     });
@@ -53,6 +60,7 @@ export class ChainBurstAction extends BattleAction {
         assertNotNullOrUndefined(json["chainCount"] as number),
         assertNotNullOrUndefined(json["name"] as string),
         assertNotNullOrUndefined(json["partySize"] as number),
+        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
         assertNotNullOrUndefined(json["damageInstances"] as DamageInstance[]),
       );
     } else {

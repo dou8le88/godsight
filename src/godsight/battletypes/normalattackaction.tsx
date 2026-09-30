@@ -13,6 +13,7 @@ export class NormalAttackAction extends BattleAction {
   constructor(
     public attackerName: string,
     public isCounter: boolean,
+    public beforeBossTurn: boolean,
     public subactions: BattleAction[],
   ) {
     super();
@@ -64,6 +65,7 @@ export class NormalAttackAction extends BattleAction {
       return new NormalAttackAction(
         assertNotNullOrUndefined(json["attackerName"] as string),
         assertNotNullOrUndefined(json["isCounter"] as boolean),
+        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
         (json["subactions"] as Record<string, unknown>[]).map(action => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],

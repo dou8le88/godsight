@@ -15,10 +15,12 @@ export class CAMeterChangedAction extends BattleAction {
     public targetName: string,
     public newValue: number,
     public change: number,
+    public beforeBossTurn: boolean,
   ) {
     super();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
     let changeWord = "";
     if (this.change > 0) {
@@ -56,6 +58,7 @@ export class CAMeterChangedAction extends BattleAction {
         assertNotNullOrUndefined(json["targetName"] as string),
         assertNotNullOrUndefined(json["newValue"] as number),
         assertNotNullOrUndefined(json["change"] as number),
+        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
       );
     } else {
       console.error(`CAMeterChangedAction.fromJSON called on ${json}`);

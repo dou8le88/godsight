@@ -11,6 +11,7 @@ export class OmenCancelAction extends BattleAction {
 
   constructor(
     public bossName: string,
+    public beforeBossTurn: boolean,
   ) {
     super();
   }
@@ -19,6 +20,7 @@ export class OmenCancelAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
     return (
       <div key={key} className="action-description">{this.bossName}&apos;s omen was canceled!
@@ -31,6 +33,7 @@ export class OmenCancelAction extends BattleAction {
     if (actionType == ActionType.OMEN_CANCELLED) {
       return new OmenCancelAction(
         assertNotNullOrUndefined(json["bossName"] as string),
+        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
       );
     } else {
       console.error(`OmenCancelAction.fromJSON called on ${json}`);

@@ -4,11 +4,13 @@ import { BattleAction } from "./battleaction";
 import { BattleActionParser } from "./battleactionparser";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { DamageDisplay } from "../settings/godsightsettings";
+import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class FullElixirAction extends BattleAction {
   public actionType: ActionType = ActionType.USED_FULL_ELIXIR;
 
   constructor(
+    public beforeBossTurn: boolean,
     public subactions: BattleAction[],
   ) {
     super();
@@ -40,6 +42,7 @@ export class FullElixirAction extends BattleAction {
     const actionType = json["actionType"];
     if (actionType == ActionType.USED_FULL_ELIXIR) {
       return new FullElixirAction(
+        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
         (json["subactions"] as Record<string, unknown>[]).map(action => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],

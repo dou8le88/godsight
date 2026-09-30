@@ -18,6 +18,7 @@ export class SingularNormalAttackAction extends BattleAction {
     public attackerIndex: number,
     public isCounter: boolean,
     public partySize: number,
+    public beforeBossTurn: boolean,
     public damageInstances: DamageInstance[],
   ) {
     super();
@@ -44,9 +45,15 @@ export class SingularNormalAttackAction extends BattleAction {
         this.damageInstances.forEach(instance => {
           const attackerIndex = this.attackerIndex;
           update["generalStats"]["normalAttackDamage"][instance["element"]] += instance["value"];
+          if (this.beforeBossTurn) {
+            update["beforeBossTurnStats"]["normalAttackDamage"][instance["element"]] += instance["value"];
+          }
           update["characterStats"][attackerIndex]["normalAttackDamage"][instance["element"]] += instance["value"];
           if (instance["value"] > 0) {
             update["generalStats"]["hitCount"] += 1;
+            if (this.beforeBossTurn) {
+              update["beforeBossTurnStats"]["hitCount"] += 1;
+            }
             update["characterStats"][attackerIndex]["hitCount"] += 1;
           }
         });
@@ -54,6 +61,9 @@ export class SingularNormalAttackAction extends BattleAction {
       case Actor.BOSS:
         this.damageInstances.forEach(instance => {
           update["generalStats"]["damageTaken"][instance["element"]] += instance["value"];
+          if (this.beforeBossTurn) {
+            update["beforeBossTurnStats"]["damageTaken"][instance["element"]] += instance["value"];
+          }
           update["characterStats"][instance["receiverIndex"]]["damageTaken"][instance["element"]] += instance["value"];
         });
         break;
@@ -73,6 +83,7 @@ export class SingularNormalAttackAction extends BattleAction {
         assertNotNullOrUndefined(json["attackerIndex"] as number),
         assertNotNullOrUndefined(json["isCounter"] as boolean),
         assertNotNullOrUndefined(json["partySize"] as number),
+        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
         assertNotNullOrUndefined(json["damageInstances"] as DamageInstance[]),
       );
     } else {

@@ -12,6 +12,7 @@ export class TurnChangeAction extends BattleAction {
   constructor(
     public currentTurn: number,
     public newTurn: number,
+    public beforeBossTurn: boolean,
   ) {
     super();
   }
@@ -20,6 +21,7 @@ export class TurnChangeAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
     return (
       <div key={key} className="action-description">The turn counter advanced by {this.newTurn - this.currentTurn}!
@@ -33,6 +35,7 @@ export class TurnChangeAction extends BattleAction {
       return new TurnChangeAction(
         assertNotNullOrUndefined(json["currentTurn"] as number),
         assertNotNullOrUndefined(json["newTurn"] as number),
+        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
       );
     } else {
       console.error(`TurnChangeAction.fromJSON called on ${json}`);

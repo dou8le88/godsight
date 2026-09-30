@@ -12,10 +12,12 @@ export class ReplaceCharacterAction extends BattleAction {
   constructor(
     public characterName: string,
     public replacementCharacterName: string,
+    public beforeBossTurn: boolean,
   ) {
     super();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
 
     return (
@@ -36,6 +38,7 @@ export class ReplaceCharacterAction extends BattleAction {
       return new ReplaceCharacterAction(
         assertNotNullOrUndefined(json["characterName"] as string),
         assertNotNullOrUndefined(json["replacementCharacterName"] as string),
+        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
       );
     } else {
       console.error(`ReplaceCharacterAction.fromJSON called on ${json}`);

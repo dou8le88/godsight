@@ -2,6 +2,7 @@ export enum StatsView {
   TOTAL,
   DPT,
   PREV_TURN,
+  PREV_TURN_BEFORE_BOSS_ACTION,
   CURRENT_TURN,
   CHARACTER,
 }

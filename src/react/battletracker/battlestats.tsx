@@ -31,12 +31,13 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
 
     const currentTurnStats = currentTurn ? currentTurn["turnStats"] : StatsUpdateHelper.getEmptyStats();
     const previousTurnStats = previousTurn ? previousTurn["turnStats"] : StatsUpdateHelper.getEmptyStats();
+    const previousTurnBeforeBossActionStats = previousTurn ? previousTurn["beforeBossTurnStats"] : StatsUpdateHelper.getEmptyStats();
 
     const allCharacterStats = battleData["battleStats"]["characterStats"];
     const currentTurnCharacterStats = currentTurn ? currentTurn["characterCurrentTurnStats"] : {};
     const previousTurnCharacterStats = previousTurn ? previousTurn["characterCurrentTurnStats"] : {};
 
-    const previousTurnNumber = lastTurnIndex != -1 ? `${turns[lastTurnIndex]}` : "??";
+    const previousTurnNumber = lastTurnIndex != -1 ? `${turns[lastTurnIndex]}` : "?";
 
     const currenTurnHasActions = currentTurn ?
       currentTurn["turnActions"] && currentTurn["turnActions"].length &&
@@ -60,6 +61,7 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
       [StatsView.DPT]: damagePerTurnStats,
       [StatsView.CURRENT_TURN]: currentTurnStats,
       [StatsView.PREV_TURN]: previousTurnStats,
+      [StatsView.PREV_TURN_BEFORE_BOSS_ACTION]: previousTurnBeforeBossActionStats,
       [StatsView.CHARACTER]: battleData["battleStats"]["characterStats"],
     };
     const byCharacterViews: Record<StatsView, Record<string | number, Stats>> = {
@@ -67,6 +69,7 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
       [StatsView.DPT]: characterDamagePerTurnStats,
       [StatsView.CURRENT_TURN]: currentTurnCharacterStats,
       [StatsView.PREV_TURN]: previousTurnCharacterStats,
+      [StatsView.PREV_TURN_BEFORE_BOSS_ACTION]: {},
       [StatsView.CHARACTER]: {},
     }
     const viewNames = {
@@ -74,6 +77,7 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
       [StatsView.DPT]: "Average DPT Breakdown",
       [StatsView.CURRENT_TURN]: "Current Turn Breakdown",
       [StatsView.PREV_TURN]: "Previous Turn Breakdown",
+      [StatsView.PREV_TURN_BEFORE_BOSS_ACTION]: "Previous Turn Before-Boss-Action Breakdown",
       [StatsView.CHARACTER]: `${battleData["party"]["members"][selectedCharacter]["name"]}'s Damage Breakdown`,
     };
 
@@ -155,6 +159,13 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
                   if (selectedBreakdown == Breakdown.BY_TURN) {
                     setSelectedBreakdown(Breakdown.BY_TYPE);
                   }
+                }}
+              />
+              <StatsShower
+                stats={previousTurnBeforeBossActionStats}
+                header={`Prev Turn (${previousTurnNumber}) Omen-Contributing`}
+                onClick={() => {
+                  setSelectedStatsView(StatsView.PREV_TURN_BEFORE_BOSS_ACTION);
                 }}
               />
               <StatsShower

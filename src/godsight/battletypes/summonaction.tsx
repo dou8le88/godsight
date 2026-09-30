@@ -15,6 +15,7 @@ export class SummonAction extends BattleAction {
     public summonCallName: string,
     public mainCharacterName: string,
     public partySize: number,
+    public beforeBossTurn: boolean,
     public damageInstances: DamageInstance[],
     public subactions: BattleAction[],
     public trueSummonHitCount: number | undefined,
@@ -47,11 +48,17 @@ export class SummonAction extends BattleAction {
 
     this.damageInstances.forEach(instance => {
       update["generalStats"]["otherDamage"][instance["element"]] += instance["value"];
+      if (this.beforeBossTurn) {
+        update["beforeBossTurnStats"]["otherDamage"][instance["element"]] += instance["value"];
+      }
       // The game considers summon damage to belong to MC
       update["characterStats"][0]["otherDamage"][instance["element"]] += instance["value"];
 
       if (instance["value"] > 0) {
         update["generalStats"]["hitCount"] += 1;
+        if (this.beforeBossTurn) {
+          update["beforeBossTurnStats"]["hitCount"] += 1;
+        }
         update["characterStats"][0]["hitCount"] += 1;
       }
     });
@@ -59,6 +66,9 @@ export class SummonAction extends BattleAction {
     const maybeHitCountOverride = this.trueSummonHitCount;
     if (maybeHitCountOverride !== undefined) {
       update["generalStats"]["hitCount"] = maybeHitCountOverride;
+      if (this.beforeBossTurn) {
+        update["beforeBossTurnStats"]["hitCount"] = maybeHitCountOverride;
+      }
       update["characterStats"][0]["hitCount"] = maybeHitCountOverride;
     }
 
@@ -77,6 +87,7 @@ export class SummonAction extends BattleAction {
         assertNotNullOrUndefined(json["summonCallName"] as string),
         assertNotNullOrUndefined(json["mainCharacterName"] as string),
         assertNotNullOrUndefined(json["partySize"] as number),
+        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
         assertNotNullOrUndefined(json["damageInstances"] as DamageInstance[]),
         (json["subactions"] as Record<string, unknown>[]).map(action => {
           return BattleActionParser.fromJSON(action);

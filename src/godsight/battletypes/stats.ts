@@ -17,10 +17,11 @@ export type DamageByElement = Record<string | number, number>;
 export interface StatsUpdate {
   "characterStats": Record<string | number, Stats>,
   "generalStats": Stats,
+  "beforeBossTurnStats": Stats,
 }
 
 export class StatsUpdateHelper {
-  static getEmptyElementValues(): DamageByElement {
+  private static getEmptyElementValues(): DamageByElement {
     const damageByElement: DamageByElement = {};
 
     GameElementHelper.getAllElements().forEach(element => {
@@ -58,6 +59,7 @@ export class StatsUpdateHelper {
     return {
       "characterStats": characterStats,
       "generalStats": this.getEmptyStats(),
+      "beforeBossTurnStats": this.getEmptyStats(),
     }
   }
 
@@ -92,6 +94,8 @@ export class StatsUpdateHelper {
 
     this.mergeStats(first["generalStats"], output["generalStats"]);
     this.mergeStats(second["generalStats"], output["generalStats"]);
+    this.mergeStats(first["beforeBossTurnStats"], output["beforeBossTurnStats"]);
+    this.mergeStats(second["beforeBossTurnStats"], output["beforeBossTurnStats"]);
 
     return output;
   }

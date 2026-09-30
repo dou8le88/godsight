@@ -16,6 +16,7 @@ export class DamageAction extends BattleAction {
     public target: Actor,
     public partySize: number,
     public endOfTurnDamage: boolean,
+    public beforeBossTurn: boolean,
     public instances: DamageInstance[],
   ) {
     super();
@@ -46,8 +47,14 @@ export class DamageAction extends BattleAction {
             update["generalStats"]["dotDamage"] += instance["value"];
           } else {
             update["generalStats"]["skillDamage"][instance["element"]] += instance["value"];
+            if (this.beforeBossTurn) {
+              update["beforeBossTurnStats"]["skillDamage"][instance["element"]] += instance["value"];
+            }
             if (instance["value"] > 0) {
               update["generalStats"]["hitCount"] += 1;
+              if (this.beforeBossTurn) {
+                update["beforeBossTurnStats"]["hitCount"] += 1;
+              }
             }
           }
         });
@@ -56,6 +63,9 @@ export class DamageAction extends BattleAction {
         // Boss "skill damage" can occur in certain raids like Macutanmacar or Esoteric Mastery Trial.
         this.instances.forEach(instance => {
           update["generalStats"]["damageTaken"][instance["element"]] += instance["value"];
+          if (this.beforeBossTurn) {
+            update["beforeBossTurnStats"]["damageTaken"][instance["element"]] += instance["value"];
+          }
           update["characterStats"][instance["receiverIndex"]]["damageTaken"][instance["element"]] += instance["value"];
         });
         break;
@@ -72,6 +82,7 @@ export class DamageAction extends BattleAction {
         assertNotNullOrUndefined(json["target"] as Actor),
         assertNotNullOrUndefined(json["partySize"] as number),
         assertNotNullOrUndefined(json["endOfTurnDamage"] as boolean),
+        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
         assertNotNullOrUndefined(json["instances"] as DamageInstance[]),
       );
     } else {

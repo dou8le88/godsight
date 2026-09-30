@@ -15,6 +15,7 @@ export class MultihitDamageAction extends BattleAction {
   constructor(
     public target: Actor,
     public partySize: number,
+    public beforeBossTurn: boolean,
     public hits: DamageInstance[],
   ) {
     super();
@@ -46,8 +47,14 @@ export class MultihitDamageAction extends BattleAction {
           // Chain Bursts appear to be the only exception, but we handle those commands specially
           // so we never end up with a DamageAction for a chain burst damage instance.
           update["generalStats"]["skillDamage"][instance["element"]] += instance["value"];
+          if (this.beforeBossTurn) {
+            update["beforeBossTurnStats"]["skillDamage"][instance["element"]] += instance["value"];
+          }
           if (instance["value"] > 0) {
             update["generalStats"]["hitCount"] += 1;
+            if (this.beforeBossTurn) {
+              update["beforeBossTurnStats"]["hitCount"] += 1;
+            }
           }
         });
         break;
@@ -55,6 +62,9 @@ export class MultihitDamageAction extends BattleAction {
         // Boss "skill damage" can occur in certain raids like Macutanmacar or Esoteric Mastery Trial.
         this.hits.forEach(instance => {
           update["generalStats"]["damageTaken"][instance["element"]] += instance["value"];
+          if (this.beforeBossTurn) {
+            update["beforeBossTurnStats"]["damageTaken"][instance["element"]] += instance["value"];
+          }
           update["characterStats"][instance["receiverIndex"]]["damageTaken"][instance["element"]] += instance["value"];
         });
         break;
@@ -70,6 +80,7 @@ export class MultihitDamageAction extends BattleAction {
       return new MultihitDamageAction(
         assertNotNullOrUndefined(json["target"] as Actor),
         assertNotNullOrUndefined(json["partySize"] as number),
+        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
         assertNotNullOrUndefined(json["hits"] as DamageInstance[]),
       );
     } else {

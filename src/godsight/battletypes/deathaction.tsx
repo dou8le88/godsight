@@ -13,11 +13,13 @@ export class DeathAction extends BattleAction {
   constructor(
     public target: Actor,
     public targetName: string,
+    public beforeBossTurn: boolean,
     public index: number | null,
   ) {
     super();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
     return (
       <div key={key} className="action-description">{this.targetName} was knocked out!
@@ -35,6 +37,7 @@ export class DeathAction extends BattleAction {
       return new DeathAction(
         assertNotNullOrUndefined(json["target"] as Actor),
         assertNotNullOrUndefined(json["targetName"] as string),
+        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
         assertNotUndefined(json["index"] as number | null),
       );
     } else {

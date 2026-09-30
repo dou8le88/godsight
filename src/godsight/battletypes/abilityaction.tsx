@@ -18,6 +18,7 @@ export class AbilityAction extends BattleAction {
     public sourceName: string,
     public sourceIndex: number,
     public partySize: number,
+    public beforeBossTurn: boolean,
     public subactions: BattleAction[],
   ) {
     super();
@@ -94,6 +95,7 @@ export class AbilityAction extends BattleAction {
         assertNotNullOrUndefined(json["sourceName"] as string),
         assertNotNullOrUndefined(json["sourceIndex"] as number),
         assertNotNullOrUndefined(json["partySize"] as number),
+        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
         (json["subactions"] as Record<string, unknown>[]).map(action => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],
