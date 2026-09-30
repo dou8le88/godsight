@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { SettingsManager } from "../../godsight/settings/settingsmanager";
 import { useGodsightSettings } from "../../godsight/settings/usegodsightsettings";
-import { DamageDisplay, DefaultBattleView } from "../../godsight/settings/godsightsettings";
+import { DamageDisplay, DefaultBattleView, OnRaidLoadBehavior } from "../../godsight/settings/godsightsettings";
 import { DamageInstance } from "../../godsight/battletypes/damageinstance";
 import { GameElement } from "../../gbf/battletypes/scenariodata/mechanics/element";
 import { BattleActionHelper } from "../../godsight/battletypes/battleactionhelper";
@@ -150,6 +150,9 @@ export function Config({ onExit }: { onExit: () => void }) {
     "guarded": false,
   }];
 
+  const onRaidLoadOptions = Object.values(OnRaidLoadBehavior);
+  const onRaidLoadRef = useRef<HTMLSelectElement>(null);
+
   useEffect(() => {
     const listener = (e: KeyboardEvent) => {
       if (e.key == "Escape") {
@@ -178,114 +181,163 @@ export function Config({ onExit }: { onExit: () => void }) {
             X
           </div>
         </div>
-        <div className="config-body">
-          <div className="config-option">
-            <label htmlFor="main-character-name-override" className="config-description">
-              Override MC name (leave blank to use ingame name):
-            </label>
-            <input
-              id="main-character-name-override"
-              className="config-text-input"
-              type="text"
-              placeholder="Same as ingame name"
-              ref={mainCharacterNameRef}
-              value={settings["mainCharacterNameOverride"]}
-              onChange={() => {
-                if (mainCharacterNameRef.current) {
-                  settingsManager.updateSingleSetting(
-                    "mainCharacterNameOverride",
-                    mainCharacterNameRef.current.value
-                  );
-                }
-              }} />
-          </div>
-          <div className="config-option">
-            <label htmlFor="default-battle-view" className="config-description">
-              Default battle view:
-            </label>
-            <select
-              id="default-battle-view"
-              className="config-select-input"
-              name="default-battle-view"
-              ref={defaultBattleViewRef}
-              defaultValue={settings["defaultBattleView"]}
-              onChange={() => {
-                if (defaultBattleViewRef.current) {
-                  settingsManager.updateSingleSetting(
-                    "defaultBattleView",
-                    defaultBattleViewRef.current.value as DefaultBattleView,
-                  );
-                }
-              }}
-            >
-              {defaultBattleViewOptions.map(viewOption => (
-                <option
-                  key={viewOption}
-                  value={viewOption}
+        <table className="config-body">
+          <tbody>
+            <tr className="config-option">
+              <td className="config-description">
+                Override MC name:
+              </td>
+              <td className="config-input-container">
+                <input
+                  id="main-character-name-override"
+                  className="config-text-input"
+                  type="text"
+                  placeholder="Same as ingame name"
+                  ref={mainCharacterNameRef}
+                  value={settings["mainCharacterNameOverride"]}
+                  onChange={() => {
+                    if (mainCharacterNameRef.current) {
+                      settingsManager.updateSingleSetting(
+                        "mainCharacterNameOverride",
+                        mainCharacterNameRef.current.value
+                      );
+                    }
+                  }} />
+              </td>
+              <td className="config-explanation">
+                Leave blank to use your ingame name. Existing actions in recorded battles will not be updated.
+              </td>
+            </tr>
+            <tr className="config-option">
+              <td className="config-description">
+                Default battle view:
+              </td>
+              <td className="config-input-container">
+                <select
+                  id="default-battle-view"
+                  className="config-select-input"
+                  name="default-battle-view"
+                  ref={defaultBattleViewRef}
+                  defaultValue={settings["defaultBattleView"]}
+                  onChange={() => {
+                    if (defaultBattleViewRef.current) {
+                      settingsManager.updateSingleSetting(
+                        "defaultBattleView",
+                        defaultBattleViewRef.current.value as DefaultBattleView,
+                      );
+                    }
+                  }}
                 >
-                  {viewOption}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="config-option">
-            <label htmlFor="max-remembered-battles" className="config-description">
-              Max remembered battles:
-            </label>
-            <input
-              id="max-remembered-battles"
-              className="config-text-input"
-              type="number"
-              value={settings["maxRememberedBattles"]}
-              min={minRememberedBattles}
-              ref={maxRememberedBattlesRef}
-              onChange={() => {
-                if (maxRememberedBattlesRef.current) {
-                  const value = Number(maxRememberedBattlesRef.current.value);
+                  {defaultBattleViewOptions.map(viewOption => (
+                    <option
+                      key={viewOption}
+                      value={viewOption}
+                    >
+                      {viewOption}
+                    </option>
+                  ))}
+                </select>
+              </td>
+            </tr>
+            <tr className="config-option">
+              <td className="config-description">
+                Max remembered battles:
+              </td>
+              <td className="config-input-container">
+                <input
+                  id="max-remembered-battles"
+                  className="config-text-input"
+                  type="number"
+                  value={settings["maxRememberedBattles"]}
+                  min={minRememberedBattles}
+                  ref={maxRememberedBattlesRef}
+                  onChange={() => {
+                    if (maxRememberedBattlesRef.current) {
+                      const value = Number(maxRememberedBattlesRef.current.value);
 
-                  if (!isNaN(value) && value >= minRememberedBattles) {
-                    settingsManager.updateSingleSetting(
-                      "maxRememberedBattles",
-                      value,
-                    );
-                  }
-                }
-              }}
-            />
-          </div>
-          <div className="config-option">
-            <label htmlFor="damage-display" className="config-description">
-              Multi-hit damage display:
-            </label>
-            <select
-              id="damage-display"
-              className="config-select-input"
-              name="damage-display"
-              ref={damageDisplayRef}
-              defaultValue={settings["damageDisplay"]}
-              onChange={() => {
-                if (damageDisplayRef.current) {
-                  settingsManager.updateSingleSetting(
-                    "damageDisplay",
-                    damageDisplayRef.current.value as DamageDisplay,
-                  );
-                }
-              }}
-            >
-              {damageDisplayOptions.map(viewOption => (
-                <option
-                  key={viewOption}
-                  value={viewOption}
+                      if (!isNaN(value) && value >= minRememberedBattles) {
+                        settingsManager.updateSingleSetting(
+                          "maxRememberedBattles",
+                          value,
+                        );
+                      }
+                    }
+                  }}
+                />
+              </td>
+            </tr>
+            <tr className="config-option">
+              <td className="config-description">
+                Multi-hit damage display:
+              </td>
+              <td className="config-input-container">
+                <select
+                  id="damage-display"
+                  className="config-select-input"
+                  name="damage-display"
+                  ref={damageDisplayRef}
+                  defaultValue={settings["damageDisplay"]}
+                  onChange={() => {
+                    if (damageDisplayRef.current) {
+                      settingsManager.updateSingleSetting(
+                        "damageDisplay",
+                        damageDisplayRef.current.value as DamageDisplay,
+                      );
+                    }
+                  }}
                 >
-                  {viewOption}
-                </option>
-              ))}
-            </select>
-            <div className="config-explanation">
-              {BattleActionHelper.getDamageInstanceJsx(sampleDamageInstances, settings["damageDisplay"])}
-            </div>
-          </div>
-        </div>
+                  {damageDisplayOptions.map(viewOption => (
+                    <option
+                      key={viewOption}
+                      value={viewOption}
+                    >
+                      {viewOption}
+                    </option>
+                  ))}
+                </select>
+              </td>
+              <td className="config-explanation">
+                {BattleActionHelper.getDamageInstanceJsx(sampleDamageInstances, settings["damageDisplay"])}
+              </td>
+            </tr>
+            <tr className="config-option">
+              <td className="config-description">
+                Behavior on loading into a raid:
+              </td>
+              <td className="config-input-container">
+                <select
+                  id="on-raid-load"
+                  className="config-select-input"
+                  name="on-raid-load"
+                  ref={onRaidLoadRef}
+                  defaultValue={settings["onRaidLoadBehavior"]}
+                  onChange={() => {
+                    if (onRaidLoadRef.current) {
+                      settingsManager.updateSingleSetting(
+                        "onRaidLoadBehavior",
+                        onRaidLoadRef.current.value as OnRaidLoadBehavior,
+                      );
+                    }
+                  }}
+                >
+                  {onRaidLoadOptions.map(viewOption => (
+                    <option
+                      key={viewOption}
+                      value={viewOption}
+                    >
+                      {viewOption}
+                    </option>
+                  ))}
+                </select>
+              </td>
+              <td className="config-explanation">
+                Switch to Raid - Immediately change the inspected battle to the newly-loaded battle.<br />
+                Notify - Show a notification with a clickable button to inspect the battle.<br />
+                No Action - do nothing when loading into a raid.
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </>
   );

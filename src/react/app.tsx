@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import WrongWebsiteBanner from "./wrongwebsitebanner";
 import { GranblueBattleData } from "../gbf/battletypes/battledata";
 import { StartData } from "../gbf/battletypes/startdata";
@@ -13,21 +13,26 @@ import SearchHandler from "./search/searchhandler";
 import { BattleActionHelper } from "../godsight/battletypes/battleactionhelper";
 import { Config } from "./config/config";
 import { useGodsightSettings } from "../godsight/settings/usegodsightsettings";
+import { GodsightNotification, Notification, NotificationType } from "./notifications/notification";
+import { OnRaidLoadBehavior } from "../godsight/settings/godsightsettings";
+
+const NoKnownActiveBattleNotificationKey = "NoKnownActiveBattle";
+const LoadedIntoRaidNotificationKey = "LoadedIntoRaid";
+
+const validHosts = [
+  "game.granbluefantasy.jp",
+  "steam.granbluefantasy.jp"
+];
+
+// /rest/raid/*.json for solo battles/free quests.
+// /rest/multiraid/*.json for multiplayer battles.
+const battleApiRegex = /^\/rest\/(?:multi)?raid/;
+
+// raid/123456
+// raid_multi/123456
+const battleIdRegex = /^raid(?:_multi)?\/(\d+)/;
 
 export default function GodsightPanel() {
-  const validHosts = [
-    "game.granbluefantasy.jp",
-    "steam.granbluefantasy.jp"
-  ];
-
-  // /rest/raid/*.json for solo battles/free quests.
-  // /rest/multiraid/*.json for multiplayer battles.
-  const battleApiRegex = /^\/rest\/(?:multi)?raid/;
-
-  // raid/123456
-  // raid_multi/123456
-  const battleIdRegex = /^raid(?:_multi)?\/(\d+)/;
-
   // Find out if we're inspecting a GBF page.
   const [onGbfPage, setOnGbfPage] = useState(false);
   useEffect(() => {
@@ -58,6 +63,25 @@ export default function GodsightPanel() {
 
   const settings = useGodsightSettings();
 
+  const [notifications, setNotifications] = useState<GodsightNotification[]>([]);
+
+  // Clear notifications when they expire.
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      if (notifications.some(n => n.expiration <= Date.now())) {
+        startTransition(() => {
+          setNotifications([...notifications].filter(n => n.expiration > Date.now()));
+        });
+      }
+    }, 1000);
+
+    return () => {
+      clearInterval(intervalId);
+    }
+  }, [notifications]);
+
+  const [selectedBattle, setSelectedBattle] = useState<number | undefined>(undefined);
+
   // Only listen for network requests when we're inspecting GBF.
   useEffect(() => {
     if (!onGbfPage) return;
@@ -83,7 +107,44 @@ export default function GodsightPanel() {
       }
 
       storageManager.setBattleData(raidId, godsightBattleData, settings["maxRememberedBattles"]);
-      setSelectedBattle(raidId);
+      switch (settings["onRaidLoadBehavior"]) {
+        case OnRaidLoadBehavior.SWITCH:
+          setSelectedBattle(raidId);
+          break;
+
+        case OnRaidLoadBehavior.NOTIFY: {
+          if (selectedBattle != raidId) {
+            const thisRaidNotificationKey = `${LoadedIntoRaidNotificationKey}-${raidId}`;
+            if (!notifications.some(n => n.key == thisRaidNotificationKey)) {
+              const updatedNotifications = [...notifications];
+
+              updatedNotifications.unshift({
+                key: thisRaidNotificationKey,
+                type: NotificationType.INFO,
+                message: `New raid battle detected vs ${godsightBattleData["boss"][0]["name"]}!`,
+                expiration: Date.now() + (100 * 1000),
+                action: {
+                  buttonText: "View",
+                  onClick: () => {
+                    setSelectedBattle(raidId);
+                    startTransition(() => {
+                      setNotifications([...notifications].filter(n => n.key != thisRaidNotificationKey));
+                    });
+                  },
+                },
+              });
+
+              startTransition(() => {
+                setNotifications(updatedNotifications);
+              });
+            }
+          }
+          break;
+        }
+
+        case OnRaidLoadBehavior.NO_ACTION:
+          break;
+      }
     }
 
     function withActiveBattle(callback: (battleId: number, raid: GodsightBattleData) => void) {
@@ -100,7 +161,20 @@ export default function GodsightPanel() {
             });
             callback(battleId, raidCopy);
           } else {
-            console.warn("Unable to record battle actions: no known active battle (refresh the battle while the Godsight panel is open)");
+            if (!notifications.some(n => n.key == NoKnownActiveBattleNotificationKey)) {
+              const updatedNotifications = [...notifications];
+
+              updatedNotifications.unshift({
+                key: NoKnownActiveBattleNotificationKey,
+                type: NotificationType.ERROR,
+                message: "Got battle data for unknown battle, please refresh the battle while Godsight is open.",
+                expiration: Date.now() + (10 * 1000),
+              });
+
+              startTransition(() => {
+                setNotifications(updatedNotifications);
+              });
+            }
           }
         } else {
           console.error("Couldn't determine the active battle.");
@@ -277,10 +351,9 @@ export default function GodsightPanel() {
     return () => {
       chrome.devtools.network.onRequestFinished.removeListener(onRequestFinishedListener);
     };
-  }, [onGbfPage, godsightStorage, settings]);
+  }, [onGbfPage, godsightStorage, selectedBattle, settings, notifications]);
 
   const allBattles = godsightStorage["battles"];
-  const [selectedBattle, setSelectedBattle] = useState<number | undefined>(undefined);
 
   const [showConfig, setShowConfig] = useState(false);
 
@@ -297,6 +370,15 @@ export default function GodsightPanel() {
       </div>
       <div className="toolbar">
         <div className="icon config-icon" onClick={() => setShowConfig(true)}>⚙</div>
+      </div>
+      <div className="notification-bar">
+        {notifications.map(notification => (
+          <Notification key={notification.key} notification={notification} onExit={() => {
+            startTransition(() => {
+              setNotifications([...notifications].filter(n => n.key != notification.key));
+            });
+          }} />
+        ))}
       </div>
       {showConfig ?
         <>

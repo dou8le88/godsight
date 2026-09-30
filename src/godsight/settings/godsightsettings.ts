@@ -4,6 +4,7 @@ export interface GodsightSettings {
   "lastSelectedBattleView"?: BattleViewTab,
   "maxRememberedBattles": number,
   "damageDisplay": DamageDisplay,
+  "onRaidLoadBehavior": OnRaidLoadBehavior,
 }
 
 export enum DefaultBattleView {
@@ -23,9 +24,16 @@ export enum DamageDisplay {
   ALL_HITS = "All Hits",
 }
 
+export enum OnRaidLoadBehavior {
+  SWITCH = "Switch to Raid",
+  NOTIFY = "Notify",
+  NO_ACTION = "No Action",
+}
+
 export const DefaultSettings: GodsightSettings = {
   "mainCharacterNameOverride": "MC",
   "defaultBattleView": DefaultBattleView.LAST_SELECTION,
   "maxRememberedBattles": 10,
   "damageDisplay": DamageDisplay.ONE_PER_ELEMENT,
+  "onRaidLoadBehavior": OnRaidLoadBehavior.SWITCH,
 };
