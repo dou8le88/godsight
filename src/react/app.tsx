@@ -18,6 +18,7 @@ import { OnRaidLoadBehavior } from "../godsight/settings/godsightsettings";
 
 const NoKnownActiveBattleNotificationKey = "NoKnownActiveBattle";
 const LoadedIntoRaidNotificationKey = "LoadedIntoRaid";
+const DeleteAllStoredDataNotificationKey = "DeleteAllStoredData";
 
 const validHosts = [
   "game.granbluefantasy.jp",
@@ -192,6 +193,7 @@ export default function GodsightPanel() {
         if (!currentTurn) {
           raid["turnData"][currentTurnNumber] = {
             "turnStats": StatsUpdateHelper.getEmptyStats(),
+            "beforeBossTurnStats": StatsUpdateHelper.getEmptyStats(),
             "characterCurrentTurnStats": {},
             "turnActions": [],
           }
@@ -216,6 +218,7 @@ export default function GodsightPanel() {
 
         // Then merge the new turn stats into the existing turn stats
         StatsUpdateHelper.mergeStats(currentTurn["turnStats"], newTurnData["turnStats"]);
+        StatsUpdateHelper.mergeStats(currentTurn["beforeBossTurnStats"], newTurnData["beforeBossTurnStats"]);
         Object.keys(currentTurn["characterCurrentTurnStats"]).forEach(characterIndex => {
           StatsUpdateHelper.mergeStats(
             currentTurn["characterCurrentTurnStats"][characterIndex],
@@ -404,7 +407,27 @@ export default function GodsightPanel() {
                   )}
                 </div>
               ) : (
-                <div className="empty-battle-list-banner">No battles recorded. Start a raid battle, or refresh an active raid to start recording data.</div>
+                <div className="empty-battle-list-banner">
+                  No battles recorded. Start a raid battle, or refresh an active raid to start recording data.<br />
+                  If you expected to see data here, the underlying schema may have changed.<br />
+                  Clicking the button below will delete all stored battle data to attempt to recover.
+                  <div
+                    className="reset-storage-button"
+                    onClick={() => {
+                      storageManager.deleteAllBattles();
+                      const updatedNotifications = [...notifications];
+                      updatedNotifications.unshift({
+                        key: DeleteAllStoredDataNotificationKey,
+                        type: NotificationType.INFO,
+                        message: "Stored data deleted. Start a new battle to begin recording data.",
+                        expiration: Date.now() + (5 * 1000),
+                      });
+                      setNotifications(updatedNotifications);
+                    }}
+                  >
+                    Delete All Stored Battle Data
+                  </div>
+                </div>
               )}
             </>
           )}

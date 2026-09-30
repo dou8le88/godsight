@@ -1,14 +1,12 @@
 import { BattleActionHelper } from "../battletypes/battleactionhelper";
 import { GodsightBattleData } from "../battletypes/battledata";
-import { GodsightStorage } from "./battlestorage";
+import { DefaultGodsightStorage, GodsightStorage } from "./battlestorage";
 
 export class GodsightStorageManager {
   private static godsightStorageKey = "godsightStorage";
   private static instance: GodsightStorageManager;
 
-  private storageCache: GodsightStorage = {
-    "battles": [],
-  };
+  private storageCache: GodsightStorage = structuredClone(DefaultGodsightStorage) as unknown as GodsightStorage;
 
   private lastSetPromise = new Promise<void>((resolve) => resolve(undefined));
 
@@ -120,6 +118,11 @@ export class GodsightStorageManager {
     this.cloneAndRehydrateStorage();
     const battlesWithoutBattleId = this.storageCache["battles"].filter(b => b["raidId"] != battleId);
     this.storageCache["battles"] = battlesWithoutBattleId;
+    this.updateUnderlyingStorageAndNotify();
+  }
+
+  public deleteAllBattles() {
+    this.storageCache = structuredClone(DefaultGodsightStorage) as unknown as GodsightStorage;
     this.updateUnderlyingStorageAndNotify();
   }
 }
