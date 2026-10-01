@@ -6,7 +6,6 @@ import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { JSX } from "react/jsx-runtime";
 import { BattleActionHelper } from "./battleactionhelper";
 import { assertNotNullOrUndefined } from "../../util/assert";
-import { GameElementValue } from "../../gbf/battletypes/scenariodata/mechanics/element";
 import { DamageDisplay } from "../settings/godsightsettings";
 
 export class SingularNormalAttackAction extends BattleAction {

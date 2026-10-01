@@ -6,6 +6,7 @@ import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { SingularNormalAttackAction } from "./singularnormalattackaction";
 import { assertNotNullOrUndefined } from "../../util/assert";
 import { DamageDisplay } from "../settings/godsightsettings";
+import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
 
 export class NormalAttackAction extends BattleAction {
   public actionType: ActionType = ActionType.NORMAL_ATTACK;
@@ -13,6 +14,7 @@ export class NormalAttackAction extends BattleAction {
   constructor(
     public attackerName: string,
     public isCounter: boolean,
+    public partySize: number,
     public beforeBossTurn: boolean,
     public subactions: BattleAction[],
   ) {
@@ -49,7 +51,29 @@ export class NormalAttackAction extends BattleAction {
   }
 
   getStats(): StatsUpdate {
-    const update = StatsUpdateHelper.getEmptyStatsUpdate();
+    const update = StatsUpdateHelper.getEmptyStatsUpdate(this.partySize);
+
+    const attacks = this.subactions.filter(a => a instanceof SingularNormalAttackAction);
+    const attackCount = attacks.length;
+
+    if (attackCount > 0 && !this.isCounter && attacks[0]["source"] == Actor.PLAYER) {
+      const attacker = attacks[0]["attackerIndex"];
+      update["generalStats"]["normalAttacks"] += 1;
+      update["characterStats"][attacker]["normalAttacks"] += 1;
+      if (attackCount == 3) {
+        update["generalStats"]["tripleAttacks"] += 1;
+        update["characterStats"][attacker]["tripleAttacks"] += 1;
+      }
+      if (this.beforeBossTurn) {
+        update["beforeBossTurnStats"]["normalAttacks"] += 1;
+        update["characterBeforeBossTurnStats"][attacker]["normalAttacks"] += 1;
+
+        if (attackCount == 3) {
+          update["beforeBossTurnStats"]["tripleAttacks"] += 1;
+          update["characterBeforeBossTurnStats"][attacker]["tripleAttacks"] += 1;
+        }
+      }
+    }
 
     const subactionUpdates = this.subactions.map(action => action.getStats());
 
@@ -65,6 +89,7 @@ export class NormalAttackAction extends BattleAction {
       return new NormalAttackAction(
         assertNotNullOrUndefined(json["attackerName"] as string),
         assertNotNullOrUndefined(json["isCounter"] as boolean),
+        assertNotNullOrUndefined(json["partySize"] as number),
         assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
         (json["subactions"] as Record<string, unknown>[]).map(action => {
           return BattleActionParser.fromJSON(action);

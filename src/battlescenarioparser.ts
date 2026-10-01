@@ -495,6 +495,7 @@ export class BattleScenarioParser {
           const normalAttackAction = new NormalAttackAction(
             attackerName,
             firstNormalAttack ? firstNormalAttack.isCounter : false,
+            godsightBattleData["party"]["partyMemberCount"],
             !isBossAttackPhase,
             subactions.actions,
           );

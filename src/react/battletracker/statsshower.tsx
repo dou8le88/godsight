@@ -44,6 +44,9 @@ export function StatsShower({ stats, header, character, backline, onClick }: {
     className += " clickable";
   }
 
+  const tripleAttackRate =
+    stats["normalAttacks"] > 0 ? `${((stats["tripleAttacks"] / stats["normalAttacks"]) * 100).toFixed(0)}` : "--";
+
   return (
     <div className={className} {...(onClick && { "onClick": () => onClick() })}>
       {character ?
@@ -59,13 +62,29 @@ export function StatsShower({ stats, header, character, backline, onClick }: {
           </div> :
           <></>
         }
-        <div className="stat-line"><span className="stat-label">Total damage:</span> <span className="stat-value">{totalDamage.toLocaleString()}</span></div>
-        <div className="stat-line"><span className="stat-label">NA damage:</span> <span className="stat-value">{totalNormalAttackDamage.toLocaleString()}</span></div>
-        <div className="stat-line"><span className="stat-label">CA damage:</span> <span className="stat-value">{totalChargedAttackDamage.toLocaleString()}</span></div>
-        <div className="stat-line"><span className="stat-label">Skill damage:</span> <span className="stat-value">{totalSkillDamage.toLocaleString()}</span></div>
-        <div className="stat-line"><span className="stat-label">Other damage:</span> <span className="stat-value">{totalOtherDamage.toLocaleString()}</span></div>
-        <div className="stat-line"><span className="stat-label">Hit count:</span> <span className="stat-value">{hitCount}</span></div>
-        <div className="stat-line"><span className="stat-label">Debuffs:</span> <span className="stat-value">{debuffs}</span></div>
+        <div className="stat-line">
+          <span className="stat-label">Total damage:</span> <span className="stat-value">{totalDamage.toLocaleString()}</span></div>
+        <div className="stat-line">
+          <span className="stat-label">NA damage:</span> <span className="stat-value">{totalNormalAttackDamage.toLocaleString()}</span>
+        </div>
+        <div className="stat-line">
+          <span className="stat-label">CA damage:</span> <span className="stat-value">{totalChargedAttackDamage.toLocaleString()}</span>
+        </div>
+        <div className="stat-line">
+          <span className="stat-label">Skill damage:</span> <span className="stat-value">{totalSkillDamage.toLocaleString()}</span>
+        </div>
+        <div className="stat-line">
+          <span className="stat-label">Other damage:</span> <span className="stat-value">{totalOtherDamage.toLocaleString()}</span>
+        </div>
+        <div className="stat-line">
+          <span className="stat-label">Hit count:</span> <span className="stat-value">{hitCount}</span>
+        </div>
+        <div className="stat-line">
+          <span className="stat-label">Debuffs:</span> <span className="stat-value">{debuffs}</span>
+        </div>
+        <div className="stat-line">
+          <span className="stat-label">TA rate:</span> <span className="stat-value">{tripleAttackRate}%</span>
+        </div>
       </div>
     </div>
   );

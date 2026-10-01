@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { GodsightBattleData } from "../../godsight/battletypes/battledata";
-import { RetreatAction } from "../../godsight/battletypes/retreataction";
 import { Stats, StatsUpdateHelper } from "../../godsight/battletypes/stats";
 import { StatsShower } from "./statsshower";
 import { StatsView } from "./statsview";
@@ -40,18 +39,14 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
 
     const previousTurnNumber = lastTurnIndex != -1 ? `${turns[lastTurnIndex]}` : "?";
 
-    const currenTurnHasActions = currentTurn ?
-      currentTurn["turnActions"] && currentTurn["turnActions"].length &&
-      !(currentTurn["turnActions"][0] instanceof RetreatAction) : false;
-
-    const turnsWithData = currenTurnHasActions ? (turns.filter(t => t != 0)).length : turns.length - 1;
+    const turnsWithData = turns.filter(t => t != 0).length;
     const damagePerTurnStats = structuredClone(totalStats);
 
-    StatsUpdateHelper.divideStatsBy(damagePerTurnStats, turnsWithData || 1);
+    StatsUpdateHelper.divideStatsBy(damagePerTurnStats, turnsWithData || 1, ["normalAttacks", "tripleAttacks"]);
 
     const characterDamagePerTurnStats = structuredClone(allCharacterStats);
     Object.keys(characterDamagePerTurnStats).forEach((charIdx) => {
-      StatsUpdateHelper.divideStatsBy(characterDamagePerTurnStats[charIdx], turnsWithData || 1);
+      StatsUpdateHelper.divideStatsBy(characterDamagePerTurnStats[charIdx], turnsWithData || 1, ["normalAttacks", "tripleAttacks"]);
     });
 
     const [selectedStatsView, setSelectedStatsView] = useState<StatsView | undefined>(undefined);

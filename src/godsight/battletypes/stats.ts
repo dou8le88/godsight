@@ -10,6 +10,8 @@ export interface Stats {
   "otherDamage": DamageByElement,
   "dotDamage": number,
   "damageTaken": DamageByElement,
+  "normalAttacks": number,
+  "tripleAttacks": number,
 }
 
 export type DamageByElement = Record<string | number, number>;
@@ -43,6 +45,8 @@ export class StatsUpdateHelper {
       "otherDamage": this.getEmptyElementValues(),
       "dotDamage": 0,
       "damageTaken": this.getEmptyElementValues(),
+      "normalAttacks": 0,
+      "tripleAttacks": 0,
     };
   }
 
@@ -128,11 +132,12 @@ export class StatsUpdateHelper {
     });
   }
 
-  static divideStatsBy(stats: Stats, by: number): void {
+  static divideStatsBy(stats: Stats, by: number, excludedKeys?: string[]): void {
+    excludedKeys = excludedKeys || [];
     (Object.keys(stats) as (keyof Stats)[]).forEach(key => {
-      if (typeof stats[key] === "number") {
+      if (typeof stats[key] === "number" && !excludedKeys.includes(key)) {
         (stats as unknown as Record<string, number>)[key] /= by;
-      } else if (typeof stats[key] === "object") {
+      } else if (typeof stats[key] === "object" && !excludedKeys.includes(key)) {
         GameElementHelper.getAllElements().forEach(element => {
           (stats as unknown as Record<string, DamageByElement>)[key][element] /= by;
         });
