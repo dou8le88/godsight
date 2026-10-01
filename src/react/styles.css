@@ -733,6 +733,7 @@ body,
             align-items: center;
             justify-content: center;
             width: 80px;
+            user-select: none;
 
             &:first-child {
                 border-top-left-radius: 5px;

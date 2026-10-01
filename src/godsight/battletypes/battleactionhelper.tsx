@@ -9,7 +9,7 @@ import { BattleAction } from "./battleaction";
 import { identity } from "../../util/functional";
 import { BattleActionParser } from "./battleactionparser";
 import { DamageDisplay } from "../settings/godsightsettings";
-import { DamageByElement, StatsUpdateHelper } from "./stats";
+import { DamageByElement } from "./stats";
 
 export class BattleActionHelper {
   static IconlessStatusEffects = [

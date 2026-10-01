@@ -490,7 +490,7 @@ function totalCharacterDamageByElementTimeSeries(battleData: GodsightBattleData,
 }
 
 function omenContributingDamageByTypeTimeSeries(battleData: GodsightBattleData) {
-  const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t));
+  const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t)).filter(t => t != 0);
 
   const allTurnStats = allTurns.map(t => {
     return {
@@ -505,7 +505,7 @@ function omenContributingDamageByTypeTimeSeries(battleData: GodsightBattleData) 
 }
 
 function omenContributingDamageByElementTimeSeries(battleData: GodsightBattleData) {
-  const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t));
+  const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t)).filter(t => t != 0);
 
   const allTurnStats = allTurns.map(t => {
     return {
@@ -520,7 +520,7 @@ function omenContributingDamageByElementTimeSeries(battleData: GodsightBattleDat
 }
 
 function omenContributingDamageByCharacterTimeSeries(battleData: GodsightBattleData) {
-  const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t));
+  const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t)).filter(t => t != 0);
   const allCharacters = Array.from({ length: battleData["party"]["members"].length }, (_, idx) => idx);
 
   const allTurnStats = allTurns.map(t => {

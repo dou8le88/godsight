@@ -27,7 +27,7 @@ This project is currently under active development.
 - [x] Basic UI with party member portraits
 - [x] Basic battle summary describing the outcomes of actions.
 - [x] More detailed result display: hitcounts (total/by damage type), debuffs applied count, etc.
-    - [ ] Stats variant that just shows before-boss-action stuff ("omen-cancel-contributing stats")
+- [x] Stats variant that just shows before-boss-action stuff ("omen-cancel-contributing stats")
 - [X] DPS/DPT view
     - [X] Current DPS/DPT
     - [X] Last turn damage

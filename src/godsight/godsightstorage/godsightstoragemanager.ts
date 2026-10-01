@@ -35,13 +35,6 @@ export class GodsightStorageManager {
     });
   }
 
-  private cloneAndRehydrateStorage() {
-    this.storageCache = structuredClone(this.storageCache)
-    this.storageCache["battles"].forEach(battle => {
-      this.rehydrateTurns(battle);
-    });
-  }
-
   private async initialize() {
     const existingData = await chrome.storage.local.get(GodsightStorageManager.godsightStorageKey) as { [GodsightStorageManager.godsightStorageKey]?: string };
 
@@ -105,7 +98,9 @@ export class GodsightStorageManager {
   }
 
   public setBattleData(battleId: number, battleData: GodsightBattleData, maxRememberedBattles: number) {
-    this.cloneAndRehydrateStorage();
+    this.storageCache = {
+      "battles": [...this.storageCache["battles"]],
+    };
     this.storageCache["battles"] = this.storageCache["battles"].filter(b => b["raidId"] != battleId);
     this.storageCache["battles"].unshift(battleData);
     if (this.storageCache["battles"].length > maxRememberedBattles) {
@@ -115,7 +110,9 @@ export class GodsightStorageManager {
   }
 
   public deleteBattle(battleId: string | number) {
-    this.cloneAndRehydrateStorage();
+    this.storageCache = {
+      "battles": [...this.storageCache["battles"]],
+    };
     const battlesWithoutBattleId = this.storageCache["battles"].filter(b => b["raidId"] != battleId);
     this.storageCache["battles"] = battlesWithoutBattleId;
     this.updateUnderlyingStorageAndNotify();

@@ -1190,7 +1190,8 @@ export class BattleScenarioParser {
       Object.keys(allBossConditionActions).forEach(pos => {
         if (allBossConditionActions[pos].buffs.length ||
           allBossConditionActions[pos].debuffs.length ||
-          allBossConditionActions[pos].unclassified.length) {
+          allBossConditionActions[pos].unclassified.length ||
+          allBossConditionActions[pos].missCount > 0) {
           actions.push(allBossConditionActions[pos]);
         }
       });

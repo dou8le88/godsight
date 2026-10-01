@@ -156,11 +156,7 @@ export default function GodsightPanel() {
         if (!isNaN(battleId)) {
           const raid = godsightStorage["battles"].find(b => b["raidId"] == battleId);
           if (raid) {
-            const raidCopy = structuredClone(raid);
-            Object.keys(raidCopy["turnData"]).forEach(turnNumber => {
-              raidCopy["turnData"][turnNumber]["turnActions"] = BattleActionHelper.getRehydratedActions(raidCopy["turnData"][turnNumber]["turnActions"]);
-            });
-            callback(battleId, raidCopy);
+            callback(battleId, raid);
           } else {
             if (!notifications.some(n => n.key == NoKnownActiveBattleNotificationKey)) {
               const updatedNotifications = [...notifications];
@@ -316,6 +312,7 @@ export default function GodsightPanel() {
               case "guard_setting.json":
               case "chat_result.json":
               case "check_set_time_limit.json":
+              case "get_select_if.json":
               case "0.json":
               case "1.json":
               case "2.json":
