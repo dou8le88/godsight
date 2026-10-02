@@ -83,7 +83,7 @@ export function StatsShower({ stats, header, character, backline, onClick }: {
           <span className="stat-label">Debuffs:</span> <span className="stat-value">{debuffs}</span>
         </div>
         <div className="stat-line">
-          <span className="stat-label">TA rate:</span> <span className="stat-value">{tripleAttackRate}%</span>
+          <span className="stat-label">TAs:</span> <span className="stat-value">{stats["tripleAttacks"]}/{stats["normalAttacks"]} ({tripleAttackRate}%)</span>
         </div>
       </div>
     </div>

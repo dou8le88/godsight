@@ -300,19 +300,21 @@ export default function GodsightPanel() {
                 break;
 
               // Misc configuration endpoints that don't contain battle info.
-              case "setting":
+              case "assist_check":
+              case "assist.json":
               case "auto_setting":
-              case "special_skill_setting":
-              case "user_battle_log":
-              case "multi_battle_log":
-              case "stamp_list":
-              case "get_union_summon_lock":
-              case "vote_abort.json":
-              case "showed_vote_result.json":
-              case "guard_setting.json":
               case "chat_result.json":
               case "check_set_time_limit.json":
               case "get_select_if.json":
+              case "get_union_summon_lock":
+              case "guard_setting.json":
+              case "multi_battle_log":
+              case "setting":
+              case "showed_vote_result.json":
+              case "special_skill_setting":
+              case "stamp_list":
+              case "user_battle_log":
+              case "vote_abort.json":
               case "0.json":
               case "1.json":
               case "2.json":
