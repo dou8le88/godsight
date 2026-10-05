@@ -63,11 +63,33 @@ export class ChargedAttackAction extends BattleAction {
           }
         }
       });
-      const subactionStatsUpdates = this.subactions.map(action => action.getStats());
-      return subactionStatsUpdates.reduce(
+      const subactionUpdates = this.subactions.map(action => action.getStats()).reduce(
         (prev, cur) => StatsUpdateHelper.concatUpdates(prev, cur),
-        update
+        StatsUpdateHelper.getEmptyStatsUpdate(this.partySize)
       );
+
+      // Damage stats from subactions can happen when a CA does bonus skill damage or somesuch.
+      // These subactions have no way to associate certain general stats with
+      // a specific character, so we must do it here.
+      const subactionHitCount = subactionUpdates["generalStats"]["hitCount"];
+      const subactionDebuffs = subactionUpdates["generalStats"]["debuffsInflictedCount"];
+      const subactionSkillDamage = subactionUpdates["generalStats"]["skillDamage"];
+
+      subactionUpdates["characterStats"][this.attackerIndex]["hitCount"] += subactionHitCount;
+      subactionUpdates["characterStats"][this.attackerIndex]["debuffsInflictedCount"] += subactionDebuffs;
+      if (this.beforeBossTurn) {
+        subactionUpdates["characterBeforeBossTurnStats"][this.attackerIndex]["hitCount"] += subactionHitCount;
+        subactionUpdates["characterBeforeBossTurnStats"][this.attackerIndex]["debuffsInflictedCount"] += subactionDebuffs;
+      }
+      GameElementHelper.getAllElements().forEach(element => {
+        subactionUpdates["characterStats"][this.attackerIndex]["skillDamage"][element] += subactionSkillDamage[element];
+        if (this.beforeBossTurn) {
+          subactionUpdates["characterBeforeBossTurnStats"][this.attackerIndex]["skillDamage"][element] +=
+            subactionSkillDamage[element];
+        }
+      });
+
+      return StatsUpdateHelper.concatUpdates(update, subactionUpdates);
     } else {
       console.error(`Got ${this.target} target for ChargedAttackAction`);
       return update;

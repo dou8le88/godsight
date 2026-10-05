@@ -1,4 +1,4 @@
-import { AbilityScenarioData } from "./gbf/battletypes/scenariodata/abilityscenariodata";
+import { AbilityMotion, AbilityScenarioData } from "./gbf/battletypes/scenariodata/abilityscenariodata";
 import { BossSpecialAttackScenarioData } from "./gbf/battletypes/scenariodata/bossspecialattackscenariodata";
 import { BossStatusScenarioData } from "./gbf/battletypes/scenariodata/bossstatusscenariodata";
 import { ChargeAttackMeterChangedScenarioData } from "./gbf/battletypes/scenariodata/chargeattackmeterchangedscenariodata";
@@ -227,10 +227,13 @@ export class BattleScenarioParser {
         }
 
         case ScenarioCommand.ABILITY: {
+          const abilityScenario = scenario as AbilityScenarioData;
+          if (!abilityScenario["name"] && abilityScenario["motion"] == AbilityMotion.OFF) {
+            break;
+          }
           if (stopOnMainAction) {
             break baseLoop;
           }
-          const abilityScenario = scenario as AbilityScenarioData;
           const subactions = this._parseScenarioData(
             scenarioData.slice(i + 1),
             gbfBattleData,
