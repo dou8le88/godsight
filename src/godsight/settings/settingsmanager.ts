@@ -92,7 +92,9 @@ export class SettingsManager {
   }
 
   public updateSingleSetting<T extends keyof GodsightSettings>(setting: T, newValue: GodsightSettings[T]) {
-    this.settingsCache = structuredClone(this.settingsCache);
+    this.settingsCache = {
+      ...this.settingsCache,
+    };
     this.settingsCache[setting] = newValue;
     this.updateUnderlyingSettingsAndNotify();
   }

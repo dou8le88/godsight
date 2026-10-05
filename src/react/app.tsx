@@ -1,4 +1,5 @@
 import { startTransition, useEffect, useState } from "react";
+import { produce } from "immer";
 import WrongWebsiteBanner from "./wrongwebsitebanner";
 import { GranblueBattleData } from "../gbf/battletypes/battledata";
 import { StartData } from "../gbf/battletypes/startdata";
@@ -10,7 +11,6 @@ import BattleSummary from "./battletracker/battlesummary";
 import { StatsUpdateHelper } from "../godsight/battletypes/stats";
 import { GodsightBattleData } from "../godsight/battletypes/battledata";
 import SearchHandler from "./search/searchhandler";
-import { BattleActionHelper } from "../godsight/battletypes/battleactionhelper";
 import { Config } from "./config/config";
 import { useGodsightSettings } from "../godsight/settings/usegodsightsettings";
 import { GodsightNotification, Notification, NotificationType } from "./notifications/notification";
@@ -183,62 +183,64 @@ export default function GodsightPanel() {
       console.info(`Got battle data for ${endpoint}`);
 
       withActiveBattle((battleId, raid) => {
-        const currentTurnNumber = raid["currentTurn"];
-        let currentTurn = raid["turnData"][currentTurnNumber];
+        const updatedRaid = produce(raid, draft => {
+          const currentTurnNumber = draft["currentTurn"];
+          let currentTurn = draft["turnData"][currentTurnNumber];
 
-        if (!currentTurn) {
-          raid["turnData"][currentTurnNumber] = {
-            "turnStats": StatsUpdateHelper.getEmptyStats(),
-            "beforeBossTurnStats": StatsUpdateHelper.getEmptyStats(),
-            "characterCurrentTurnStats": {},
-            "characterBeforeBossTurnStats": {},
-            "turnActions": [],
-          };
+          if (!currentTurn) {
+            draft["turnData"][currentTurnNumber] = {
+              "turnStats": StatsUpdateHelper.getEmptyStats(),
+              "beforeBossTurnStats": StatsUpdateHelper.getEmptyStats(),
+              "characterCurrentTurnStats": {},
+              "characterBeforeBossTurnStats": {},
+              "turnActions": [],
+            };
 
-          currentTurn = raid["turnData"][currentTurnNumber];
-        }
+            currentTurn = draft["turnData"][currentTurnNumber];
+          }
 
-        const existingTurnActions = currentTurn["turnActions"];
+          const existingTurnActions = currentTurn["turnActions"];
 
-        const newActions = data["scenario"] ? battleScenarioParser.parseScenarioData(data["scenario"], data, raid) : [];
-        const newTurnData = battleScenarioParser.processTurnActionData(newActions, raid["party"]);
+          const newActions = data["scenario"] ? battleScenarioParser.parseScenarioData(data["scenario"], data, draft) : [];
+          const newTurnData = battleScenarioParser.processTurnActionData(newActions, draft["party"]);
 
-        // Merge previous actions and stats into the new stuff.
-        // First merge the new data into the raidwide data.
-        StatsUpdateHelper.mergeStats(newTurnData["turnStats"], raid["battleStats"]["generalStats"]);
-        Object.keys(newTurnData["characterCurrentTurnStats"]).forEach(characterIndex => {
-          StatsUpdateHelper.mergeStats(
-            newTurnData["characterCurrentTurnStats"][characterIndex],
-            raid["battleStats"]["characterStats"][characterIndex],
-          );
+          // Merge previous actions and stats into the new stuff.
+          // First merge the new data into the raidwide data.
+          StatsUpdateHelper.mergeStats(newTurnData["turnStats"], draft["battleStats"]["generalStats"]);
+          Object.keys(newTurnData["characterCurrentTurnStats"]).forEach(characterIndex => {
+            StatsUpdateHelper.mergeStats(
+              newTurnData["characterCurrentTurnStats"][characterIndex],
+              draft["battleStats"]["characterStats"][characterIndex],
+            );
+          });
+
+          // Then merge the new turn stats into the existing turn stats
+          StatsUpdateHelper.mergeStats(currentTurn["turnStats"], newTurnData["turnStats"]);
+          StatsUpdateHelper.mergeStats(currentTurn["beforeBossTurnStats"], newTurnData["beforeBossTurnStats"]);
+          Object.keys(currentTurn["characterCurrentTurnStats"]).forEach(characterIndex => {
+            StatsUpdateHelper.mergeStats(
+              currentTurn["characterCurrentTurnStats"][characterIndex],
+              newTurnData["characterCurrentTurnStats"][characterIndex],
+            );
+            StatsUpdateHelper.mergeStats(
+              currentTurn["characterBeforeBossTurnStats"][characterIndex],
+              newTurnData["characterBeforeBossTurnStats"][characterIndex],
+            );
+          });
+
+          // Then merge the old actions into the new ones.
+          newTurnData["turnActions"] = existingTurnActions.concat(newTurnData["turnActions"]);
+          draft["turnData"][currentTurnNumber] = newTurnData;
+
+          draft["lastUpdated"] = Date.now();
+
+          if ("updateTurnTo" in draft) {
+            draft["currentTurn"] = draft["updateTurnTo"]!;
+            delete draft["updateTurnTo"];
+          }
         });
 
-        // Then merge the new turn stats into the existing turn stats
-        StatsUpdateHelper.mergeStats(currentTurn["turnStats"], newTurnData["turnStats"]);
-        StatsUpdateHelper.mergeStats(currentTurn["beforeBossTurnStats"], newTurnData["beforeBossTurnStats"]);
-        Object.keys(currentTurn["characterCurrentTurnStats"]).forEach(characterIndex => {
-          StatsUpdateHelper.mergeStats(
-            currentTurn["characterCurrentTurnStats"][characterIndex],
-            newTurnData["characterCurrentTurnStats"][characterIndex],
-          );
-          StatsUpdateHelper.mergeStats(
-            currentTurn["characterBeforeBossTurnStats"][characterIndex],
-            newTurnData["characterBeforeBossTurnStats"][characterIndex],
-          );
-        });
-
-        // Then merge the old actions into the new ones.
-        newTurnData["turnActions"] = existingTurnActions.concat(newTurnData["turnActions"]);
-        raid["turnData"][currentTurnNumber] = newTurnData;
-
-        raid["lastUpdated"] = Date.now();
-
-        if ("updateTurnTo" in raid) {
-          raid["currentTurn"] = raid["updateTurnTo"]!;
-          delete raid["updateTurnTo"];
-        }
-
-        storageManager.setBattleData(Number(battleId), raid, settings["maxRememberedBattles"]);
+        storageManager.setBattleData(Number(battleId), updatedRaid, settings["maxRememberedBattles"]);
       });
     }
 
@@ -299,7 +301,7 @@ export default function GodsightPanel() {
                 // Contains info about honors, might be useful.
                 break;
 
-              // Misc configuration endpoints that don't contain battle info.
+              // Misc endpoints that don't contain battle info.
               case "assist_check":
               case "assist.json":
               case "auto_setting":
