@@ -1,4 +1,5 @@
 import { GodsightBattleData } from "../../godsight/battletypes/battledata";
+import { useGodsightSettings } from "../../godsight/settings/usegodsightsettings";
 import Avatar from "./avatar";
 import Turn from "./turn";
 
@@ -16,21 +17,26 @@ export function TurnTracker({ battleData }: { battleData: GodsightBattleData | u
 
     const turns = Object.keys(battleData["turnData"]);
 
+    const settings = useGodsightSettings();
+
     return (
       <>
         <div className="battle-metadata">Vs. {battleData["boss"][0]["name"]}</div>
-        <div className="party-container">
-          {frontliners.map(char => {
-            return (
-              <Avatar key={char["characterId"]} characterData={char} />
-            );
-          })}
-          {backliners.map(char => {
-            return (
-              <Avatar key={char["characterId"]} characterData={char} />
-            );
-          })}
-        </div>
+        {!settings["disableImageLoading"] ?
+          <div className="party-container">
+            {frontliners.map(char => {
+              return (
+                <Avatar key={char["characterId"]} characterData={char} />
+              );
+            })}
+            {backliners.map(char => {
+              return (
+                <Avatar key={char["characterId"]} characterData={char} />
+              );
+            })}
+          </div> :
+          <></>
+        }
         <div className="turn-container">
           {turns.length > 0 ? (
             <>

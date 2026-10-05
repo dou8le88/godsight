@@ -7,7 +7,8 @@ import { BattleActionParser } from "./battleactionparser";
 import { JSX } from "react/jsx-runtime";
 import { BattleActionHelper } from "./battleactionhelper";
 import { assertNotNullOrUndefined } from "../../util/assert";
-import { DamageDisplay } from "../settings/godsightsettings";
+import { GodsightSettings } from "../settings/godsightsettings";
+import { GameElementHelper } from "../../gbf/battletypes/scenariodata/mechanics/element";
 
 export class ChargedAttackAction extends BattleAction {
   public actionType: ActionType = ActionType.CHARGED_ATTACK;
@@ -25,10 +26,10 @@ export class ChargedAttackAction extends BattleAction {
     super();
   }
 
-  getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
+  getDescription(key: number, settings: GodsightSettings): JSX.Element {
     const damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(
       this.damageTotals,
-      damageDisplay,
+      settings["damageDisplay"],
     );
 
     return (
@@ -36,7 +37,7 @@ export class ChargedAttackAction extends BattleAction {
         {damageInstanceJsx}
         {
           this.subactions.map((subaction, idx) => (
-            subaction.getDescription(idx, damageDisplay)
+            subaction.getDescription(idx, settings)
           ))
         }
       </div>

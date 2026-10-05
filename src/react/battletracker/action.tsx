@@ -7,7 +7,7 @@ function Action({ action, idx }: { action: BattleAction, idx: number }) {
 
   return (
     <div className="action-container">
-      {action.getDescription(idx, settings["damageDisplay"])}
+      {action.getDescription(idx, settings)}
     </div>
   );
 }

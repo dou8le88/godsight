@@ -3,7 +3,7 @@ import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { BattleActionParser } from "./battleactionparser";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
-import { DamageDisplay } from "../settings/godsightsettings";
+import { GodsightSettings } from "../settings/godsightsettings";
 import { assertNotNullOrUndefined } from "../../util/assert";
 
 export class FullElixirAction extends BattleAction {
@@ -16,12 +16,12 @@ export class FullElixirAction extends BattleAction {
     super();
   }
 
-  getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
+  getDescription(key: number, settings: GodsightSettings): JSX.Element {
     return (
       <div key={key} className="action-description">The party used a Full Elixir!
         {
           this.subactions.map((subaction, idx) => (
-            subaction.getDescription(idx, damageDisplay)
+            subaction.getDescription(idx, settings)
           ))
         }
       </div>

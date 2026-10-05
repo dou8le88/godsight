@@ -6,7 +6,7 @@ import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { JSX } from "react/jsx-runtime";
 import { BattleActionHelper } from "./battleactionhelper";
 import { assertNotNullOrUndefined } from "../../util/assert";
-import { DamageDisplay } from "../settings/godsightsettings";
+import { GodsightSettings } from "../settings/godsightsettings";
 
 export class SingularNormalAttackAction extends BattleAction {
   public actionType: ActionType = ActionType.SINGULAR_NORMAL_ATTACK;
@@ -23,10 +23,10 @@ export class SingularNormalAttackAction extends BattleAction {
     super();
   }
 
-  getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
+  getDescription(key: number, settings: GodsightSettings): JSX.Element {
     const damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(
       this.damageInstances,
-      damageDisplay,
+      settings["damageDisplay"],
     );
 
     return (

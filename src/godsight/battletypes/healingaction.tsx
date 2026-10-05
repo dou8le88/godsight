@@ -6,7 +6,7 @@ import { HealingInstance } from "./healinginstance";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { BattleActionHelper } from "./battleactionhelper";
 import { assertNotNullOrUndefined } from "../../util/assert";
-import { DamageDisplay } from "../settings/godsightsettings";
+import { GodsightSettings } from "../settings/godsightsettings";
 
 export class HealingAction extends BattleAction {
   public actionType: ActionType = ActionType.HEAL;
@@ -22,7 +22,7 @@ export class HealingAction extends BattleAction {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
+  getDescription(key: number, settings: GodsightSettings): JSX.Element {
     const healingJsx = BattleActionHelper.getHealingInstanceJsx(
       this.healingInstances,
     );

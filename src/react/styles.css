@@ -242,6 +242,10 @@ body,
                     height: 28px;
                     padding: 5px;
                 }
+
+                .config-checkbox {
+                    width: 100%;
+                }
             }
 
             .config-explanation {
@@ -794,6 +798,8 @@ body,
                 padding: 5px;
                 margin: 5px;
                 text-align: center;
+                user-select: none;
+                cursor: pointer;
             }
 
             .turn-action-container {

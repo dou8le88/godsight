@@ -5,7 +5,7 @@ import { BattleActionParser } from "./battleactionparser";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { SingularNormalAttackAction } from "./singularnormalattackaction";
 import { assertNotNullOrUndefined } from "../../util/assert";
-import { DamageDisplay } from "../settings/godsightsettings";
+import { GodsightSettings } from "../settings/godsightsettings";
 import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
 
 export class NormalAttackAction extends BattleAction {
@@ -36,7 +36,7 @@ export class NormalAttackAction extends BattleAction {
     10: "made a decuple attack",
   }
 
-  getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
+  getDescription(key: number, settings: GodsightSettings): JSX.Element {
     const attacks = this.subactions.filter(a => a instanceof SingularNormalAttackAction);
     const attackCount = attacks.length;
     const attackWording = this.isCounter ? "executed a counter" : (this.attackCountWording[attackCount] || "made unknown attacks");
@@ -44,7 +44,7 @@ export class NormalAttackAction extends BattleAction {
     return (
       <div key={key} className="action-description">{this.attackerName} {attackWording}!
         {this.subactions.map((subaction, idx) => (
-          subaction.getDescription(idx, damageDisplay)
+          subaction.getDescription(idx, settings)
         ))}
       </div>
     );

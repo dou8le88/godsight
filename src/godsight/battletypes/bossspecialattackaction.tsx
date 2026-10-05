@@ -7,7 +7,7 @@ import { BattleActionParser } from "./battleactionparser"
 import { JSX } from "react/jsx-runtime"
 import { BattleActionHelper } from "./battleactionhelper"
 import { assertNotNullOrUndefined } from "../../util/assert"
-import { DamageDisplay } from "../settings/godsightsettings"
+import { GodsightSettings } from "../settings/godsightsettings"
 
 export class BossSpecialAttackAction extends BattleAction {
   public actionType: ActionType = ActionType.BOSS_SPECIAL_ATTACK;
@@ -24,12 +24,12 @@ export class BossSpecialAttackAction extends BattleAction {
     super();
   }
 
-  getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
+  getDescription(key: number, settings: GodsightSettings): JSX.Element {
     let damageInstanceJsx = <></>;
     if (this.damageInstances.length) {
       damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(
         this.damageInstances,
-        damageDisplay,
+        settings["damageDisplay"],
       );
     }
 
@@ -37,7 +37,7 @@ export class BossSpecialAttackAction extends BattleAction {
       <div key={key} className="action-description">{this.sourceName} activated {this.attackName}!
         {damageInstanceJsx}
         {this.subactions.map((subaction, idx) => (
-          subaction.getDescription(idx, damageDisplay)
+          subaction.getDescription(idx, settings)
         ))}
       </div>
     );

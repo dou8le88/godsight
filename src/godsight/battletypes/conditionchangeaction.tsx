@@ -6,7 +6,7 @@ import { ActionType } from "./actiontype";
 import { JSX } from "react/jsx-runtime";
 import { BattleActionHelper } from "./battleactionhelper";
 import { assertNotNullOrUndefined } from "../../util/assert";
-import { DamageDisplay } from "../settings/godsightsettings";
+import { GodsightSettings } from "../settings/godsightsettings";
 
 export class ConditionChangeAction extends BattleAction {
   public actionType: ActionType = ActionType.CONDITION_CHANGED;
@@ -24,8 +24,7 @@ export class ConditionChangeAction extends BattleAction {
     super();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
+  getDescription(key: number, settings: GodsightSettings): JSX.Element {
     const allStatuses = [
       ...this.buffs,
       ...this.debuffs,
@@ -37,13 +36,13 @@ export class ConditionChangeAction extends BattleAction {
 
     const gainedStatusesJsx: React.ReactNode[] | null = gainedStatuses.map((status, idx) => (
       <span className="status-wrapper" key={idx}>
-        <span className="status-text">{status.name}</span> {status.icon && !BattleActionHelper.IconlessStatusEffects.includes(status.icon) ? <img className="status-icon" src={BattleActionHelper.getStatusUrl(status.icon)} /> : <></>}
+        <span className="status-text">{status.name}</span> {!settings["disableImageLoading"] && status.icon && !BattleActionHelper.IconlessStatusEffects.includes(status.icon) ? <img className="status-icon" src={BattleActionHelper.getStatusUrl(status.icon)} /> : <></>}
       </span>
     )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, ", ", cur], null);
 
     const dispelledStatusesJsx: React.ReactNode[] | null = dispelledStatuses.map((status, idx) => (
       <span className="status-wrapper" key={idx}>
-        <span className="status-text">{status.name}</span> <img className="status-icon" src={BattleActionHelper.getStatusUrl(status.icon)} />
+        <span className="status-text">{status.name}</span> {!settings["disableImageLoading"] ? <img className="status-icon" src={BattleActionHelper.getStatusUrl(status.icon)} /> : <></>}
       </span>
     )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, ", ", cur], null);
 

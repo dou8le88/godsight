@@ -3,7 +3,7 @@ import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { assertNotNullOrUndefined } from "../../util/assert";
-import { DamageDisplay } from "../settings/godsightsettings";
+import { GodsightSettings } from "../settings/godsightsettings";
 
 export class WindowEffectAction extends BattleAction {
   public actionType: ActionType = ActionType.WINDOW_EFFECT;
@@ -17,7 +17,7 @@ export class WindowEffectAction extends BattleAction {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
+  getDescription(key: number, settings: GodsightSettings): JSX.Element {
     return (
       <div key={key} className="action-description">The window effect {this.name} was activated!
       </div>

@@ -5,6 +5,7 @@ export interface GodsightSettings {
   "maxRememberedBattles": number,
   "damageDisplay": DamageDisplay,
   "onRaidLoadBehavior": OnRaidLoadBehavior,
+  "disableImageLoading": boolean,
 }
 
 export enum DefaultBattleView {
@@ -36,4 +37,5 @@ export const DefaultSettings: GodsightSettings = {
   "maxRememberedBattles": 10,
   "damageDisplay": DamageDisplay.ONE_PER_ELEMENT,
   "onRaidLoadBehavior": OnRaidLoadBehavior.SWITCH,
+  "disableImageLoading": false,
 };

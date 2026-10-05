@@ -6,7 +6,7 @@ import { DamageInstance } from "./damageinstance";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { BattleActionHelper } from "./battleactionhelper";
 import { assertNotNullOrUndefined } from "../../util/assert";
-import { DamageDisplay } from "../settings/godsightsettings";
+import { GodsightSettings } from "../settings/godsightsettings";
 
 export class SummonAction extends BattleAction {
   public actionType: ActionType = ActionType.CALLED_SUMMON;
@@ -23,12 +23,12 @@ export class SummonAction extends BattleAction {
     super();
   }
 
-  getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
+  getDescription(key: number, settings: GodsightSettings): JSX.Element {
     let damageInstanceJsx = <></>;
     if (this.damageInstances.length) {
       damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(
         this.damageInstances,
-        damageDisplay,
+        settings["damageDisplay"],
         this.trueSummonHitCount,
       );
     }
@@ -37,7 +37,7 @@ export class SummonAction extends BattleAction {
       <div key={key} className="action-description">{this.mainCharacterName} called {this.summonCallName}!
         {damageInstanceJsx}
         {this.subactions.map((subaction, idx) => (
-          subaction.getDescription(idx, damageDisplay)
+          subaction.getDescription(idx, settings)
         ))}
       </div>
     );

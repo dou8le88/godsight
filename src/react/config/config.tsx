@@ -346,6 +346,25 @@ export function Config({ onExit }: { onExit: () => void }) {
                 No Action - do nothing when loading into a raid.
               </td>
             </tr>
+            <tr className="config-option">
+              <td className="config-description">
+                Disable loading images from the GBF CDN:
+              </td>
+              <td className="config-input-container">
+                <input
+                  type="checkbox"
+                  className="config-checkbox"
+                  checked={settings["disableImageLoading"]}
+                  onChange={(e) => {
+                    settingsManager.updateSingleSetting("disableImageLoading", e.target.checked);
+                  }}
+                />
+              </td>
+              <td className="config-explanation">
+                Disables all usage of GBF images. Prevents a potential sidechannel attack which could detect this extension.<br />
+                For the paranoid.
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>

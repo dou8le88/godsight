@@ -3,7 +3,7 @@ import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { assertNotNullOrUndefined, assertNotUndefined } from "../../util/assert";
-import { DamageDisplay } from "../settings/godsightsettings";
+import { GodsightSettings } from "../settings/godsightsettings";
 
 export class StandbyAction extends BattleAction {
   public actionType: ActionType = ActionType.STANDBY;
@@ -23,7 +23,7 @@ export class StandbyAction extends BattleAction {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
+  getDescription(key: number, settings: GodsightSettings): JSX.Element {
     let message = `${this.actorName} can't attack!`;
     if (this.battleMessage) {
       message = `${this.battleMessage} They can't attack!`;

@@ -1,5 +1,6 @@
 import { GodsightPartyMemberData } from "../../godsight/battletypes/partyformationdata";
 import { Stats } from "../../godsight/battletypes/stats";
+import { useGodsightSettings } from "../../godsight/settings/usegodsightsettings";
 import Avatar from "./avatar";
 
 export function StatsShower({ stats, header, character, backline, onClick }: {
@@ -47,9 +48,11 @@ export function StatsShower({ stats, header, character, backline, onClick }: {
   const tripleAttackRate =
     stats["normalAttacks"] > 0 ? `${((stats["tripleAttacks"] / stats["normalAttacks"]) * 100).toFixed(0)}` : "--";
 
+  const settings = useGodsightSettings();
+
   return (
     <div className={className} {...(onClick && { "onClick": () => onClick() })}>
-      {character ?
+      {character && !settings["disableImageLoading"] ?
         <>
           <Avatar key={character["characterId"]} characterData={character} backline={backline} />
         </> :

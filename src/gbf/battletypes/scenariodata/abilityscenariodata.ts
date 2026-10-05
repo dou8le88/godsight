@@ -11,4 +11,10 @@ export interface AbilityScenarioData extends GenericScenarioData {
    * It's more of "this is the entity who should visually act when this ability activates".
    */
   "to": Actor,
+  "motion": AbilityMotion,
+}
+
+export enum AbilityMotion {
+  ON = "on",
+  OFF = "off",
 }

@@ -4,7 +4,7 @@ import { ActionType } from "./actiontype";
 import { BattleAction } from "./battleaction";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { assertNotNullOrUndefined, assertNotUndefined } from "../../util/assert";
-import { DamageDisplay } from "../settings/godsightsettings";
+import { GodsightSettings } from "../settings/godsightsettings";
 
 export class DeathAction extends BattleAction {
   public actionType: ActionType = ActionType.DEATH;
@@ -20,7 +20,7 @@ export class DeathAction extends BattleAction {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
+  getDescription(key: number, settings: GodsightSettings): JSX.Element {
     return (
       <div key={key} className="action-description">{this.targetName} was knocked out!
       </div>

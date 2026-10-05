@@ -6,7 +6,7 @@ import { BattleAction } from "./battleaction";
 import { BattleActionParser } from "./battleactionparser";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { assertNotNullOrUndefined } from "../../util/assert";
-import { DamageDisplay } from "../settings/godsightsettings";
+import { GodsightSettings } from "../settings/godsightsettings";
 
 export class AbilityAction extends BattleAction {
   public actionType: ActionType = ActionType.ACTIVATED_ABILITY;
@@ -24,13 +24,13 @@ export class AbilityAction extends BattleAction {
     super();
   }
 
-  getDescription(key: number, damageDisplay: DamageDisplay): JSX.Element {
+  getDescription(key: number, settings: GodsightSettings): JSX.Element {
     if (this.overrideMessage) {
       return (
         <div key={key} className="action-description" >{this.overrideMessage}
           {
             this.subactions.map((subaction, idx) => (
-              subaction.getDescription(idx, damageDisplay)
+              subaction.getDescription(idx, settings)
             ))
           }
         </div>
@@ -40,7 +40,7 @@ export class AbilityAction extends BattleAction {
         <div key={key} className="action-description"> {this.sourceName} activated {this.name}!
           {
             this.subactions.map((subaction, idx) => (
-              subaction.getDescription(idx, damageDisplay)
+              subaction.getDescription(idx, settings)
             ))
           }
         </div>
