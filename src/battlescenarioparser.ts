@@ -1046,6 +1046,7 @@ export class BattleScenarioParser {
         case ScenarioCommand._INFORMATION:
         case ScenarioCommand._MOTION:
         case ScenarioCommand._SUMMON_CUTIN:
+        case ScenarioCommand._VOICE:
         case undefined:
           break;
         default:

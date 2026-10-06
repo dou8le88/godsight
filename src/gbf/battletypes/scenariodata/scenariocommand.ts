@@ -215,4 +215,5 @@ export enum ScenarioCommand {
    * Ignored command, do not use, exists for completeness in the parser.
    */
   _SUMMON_CUTIN = "summon_cutin",
+  _VOICE = "voice",
 }
