@@ -9,7 +9,7 @@ import { BattleAction } from "./battleaction";
 import { identity } from "../../util/functional";
 import { BattleActionParser } from "./battleactionparser";
 import { DamageDisplay } from "../settings/godsightsettings";
-import { DamageByElement } from "./stats";
+import { DamageByElement, StatsUpdateHelper } from "./stats";
 
 export class BattleActionHelper {
   static IconlessStatusEffects = [
@@ -72,19 +72,47 @@ export class BattleActionHelper {
   ): JSX.Element {
     const damageInstancesByRecipient = this.getDamageInstancesGroupedByRecipient(damageInstances);
     const onlyRealDamageInstancesByRecipient: Record<string, DamageInstance[]> = {};
-    const elements = new Set<NumericGameElement>();
     Object.keys(damageInstancesByRecipient).forEach(key => {
       const instances = damageInstancesByRecipient[key];
       const nonZeroInstances = instances.filter(i => i["value"] > 0);
       if (nonZeroInstances.length == 0) {
         nonZeroInstances.push(instances[0]);
       }
-      instances.forEach(i => elements.add(i["element"]));
       onlyRealDamageInstancesByRecipient[key] = nonZeroInstances;
     });
-    const colors = [...elements.values().map(element => this.elementToColorMap[element])];
+    const damageByElementByRecipient: Record<string, DamageByElement> = {};
+    const totalDamageByRecipient: Record<string, number> = {};
+    Object.keys(onlyRealDamageInstancesByRecipient).forEach(recipient => {
+      damageByElementByRecipient[recipient] = StatsUpdateHelper.getEmptyElementValues();
+      totalDamageByRecipient[recipient] = 0;
+      onlyRealDamageInstancesByRecipient[recipient].forEach(instance => {
+        damageByElementByRecipient[recipient][instance["element"]] += instance["value"];
+        totalDamageByRecipient[recipient] += instance["value"];
+      });
+    });
+    const colorGradientByRecipient: Record<string, string> = {};
+    Object.keys(damageByElementByRecipient).forEach(recipient => {
+      const elementDamage: { damage: number, element: NumericGameElement }[] = [];
+      Object.keys(damageByElementByRecipient[recipient]).forEach(element => {
+        if (damageByElementByRecipient[recipient][element] > 0) {
+          elementDamage.push({
+            damage: damageByElementByRecipient[recipient][element],
+            element: GameElementHelper.getNumericGameElement(element as GameElementValue),
+          });
+        }
+      });
+      elementDamage.sort((a, b) => b.damage - a.damage);
+      let boundary = 0;
+      colorGradientByRecipient[recipient] = elementDamage.map(eltDmg => {
+        const color = this.elementToColorMap[eltDmg.element];
+        const percent = ((eltDmg.damage / totalDamageByRecipient[recipient]) * 100);
+        const midpoint = boundary + (percent / 2);
 
-    const gradient = colors.join(", ");
+        boundary += percent;
+
+        return `${color} ${midpoint.toFixed(0)}%`;
+      }).join(", ");
+    });
 
     switch (damageDisplay) {
       case DamageDisplay.SINGLE_NUMBER: {
@@ -93,7 +121,7 @@ export class BattleActionHelper {
             {Object.keys(onlyRealDamageInstancesByRecipient).map(recipient => (
               <div key={recipient} className="action-description">{recipient} took&nbsp;
                 <span className="element gradient" style={{
-                  "background": `linear-gradient(to right, ${gradient}) text`,
+                  "background": `linear-gradient(to right, ${colorGradientByRecipient[recipient]}) text`,
                 }}>
                   {onlyRealDamageInstancesByRecipient[recipient].reduce((prev, cur) => prev + cur["value"], 0).toLocaleString()}
                 </span> damage! {
@@ -143,18 +171,23 @@ export class BattleActionHelper {
                       {onlyRealDamageInstancesByRecipient[recipient].filter(instance => instance["value"] > 0)
                         .every(i => i["element"] == onlyRealDamageInstancesByRecipient[recipient][0]["element"]) ?
                         <>
-                          (Total: <span className={`element ${GameElementHelper.getPrettyElementName(onlyRealDamageInstancesByRecipient[recipient][0]["element"])}`}>{onlyRealDamageInstancesByRecipient[recipient].reduce((prev, cur) => prev + cur["value"], 0).toLocaleString()}</span>)&nbsp;
+                          (Total: <span className={`element ${GameElementHelper.getPrettyElementName(onlyRealDamageInstancesByRecipient[recipient][0]["element"])}`}>{totalDamageByRecipient[recipient].toLocaleString()}</span>)&nbsp;
                         </>
                         :
                         <>
-                          (Total: {onlyRealDamageInstancesByRecipient[recipient].reduce((prev, cur) => prev + cur["value"], 0).toLocaleString()})&nbsp;
+                          (Total:&nbsp;
+                          <span className="element gradient" style={{
+                            "background": `linear-gradient(to right, ${colorGradientByRecipient[recipient]}) text`,
+                          }}>{totalDamageByRecipient[recipient].toLocaleString()}
+                          </span>
+                          )
                         </>
                       }
                     </> :
                     <></>
                   }
 
-                  (Hits: {maybeHitCountOverride ? maybeHitCountOverride : onlyRealDamageInstancesByRecipient[recipient].filter(i => i["value"] > 0).length})
+                  &nbsp;(Hits: {maybeHitCountOverride ? maybeHitCountOverride : onlyRealDamageInstancesByRecipient[recipient].filter(i => i["value"] > 0).length})
                 </> :
                 <>
                 </>
@@ -181,11 +214,16 @@ export class BattleActionHelper {
                     </>
                     :
                     <>
-                      (Total: {onlyRealDamageInstancesByRecipient[recipient].reduce((prev, cur) => prev + cur["value"], 0).toLocaleString()})&nbsp;
+                      (Total:&nbsp;
+                      <span className="element gradient" style={{
+                        "background": `linear-gradient(to right, ${colorGradientByRecipient[recipient]}) text`,
+                      }}>{totalDamageByRecipient[recipient].toLocaleString()}
+                      </span>
+                      )
                     </>
                   }
 
-                  (Hits: {maybeHitCountOverride ? maybeHitCountOverride : onlyRealDamageInstancesByRecipient[recipient].filter(i => i["value"] > 0).length})
+                  &nbsp;(Hits: {maybeHitCountOverride ? maybeHitCountOverride : onlyRealDamageInstancesByRecipient[recipient].filter(i => i["value"] > 0).length})
                 </> :
                 <>
                 </>
