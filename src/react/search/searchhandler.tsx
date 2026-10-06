@@ -23,22 +23,17 @@ export default function SearchHandler() {
             searchRef.current.value = newQuery;
           }
         } else {
-          if (document.activeElement && document.activeElement == searchRef.current && window.getSelection()?.toString() == query.query) {
-            setVisible(false);
-            setQuery({ query: "" });
-          } else {
-            const currentSelection = window.getSelection()?.toString();
-            if (currentSelection && currentSelection.length > 0) {
-              if (searchRef.current) {
-                setQuery({ query: currentSelection });
-                searchRef.current.value = currentSelection;
-                searchRef.current.focus();
-                searchRef.current.select();
-              }
-            } else {
-              searchRef.current?.focus();
-              searchRef.current?.select();
+          const currentSelection = window.getSelection()?.toString();
+          if (currentSelection && currentSelection.length > 0) {
+            if (searchRef.current) {
+              setQuery({ query: currentSelection });
+              searchRef.current.value = currentSelection;
+              searchRef.current.focus();
+              searchRef.current.select();
             }
+          } else {
+            searchRef.current?.focus();
+            searchRef.current?.select();
           }
         }
       }
@@ -72,22 +67,30 @@ export default function SearchHandler() {
 
   function getMatchingActions() {
     const newMatchingActions: Element[] = [];
-    const allActions = document.querySelectorAll(".action-container");
-    allActions.forEach(actionContainer => {
-      if (actionContainer.checkVisibility()) {
+    const allActions = document.querySelectorAll(".action-container, .battle-summary-container, .stats-list.searchable");
+    allActions.forEach(container => {
+      if (container.checkVisibility()) {
         const regex = new RegExp(RegExp.escape(query.query), 'i');
-        if (query.query != "" && regex.test(actionContainer.textContent)) {
-          newMatchingActions.unshift(actionContainer);
+        if (query.query != "" && regex.test(container.textContent)) {
+          if (container.className.includes("action-container")) {
+            newMatchingActions.unshift(container);
+          } else {
+            newMatchingActions.push(container);
+          }
         }
       }
     });
     return newMatchingActions;
   }
 
+  function clearSearchClassName(className: string): string {
+    return className.replace(" highlighted", "").replace(" selected", "");
+  }
+
   useEffect(() => {
     // clear any old search data
-    matchingActions.forEach(actionContainer => {
-      actionContainer.className = "action-container";
+    matchingActions.forEach(container => {
+      container.className = clearSearchClassName(container.className);
     });
     const newMatchingActions = getMatchingActions();
 
@@ -104,10 +107,10 @@ export default function SearchHandler() {
 
       newMatchingActions.forEach((container, index) => {
         if (firstInOrBelowViewIndex == index) {
-          container.classList = "action-container highlighted selected";
+          container.className = clearSearchClassName(container.className) + " highlighted selected";
           setCurrentActionIndex(index);
         } else {
-          container.classList = "action-container highlighted";
+          container.className = clearSearchClassName(container.className) + " highlighted";
         }
       });
     }
@@ -124,9 +127,9 @@ export default function SearchHandler() {
             "block": "nearest",
           });
           matchingActions.forEach(action => {
-            action.className = "action-container highlighted";
+            action.className = clearSearchClassName(action.className) + " highlighted";
           });
-          matchingAction.className = "action-container highlighted selected";
+          matchingAction.className = clearSearchClassName(matchingAction.className) + " highlighted selected";
         } else {
           setQuery({ query: query.query });
         }

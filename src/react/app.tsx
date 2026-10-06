@@ -14,6 +14,7 @@ import { Config } from "./config/config";
 import { useGodsightSettings } from "../godsight/settings/usegodsightsettings";
 import { GodsightNotification, Notification, NotificationType } from "./notifications/notification";
 import { OnRaidLoadBehavior } from "../godsight/settings/godsightsettings";
+import SearchHandler from "./search/searchhandler";
 
 const NoKnownActiveBattleNotificationKey = "NoKnownActiveBattle";
 const LoadedIntoRaidNotificationKey = "LoadedIntoRaid";
@@ -435,6 +436,7 @@ export default function GodsightPanel() {
           )}
         </>
       )}
+      <SearchHandler />
     </>
   );
 }

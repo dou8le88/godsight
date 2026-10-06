@@ -3,11 +3,12 @@ import { Stats } from "../../godsight/battletypes/stats";
 import { useGodsightSettings } from "../../godsight/settings/usegodsightsettings";
 import Avatar from "./avatar";
 
-export function StatsShower({ stats, header, character, backline, onClick }: {
+export function StatsShower({ stats, header, character, backline, searchable, onClick }: {
   stats: Stats,
   header?: string,
   character?: GodsightPartyMemberData,
   backline?: boolean,
+  searchable?: boolean,
   onClick?: () => void,
 }) {
   const totalNormalAttackDamage = Math.round(Object.keys(stats["normalAttackDamage"]).map(element => {
@@ -43,6 +44,9 @@ export function StatsShower({ stats, header, character, backline, onClick }: {
   }
   if (onClick) {
     className += " clickable";
+  }
+  if (searchable) {
+    className += " searchable";
   }
 
   const tripleAttackRate =

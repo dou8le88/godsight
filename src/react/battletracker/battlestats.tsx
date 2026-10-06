@@ -135,11 +135,13 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
               <StatsShower
                 stats={totalStats}
                 header={"Totals"}
+                searchable
                 onClick={() => setSelectedStatsView(StatsView.TOTAL)}
               />
               <StatsShower
                 stats={damagePerTurnStats}
                 header={"Average DPT"}
+                searchable
                 onClick={() => {
                   setSelectedStatsView(StatsView.DPT)
                   if (selectedBreakdown == Breakdown.BY_TURN) {
@@ -150,6 +152,7 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
               <StatsShower
                 stats={previousTurnStats}
                 header={`Previous Turn (${previousTurnNumber})`}
+                searchable
                 onClick={() => {
                   setSelectedStatsView(StatsView.PREV_TURN);
                   if (selectedBreakdown == Breakdown.BY_TURN) {
@@ -160,6 +163,7 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
               <StatsShower
                 stats={previousTurnBeforeBossActionStats}
                 header={`Prev Turn (${previousTurnNumber}) Omen-Contributing`}
+                searchable
                 onClick={() => {
                   setSelectedStatsView(StatsView.PREV_TURN_BEFORE_BOSS_ACTION);
                 }}
@@ -167,6 +171,7 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
               <StatsShower
                 stats={currentTurnStats}
                 header={`Current Turn (${battleData["currentTurn"]})`}
+                searchable
                 onClick={() => {
                   setSelectedStatsView(StatsView.CURRENT_TURN);
                   if (selectedBreakdown == Breakdown.BY_TURN) {
@@ -182,6 +187,7 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
                   key={charIdx}
                   stats={battleData["battleStats"]["characterStats"][charIdx]}
                   header={battleData["party"]["members"][charIdx]["name"]}
+                  searchable
                   character={battleData["party"]["members"][charIdx]}
                   onClick={() => {
                     setSelectedStatsView(StatsView.CHARACTER);
@@ -196,6 +202,7 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
                   key={charIdx}
                   stats={battleData["battleStats"]["characterStats"][charIdx]}
                   header={battleData["party"]["members"][charIdx]["name"]}
+                  searchable
                   character={battleData["party"]["members"][charIdx]}
                   backline={true}
                   onClick={() => {

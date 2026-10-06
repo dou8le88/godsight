@@ -1,6 +1,5 @@
 import { GodsightBattleData } from "../../godsight/battletypes/battledata";
 import { useGodsightSettings } from "../../godsight/settings/usegodsightsettings";
-import SearchHandler from "../search/searchhandler";
 import Avatar from "./avatar";
 import Turn from "./turn";
 
@@ -51,7 +50,6 @@ export function TurnTracker({ battleData }: { battleData: GodsightBattleData | u
             <>No turn data available.</>
           )}
         </div>
-        <SearchHandler />
       </>
     )
   }

@@ -435,6 +435,17 @@ body,
         border: 1px solid #CCC;
         border-radius: 5px;
         user-select: none;
+        scroll-margin-top: 10px;
+        scroll-margin-bottom: 10px;
+
+        &.highlighted {
+            background-color: #383838;
+
+            &.selected {
+                background-color: #484848;
+                border-color: rgb(255, 255, 115);
+            }
+        }
 
         .versus {
             width: 300px;
@@ -527,6 +538,17 @@ body,
     margin: 5px;
     position: sticky;
     top: 5px;
+    scroll-margin-top: 10px;
+    scroll-margin-bottom: 10px;
+
+    &.highlighted {
+        background-color: #383838;
+
+        &.selected {
+            background-color: #484848;
+            border-color: rgb(255, 255, 115);
+        }
+    }
 
     &.clickable {
         cursor: pointer;
@@ -817,7 +839,7 @@ body,
                     word-wrap: break-word;
                     padding: 5px;
                     scroll-margin-top: 10px;
-                    scroll-margin-bottom: 40px;
+                    scroll-margin-bottom: 10px;
 
                     /* Preserve the user's scroll position. */
                     overflow-anchor: none;
