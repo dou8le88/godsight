@@ -71,10 +71,10 @@ export function StatsShower({ stats, header, character, backline, onClick }: {
           <span className="stat-label">NA damage:</span> <span className="stat-value">{totalNormalAttackDamage.toLocaleString()}</span>
         </div>
         <div className="stat-line">
-          <span className="stat-label">CA damage:</span> <span className="stat-value">{totalChargedAttackDamage.toLocaleString()}</span>
+          <span className="stat-label">Skill damage:</span> <span className="stat-value">{totalSkillDamage.toLocaleString()}</span>
         </div>
         <div className="stat-line">
-          <span className="stat-label">Skill damage:</span> <span className="stat-value">{totalSkillDamage.toLocaleString()}</span>
+          <span className="stat-label">CA damage:</span> <span className="stat-value">{totalChargedAttackDamage.toLocaleString()}</span>
         </div>
         <div className="stat-line">
           <span className="stat-label">Other damage:</span> <span className="stat-value">{totalOtherDamage.toLocaleString()}</span>
