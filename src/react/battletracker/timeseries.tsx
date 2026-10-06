@@ -227,10 +227,10 @@ function damageByTypeTimeSeries(data: ByTypeChartData[]) {
         content={CustomTooltip}
       />
       <Legend itemSorter={null} />
-      <ByType.Bar name="NA" dataKey="normalAttackDamage" stackId="turn" fill={DamageTypeColors.NORMAL_ATTACK} />
-      <ByType.Bar name="CA" dataKey="chargedAttackDamage" stackId="turn" fill={DamageTypeColors.CHARGED_ATTACK} />
-      <ByType.Bar name="Skill" dataKey="skillDamage" stackId="turn" fill={DamageTypeColors.SKILL} />
-      <ByType.Bar name="Other" dataKey="otherDamage" stackId="turn" fill={DamageTypeColors.OTHER} />
+      <ByType.Bar name="NA" maxBarSize={50} dataKey="normalAttackDamage" stackId="turn" fill={DamageTypeColors.NORMAL_ATTACK} />
+      <ByType.Bar name="CA" maxBarSize={50} dataKey="chargedAttackDamage" stackId="turn" fill={DamageTypeColors.CHARGED_ATTACK} />
+      <ByType.Bar name="Skill" maxBarSize={50} dataKey="skillDamage" stackId="turn" fill={DamageTypeColors.SKILL} />
+      <ByType.Bar name="Other" maxBarSize={50} dataKey="otherDamage" stackId="turn" fill={DamageTypeColors.OTHER} />
     </ByType.BarChart>
   );
 }
@@ -297,48 +297,56 @@ function damageByElementTimeSeries(data: ByElementChartData[]) {
       <Legend itemSorter={null} />
       <ByElement.Bar
         name={GameElementHelper.getPrettyElementName(GameElement.NULL_PLAIN)}
+        maxBarSize={50}
         dataKey={GameElement.NULL_PLAIN}
         stackId="turn"
         fill={GameElementHelper.getElementColor(GameElement.NULL_PLAIN)}
       />
       <ByElement.Bar
         name={GameElementHelper.getPrettyElementName(GameElement.FIRE)}
+        maxBarSize={50}
         dataKey={GameElement.FIRE}
         stackId="turn"
         fill={GameElementHelper.getElementColor(GameElement.FIRE)}
       />
       <ByElement.Bar
         name={GameElementHelper.getPrettyElementName(GameElement.WATER)}
+        maxBarSize={50}
         dataKey={GameElement.WATER}
         stackId="turn"
         fill={GameElementHelper.getElementColor(GameElement.WATER)}
       />
       <ByElement.Bar
         name={GameElementHelper.getPrettyElementName(GameElement.EARTH)}
+        maxBarSize={50}
         dataKey={GameElement.EARTH}
         stackId="turn"
         fill={GameElementHelper.getElementColor(GameElement.EARTH)}
       />
       <ByElement.Bar
         name={GameElementHelper.getPrettyElementName(GameElement.WIND)}
+        maxBarSize={50}
         dataKey={GameElement.WIND}
         stackId="turn"
         fill={GameElementHelper.getElementColor(GameElement.WIND)}
       />
       <ByElement.Bar
         name={GameElementHelper.getPrettyElementName(GameElement.LIGHT)}
+        maxBarSize={50}
         dataKey={GameElement.LIGHT}
         stackId="turn"
         fill={GameElementHelper.getElementColor(GameElement.LIGHT)}
       />
       <ByElement.Bar
         name={GameElementHelper.getPrettyElementName(GameElement.DARK)}
+        maxBarSize={50}
         dataKey={GameElement.DARK}
         stackId="turn"
         fill={GameElementHelper.getElementColor(GameElement.DARK)}
       />
       <ByElement.Bar
         name={GameElementHelper.getPrettyElementName(GameElement.DESTRUCTION)}
+        maxBarSize={50}
         dataKey={GameElement.DESTRUCTION}
         stackId="turn"
         fill={GameElementHelper.getElementColor(GameElement.DESTRUCTION)}
@@ -403,6 +411,7 @@ function damageByCharacterTimeSeries(battleData: GodsightBattleData, data: ByCha
         <ByCharacter.Bar
           key={charIdx}
           name={battleData["party"]["members"][charIdx]["name"]}
+          maxBarSize={50}
           dataKey={charIdx}
           stackId="turn"
           fill={CharacterColors[charIdx]}
