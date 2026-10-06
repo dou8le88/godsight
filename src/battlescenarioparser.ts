@@ -258,6 +258,16 @@ export class BattleScenarioParser {
             abilityScenario["to"],
             abilityScenario["pos"],
           );
+
+          let isFatedChain = false;
+          const maybePreviousScenario = scenarioData[i - 1];
+          if (maybePreviousScenario && maybePreviousScenario["cmd"] == ScenarioCommand._SCREEN_EFFECT) {
+            const prevScenario = maybePreviousScenario as ScreenEffectScenarioData;
+            if (prevScenario["is_fatal_chain"]) {
+              isFatedChain = true;
+            }
+          }
+
           const abilityAction = new AbilityAction(
             abilityScenario["name"],
             abilityScenario["to"],
@@ -265,6 +275,7 @@ export class BattleScenarioParser {
             sourceIndex,
             godsightBattleData["party"]["partyMemberCount"],
             !isBossAttackPhase,
+            isFatedChain,
             subactions.actions,
           );
           // Fix various ways that the Ability command can be supremely unhelpful.

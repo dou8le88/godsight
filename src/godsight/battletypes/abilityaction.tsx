@@ -7,6 +7,7 @@ import { BattleActionParser } from "./battleactionparser";
 import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { assertNotNullOrUndefined } from "../../util/assert";
 import { GodsightSettings } from "../settings/godsightsettings";
+import { DamageAction } from "./damageaction";
 
 export class AbilityAction extends BattleAction {
   public actionType: ActionType = ActionType.ACTIVATED_ABILITY;
@@ -19,6 +20,7 @@ export class AbilityAction extends BattleAction {
     public sourceIndex: number,
     public partySize: number,
     public beforeBossTurn: boolean,
+    public isFatedChain: boolean,
     public subactions: BattleAction[],
   ) {
     super();
@@ -51,6 +53,9 @@ export class AbilityAction extends BattleAction {
 
   getStats(): StatsUpdate {
     const update = StatsUpdateHelper.getEmptyStatsUpdate(this.partySize);
+    const firstDamageAction = this.subactions.find(action => action instanceof DamageAction);
+    // The first damage action might be relevant if this is a Fated Chain.
+    const firstDamageActionStats = firstDamageAction ? firstDamageAction.getStats() : StatsUpdateHelper.getEmptyStatsUpdate(this.partySize);
     const subactionStatsUpdates = this.subactions.map(action => action.getStats());
     const allUpdates = subactionStatsUpdates.reduce(
       (prev, cur) => StatsUpdateHelper.concatUpdates(prev, cur),
@@ -62,8 +67,18 @@ export class AbilityAction extends BattleAction {
         // a specific character, so we must do it here.
         const subactionHitCount = allUpdates["generalStats"]["hitCount"];
         const subactionDebuffs = allUpdates["generalStats"]["debuffsInflictedCount"];
-        const subactionSkillDamage = allUpdates["generalStats"]["skillDamage"];
         const subactionNormalAttackDamage = allUpdates["generalStats"]["normalAttackDamage"];
+        const subactionSkillDamage = allUpdates["generalStats"]["skillDamage"];
+        const subactionOtherDamage = allUpdates["generalStats"]["otherDamage"];
+
+        if (this.isFatedChain) {
+          // The first damage subaction should be the fated chain damage.
+          // It will have been incorrectly calculated as skill damage, when it should be Other.
+          GameElementHelper.getAllElements().forEach(element => {
+            subactionSkillDamage[element] -= firstDamageActionStats["generalStats"]["skillDamage"][element];
+            subactionOtherDamage[element] += firstDamageActionStats["generalStats"]["skillDamage"][element];
+          });
+        }
 
         allUpdates["characterStats"][this.sourceIndex]["hitCount"] += subactionHitCount;
         allUpdates["characterStats"][this.sourceIndex]["debuffsInflictedCount"] += subactionDebuffs;
@@ -74,11 +89,13 @@ export class AbilityAction extends BattleAction {
         GameElementHelper.getAllElements().forEach(element => {
           allUpdates["characterStats"][this.sourceIndex]["skillDamage"][element] += subactionSkillDamage[element];
           allUpdates["characterStats"][this.sourceIndex]["normalAttackDamage"][element] += subactionNormalAttackDamage[element];
+          allUpdates["characterStats"][0]["otherDamage"][element] += subactionOtherDamage[element];
           if (this.beforeBossTurn) {
             allUpdates["characterBeforeBossTurnStats"][this.sourceIndex]["skillDamage"][element] +=
               subactionSkillDamage[element];
             allUpdates["characterBeforeBossTurnStats"][this.sourceIndex]["normalAttackDamage"][element] +=
               subactionNormalAttackDamage[element];
+            allUpdates["characterBeforeBossTurnStats"][0]["otherDamage"][element] += subactionOtherDamage[element];
           }
         });
         break;
@@ -106,6 +123,7 @@ export class AbilityAction extends BattleAction {
         assertNotNullOrUndefined(json["sourceIndex"] as number),
         assertNotNullOrUndefined(json["partySize"] as number),
         assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
+        assertNotNullOrUndefined(json["isFatedChain"] as boolean),
         (json["subactions"] as Record<string, unknown>[]).map(action => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],
