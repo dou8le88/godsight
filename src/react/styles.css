@@ -269,6 +269,8 @@ body,
 }
 
 #custom-search-container {
+    position: sticky;
+    bottom: 0;
     display: flex;
     width: 100%;
     height: 32px;
@@ -815,7 +817,7 @@ body,
                     word-wrap: break-word;
                     padding: 5px;
                     scroll-margin-top: 10px;
-                    scroll-margin-bottom: 10px;
+                    scroll-margin-bottom: 40px;
 
                     /* Preserve the user's scroll position. */
                     overflow-anchor: none;

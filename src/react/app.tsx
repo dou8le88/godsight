@@ -10,7 +10,6 @@ import { GodsightStorageManager } from "../godsight/godsightstorage/godsightstor
 import BattleSummary from "./battletracker/battlesummary";
 import { StatsUpdateHelper } from "../godsight/battletypes/stats";
 import { GodsightBattleData } from "../godsight/battletypes/battledata";
-import SearchHandler from "./search/searchhandler";
 import { Config } from "./config/config";
 import { useGodsightSettings } from "../godsight/settings/usegodsightsettings";
 import { GodsightNotification, Notification, NotificationType } from "./notifications/notification";
@@ -400,10 +399,7 @@ export default function GodsightPanel() {
       ) : (
         <>
           {selectedBattle ? (
-            <>
-              <BattleTracker battleData={godsightStorage["battles"].find(b => b["raidId"] == selectedBattle)} />
-              <SearchHandler />
-            </>
+            <BattleTracker battleData={godsightStorage["battles"].find(b => b["raidId"] == selectedBattle)} />
           ) : (
             <>
               {allBattles.length > 0 ? (
