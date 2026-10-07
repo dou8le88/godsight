@@ -22,7 +22,7 @@ const DeleteAllStoredDataNotificationKey = "DeleteAllStoredData";
 
 const validHosts = [
   "game.granbluefantasy.jp",
-  "steam.granbluefantasy.jp"
+  "steam.granbluefantasy.com",
 ];
 
 // /rest/raid/*.json for solo battles/free quests.
