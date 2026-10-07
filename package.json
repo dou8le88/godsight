@@ -1,6 +1,5 @@
 {
   "name": "godsight",
-  "version": "0.1.0",
   "description": "A Granblue Fantasy battle analysis extension.",
   "private": true,
   "scripts": {
