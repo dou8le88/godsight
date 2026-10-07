@@ -228,8 +228,13 @@ export class BattleScenarioParser {
 
         case ScenarioCommand.ABILITY: {
           const abilityScenario = scenario as AbilityScenarioData;
+          // Desperately trying to find a way to properly skip meaningless ability
+          // scenarios while preserving those that do something useful.
           if (!abilityScenario["name"] && abilityScenario["motion"] == AbilityMotion.OFF) {
-            break;
+            const maybeNextScenario = scenarioData[i + 1];
+            if (maybeNextScenario["cmd"] != ScenarioCommand.WINDOW_EFFECT) {
+              break;
+            }
           }
           if (stopOnMainAction) {
             break baseLoop;
@@ -253,6 +258,9 @@ export class BattleScenarioParser {
             abilityScenario["to"],
             abilityScenario["pos"],
           );
+          if (!sourceName) {
+            break;
+          }
           const sourceIndex = BattleActionHelper.getActorIndex(
             godsightBattleData["party"],
             abilityScenario["to"],
@@ -302,7 +310,11 @@ export class BattleScenarioParser {
               const previousScenario = scenarioData[i - 1];
               if (previousScenario && previousScenario["cmd"] == ScenarioCommand._BATTLE_LOG) {
                 const battleLogScenario = previousScenario as BattleLogScenarioData;
-                abilityAction.overrideMessage = battleLogScenario["body"];
+                if (typeof battleLogScenario["body"] == "string") {
+                  abilityAction.overrideMessage = battleLogScenario["body"];
+                } else {
+                  abilityAction.overrideMessage = battleLogScenario["body"]["en"];
+                }
                 actions.push(abilityAction);
               } else {
                 const maybeDamageSubaction = abilityAction.subactions.find(a =>
@@ -943,8 +955,11 @@ export class BattleScenarioParser {
           let battleMessage: string | null = null;
           const previousScenario = scenarioData[i - 1];
           if (previousScenario && previousScenario["cmd"] == ScenarioCommand._BATTLE_LOG) {
-            if ((previousScenario as BattleLogScenarioData)["body"]) {
-              battleMessage = (previousScenario as BattleLogScenarioData)["body"];
+            const prev = previousScenario as BattleLogScenarioData;
+            if (typeof prev["body"] == "string") {
+              battleMessage = prev["body"];
+            } else {
+              battleMessage = prev["body"]["en"];
             }
           }
           const standbyAction = new StandbyAction(
@@ -1015,13 +1030,15 @@ export class BattleScenarioParser {
               break baseLoop;
             }
             const battleLogScenario = scenario as BattleLogScenarioData;
-            const standbyAction = new StandbyAction(
-              "Placeholder",
-              true,
-              !isBossAttackPhase,
-              battleLogScenario["body"],
-            );
-            actions.push(standbyAction);
+            if (typeof battleLogScenario["body"] == "string") {
+              const standbyAction = new StandbyAction(
+                "Placeholder",
+                true,
+                !isBossAttackPhase,
+                battleLogScenario["body"],
+              );
+              actions.push(standbyAction);
+            }
           }
           break;
         }

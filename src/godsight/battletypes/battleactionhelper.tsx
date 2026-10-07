@@ -30,7 +30,7 @@ export class BattleActionHelper {
   static getActorName(bossData: GodsightBossData[], formation: GodsightPartyFormationData, actor: Actor, position: number): string {
     let actorName = "";
     if (actor == Actor.BOSS) {
-      actorName = bossData[position]["name"];
+      actorName = bossData[position] ? bossData[position]["name"] : "";
     } else if (actor == Actor.PLAYER) {
       actorName = PartyFormationHelper.getNameOfFrontlineCharacterInPosition(
         formation,
