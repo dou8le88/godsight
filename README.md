@@ -4,7 +4,7 @@ Godsight is a free browser extension intended to be used with the browser game [
 
 ## Granblue Fantasy ToS Compatibility
 
-This extension does not modify any code in the game itself. It does not inject any scripts, and it uses a separate UI in your developer tools (F12/Ctrl+Shift+I) to display all of its information. An explicit aim for this extension was to be ToS-compatible by any "reasonable" definition. That said, the ToS is pretty broad about external tools, and while that's likely intended for things that give you an actual gameplay advantage, like a bot or UI modifications, it's probably best to avoid associating your account with this tool in videos or screenshots. Some game developers are *very* strict with these things. :/
+This extension does not modify any code in the game itself. It does not inject any scripts, and it uses a separate UI in your developer tools (F12/Ctrl+Shift+I) to display all of its information. An explicit aim for this extension was to be ToS-compatible by any *reasonable* definition. That said, the ToS is pretty broad about external tools, and while that's likely intended for things that give you an actual gameplay advantage, like a bot or UI modifications, it's probably best to avoid associating your account with this tool in videos or screenshots. Some game developers are *very* strict with these things. :/
 
 ## Warnings
 
@@ -16,22 +16,31 @@ Review the code of such extensions carefully, or ask a trusted individual famili
 
 The only code that interfaces with the devtools APIs is in [/src/devtools.ts](/src/devtools.ts) and [/src/react/app.tsx](/src/react/app.tsx), which should reduce the footprint of reviewing this repository for security concerns to a minimum.
 
+## Installation
+
+- Download a release and extract the zip file to its own folder.
+- In the browser you use to play GBF, go into the Extensions menu, find the "Developer mode" switch, and turn it on.
+- A "Load unpacked" button should appear in the UI. Click it and find the folder you extracted the extension zip file to, select it, and hit "Select Folder".
+
+## Usage
+
+- Navigate to the Granblue Fantasy game website (https://game.granbluefantasy.jp or https://steam.granbluefantasy.com)
+- Open the Developer Tools with F12 or CTRL+SHIFT+I.
+- Select the Godsight tab in the Developer Tools.
+- The extension will automatically begin listening for battle data.
+  - If you have a battle already started, refresh it while the extension is listening to get it to start tracking the battle.
+- View data and visualizations for recorded battles, as well as actions (approximately grouped) taken in battle.
+- Click the **⚙** icon in the top right to configure settings.
+
 ## Development Status
 
 This project is currently under active development.
 
-- [x] Listen to browser navigation and disable response parsing if on other webpages, and enable it when on the GBF website.
-- [x] Display a banner in the Godsight panel when on other websites, and show the normal UI when navigating to the game.
-- [x] Parse response bodies to determine command schemas.
-- [x] Handle commands and relevant battle data.
-- [x] Basic UI with party member portraits
-- [x] Basic battle summary describing the outcomes of actions.
-- [x] More detailed result display: hitcounts (total/by damage type), debuffs applied count, etc.
-- [x] Stats variant that just shows before-boss-action stuff ("omen-cancel-contributing stats")
-- [X] DPS/DPT view
-    - [X] Current DPS/DPT
-    - [X] Last turn damage
-    - [X] Individual character DPS/DPT
-    - [X] Damage distribution pie graphs
-    - [X] Damage distribution by turn bar graphs
-    - [ ] Damage info per action.
+- [ ] - Verify correctness in as many raids as possible
+  - [ ] Dark Rapture (Hard)
+  - [ ] Hexachromatic Hierarch
+  - [ ] Dark Rapture Zero
+  - [ ] Versusia
+  - [ ] Daily FA stuff
+  - [ ] Sandbox
+  - [x] Solomonis
