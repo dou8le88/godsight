@@ -192,6 +192,9 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
                   onClick={() => {
                     setSelectedStatsView(StatsView.CHARACTER);
                     setSelectedCharacter(charIdx);
+                    if (selectedBreakdown == Breakdown.BY_CHARACTER) {
+                      setSelectedBreakdown(Breakdown.BY_TYPE);
+                    }
                   }}
                 />
               ))}
