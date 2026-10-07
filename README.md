@@ -4,11 +4,11 @@ Godsight is a free browser extension intended to be used with the browser game [
 
 ## Granblue Fantasy ToS Compatibility
 
-This extension does not modify any code in the game itself. It does not inject any scripts, and it uses a separate UI in your developer tools (F12/Ctrl+Shift+I) to display all of its information. An explicit aim for this extension was to be ToS-compatible by any *reasonable* definition. That said, the ToS is pretty broad about external tools, and while that's likely intended for things that give you an actual gameplay advantage, like a bot or UI modifications, it's probably best to avoid associating your account with this tool in videos or screenshots. Some game developers are *very* strict with these things. :/
+This extension does not modify any code in the game itself. It does not inject any scripts, and it uses a separate UI in your developer tools (F12/CTRL+SHIFT+I) to display all of its information. An explicit aim for this extension was to be ToS-compatible by any *reasonable* definition. That said, the ToS is pretty broad about external tools, and while that's likely intended for things that give you an actual gameplay advantage, like a bot or UI modifications, it's probably best to avoid associating your account with this tool in videos or screenshots. Some game developers are *very* strict with these things. :/
 
 ## Warnings
 
-To be able to read response bodies from the server, an extension must either patch the main window's XHR functions or use devtools APIs. As the former would break Granblue Fantasy's TOS, this extension opts for the latter.
+To be able to read response bodies from the server, an extension must either patch the main window's XHR functions or use devtools APIs. As the former would definitely break Granblue Fantasy's TOS, this extension opts for the latter.
 
 Devtools APIs are very powerful and thus very dangerous for users installing such extensions. *You should be exceedingly cautious when thinking of using them, as a malicious extension could steal your cookies or act on your behalf.*
 
@@ -24,6 +24,7 @@ The only code that interfaces with the devtools APIs is in [/src/devtools.ts](/s
 
 ## Usage
 
+- **NOTE:** Refreshing too fast will cause the extension to miss data. You don't have to be particularly careful here, just don't refresh the microsecond the request reaches the server and you're good. Refreshing "too fast" has similar timing to using the Back button to refresh too quickly and having the battle fail to load until you do an actual reload.
 - Navigate to the Granblue Fantasy game website (https://game.granbluefantasy.jp or https://steam.granbluefantasy.com)
 - Open the Developer Tools with F12 or CTRL+SHIFT+I.
 - Select the Godsight tab in the Developer Tools.
@@ -31,6 +32,20 @@ The only code that interfaces with the devtools APIs is in [/src/devtools.ts](/s
   - If you have a battle already started, refresh it while the extension is listening to get it to start tracking the battle.
 - View data and visualizations for recorded battles, as well as actions (approximately grouped) taken in battle.
 - Click the **⚙** icon in the top right to configure settings.
+
+## Bug Reports and Contributions
+
+- Please file a github issue if you should find any bugs. Please note that the following are not considered bugs:
+  - "Wrong-looking" action grouping under Turn Actions.
+    - This is because the grouping is a best effort transformation of data that isn't at all designed to map to a player's intuition of what an "action" should be. The game client can order things strangely relative to the stated order of operations in skill and passive descriptions.
+- The following ARE considered bugs:
+  - Incorrect damage values. The "total damage" should always match the ingame end-of-battle Battle Log *as long as no actions were missed via refreshing too quickly*.
+  - Incorrect damage attribution. I suspect there are unavoidable cases, for instance due to ordering weirdness with Rigor damage and on-dispel passives.
+- You may make pull requests to this project.
+  - AI-assisted code is allowed, **however:**
+    - Do not "vibe-code". You are expected to understand all code you submit.
+    - Do not respond to questions about your code by pasting the questions into your AI assistant and regurgitating the answers. Be better than a "meat proxy".
+    - You are responsible for all code you submit.
 
 ## Development Status
 
