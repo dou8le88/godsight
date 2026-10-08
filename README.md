@@ -33,6 +33,11 @@ The only code that interfaces with the devtools APIs is in [/src/devtools.ts](/s
 - View data and visualizations for recorded battles, as well as actions (approximately grouped) taken in battle.
 - Click the **⚙** icon in the top right to configure settings.
 
+## Limitations
+
+- Multiwave battles are treated as separate battles per wave. This is low priority to fix, as there is esentially no multiwave content that is nontrivial.
+- Multihit summons may have incorrect hitcounts when called with a cross-summon. This is because when a summon is "reskinned" (either through setting an actual skin for your main summon, or cross-summoning), it will only display a single hit in the damage data for mono-elemental summon damage, even if it's actually several hits mechanically. We can get around this for reskinned main summons, as we can look up the summon by its call name and parse its description for the real hitcount, but cross-summons don't give us any way to find the original summon data to correct the hitcount.
+
 ## Bug Reports and Contributions
 
 - Please file a github issue if you should find any bugs. Please note that the following are not considered bugs:
@@ -40,7 +45,7 @@ The only code that interfaces with the devtools APIs is in [/src/devtools.ts](/s
     - This is because the grouping is a best effort transformation of data that isn't at all designed to map to a player's intuition of what an "action" should be. The game client can order things strangely relative to the stated order of operations in skill and passive descriptions.
 - The following ARE considered bugs:
   - Incorrect damage values. The "total damage" should always match the ingame end-of-battle Battle Log *as long as no actions were missed via refreshing too quickly*.
-  - Incorrect damage attribution. I suspect there are unavoidable cases, for instance due to ordering weirdness with Rigor damage and on-dispel passives.
+  - Incorrect damage attribution. I suspect there are unavoidable cases, for instance due to ordering weirdness with Rigor damage and on-dispel passives, but I haven't found any yet.
 - You may make pull requests to this project.
   - AI-assisted code is allowed, **however:**
     - Do not "vibe-code". You are expected to understand all code you submit.
