@@ -1,3 +1,1 @@
 This project's source code, where applicable, is licensed under the [Creative Commons Attribution-NonCommercial-ShareAlike (CC-BY-NC-SA) License](https://creativecommons.org/licenses/by-nc-sa/4.0/).
-
-This project makes use of certain assets, such as icons, that are not original, but rather taken from the game this project is made to complement. Such assets belong to their original owner, Cygames, Inc. This project makes no claim on these assets.
