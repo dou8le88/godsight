@@ -24,7 +24,8 @@ The only code that interfaces with the devtools APIs is in [/src/devtools.ts](/s
 
 ## Usage
 
-- **NOTE:** Refreshing too fast will cause the extension to miss data. You don't have to be particularly careful here, just don't refresh the microsecond the request reaches the server and you're good. Refreshing "too fast" has similar timing to using the Back button to refresh too quickly and having the battle fail to load until you do an actual reload.
+- **NOTE 1:** Refreshing too fast will cause the extension to miss data. The safe timing for refreshing is approximately how long it takes for your ingame honors score to update under normal conditions (actually a little sooner but it's an easy cue). If your honors update gets delayed due to server load, but your button press is being executed in the client, you are still safe to refresh.
+- **NOTE 2:** This extension does not support multi-window gameplay. If you open the game in two windows and the extension panel on each of those, they will overwrite each others' changes.
 - Navigate to the Granblue Fantasy game website (https://game.granbluefantasy.jp or https://steam.granbluefantasy.com)
 - Open the Developer Tools with F12 or CTRL+SHIFT+I.
 - Select the Godsight tab in the Developer Tools.
