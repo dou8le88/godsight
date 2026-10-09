@@ -58,10 +58,10 @@ The only code that interfaces with the devtools APIs is in [/src/devtools.ts](/s
 This project is currently under active development.
 
 - [ ] - Verify correctness in as many raids as possible
-  - [ ] Dark Rapture (Hard)
+  - [x] Dark Rapture (Hard)
   - [ ] Hexachromatic Hierarch
-  - [ ] Dark Rapture Zero
+  - [x] Dark Rapture Zero
   - [ ] Versusia
-  - [ ] Daily FA stuff
+  - [x] Daily FA stuff
   - [ ] Sandbox
   - [x] Solomonis
