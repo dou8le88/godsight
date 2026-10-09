@@ -21,7 +21,7 @@ export interface AppliedStatus {
 }
 
 export interface MessageData {
-  "boss"?: AppliedStatus[][],
+  "boss"?: AppliedStatus[][] | Record<number, AppliedStatus[]>,
   "player"?: Record<string, AppliedStatus[]>,
 }
 

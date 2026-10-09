@@ -80,6 +80,10 @@ export enum ScenarioCommand {
    */
   DEATH = "die",
   /**
+   * One enemy in a multi-enemy battle died.
+   */
+  STOP = "stop",
+  /**
    * A backliner replaced a frontliner, because they died or were swapped via a skill or somesuch.
    */
   REPLACE_CHARACTER = "replace",
@@ -215,5 +219,15 @@ export enum ScenarioCommand {
    * Ignored command, do not use, exists for completeness in the parser.
    */
   _SUMMON_CUTIN = "summon_cutin",
+  /**
+   * Toggling audio in-battle.
+   * Ignored command, do not use, exists for completeness in the parser.
+   */
   _VOICE = "voice",
+  /**
+   * Some kind of visual animation command.
+   * Known to be used after a STOP command when an enemy in a multi-foe battle dies.
+   * Ignored command, do not use, exists for completeness in the parser.
+   */
+  _MOTION_LINK = "motion_link",
 }

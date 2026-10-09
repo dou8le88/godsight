@@ -12,7 +12,7 @@ import { HonorsGainedScenarioData } from "./gbf/battletypes/scenariodata/honorsg
 import { GameElement, GameElementHelper, GameElementValue } from "./gbf/battletypes/scenariodata/mechanics/element";
 import { StatusType } from "./gbf/battletypes/scenariodata/mechanics/statustype";
 import { Actor } from "./gbf/battletypes/scenariodata/mechanics/actor";
-import { MessageScenarioData } from "./gbf/battletypes/scenariodata/messagescenariodata";
+import { AppliedStatus, MessageScenarioData } from "./gbf/battletypes/scenariodata/messagescenariodata";
 import { MultihitDamageScenarioData } from "./gbf/battletypes/scenariodata/multihitdamagescenariodata";
 import { NormalAttackDamage, NormalAttackScenarioData } from "./gbf/battletypes/scenariodata/normalattackscenariodata";
 import { ReplaceCharacterScenarioData } from "./gbf/battletypes/scenariodata/replacecharacterscenariodata";
@@ -65,6 +65,7 @@ import { ResurrectedAction } from "./godsight/battletypes/resurrectedaction";
 import { AttackPhaseTurnScenarioData } from "./gbf/battletypes/scenariodata/attackphaseturnscenariodata";
 import { AttackAccuracyResult } from "./gbf/battletypes/scenariodata/mechanics/attackaccuracyresult";
 import { SkillOrDebuffDamageInstance } from "./gbf/battletypes/scenariodata/individualdamageinstance";
+import { StopScenarioData } from "./gbf/battletypes/scenariodata/stopscenariodata";
 
 export class BattleScenarioParser {
   constructor() {
@@ -205,6 +206,8 @@ export class BattleScenarioParser {
           break;
         }
 
+        // STOP cmd is functionally the same as a DEATH cmd.
+        case ScenarioCommand.STOP:
         case ScenarioCommand.DEATH: {
           if (stopOnMainAction) {
             break baseLoop;
@@ -1047,22 +1050,23 @@ export class BattleScenarioParser {
           break;
 
         // All of these commands are recognized but ignored.
-        case ScenarioCommand._POTIONS_CHANGED:
-        case ScenarioCommand._HP_CHANGED:
-        case ScenarioCommand._SPECIAL_CHANGE:
-        case ScenarioCommand._CONDITION:
-        case ScenarioCommand._SCREEN_EFFECT:
-        case ScenarioCommand._BGM:
         case ScenarioCommand._BACKGROUND_CHANGE:
-        case ScenarioCommand._MODE_CHANGE:
-        case ScenarioCommand._IMAGE_CHANGE:
+        case ScenarioCommand._BGM:
+        case ScenarioCommand._CONDITION:
         case ScenarioCommand._DROP:
         case ScenarioCommand._GROUP_GAUGE:
-        case ScenarioCommand._UNIQUE_GAUGE:
-        case ScenarioCommand._LOSE:
+        case ScenarioCommand._HP_CHANGED:
+        case ScenarioCommand._IMAGE_CHANGE:
         case ScenarioCommand._INFORMATION:
+        case ScenarioCommand._LOSE:
+        case ScenarioCommand._MODE_CHANGE:
         case ScenarioCommand._MOTION:
+        case ScenarioCommand._MOTION_LINK:
+        case ScenarioCommand._POTIONS_CHANGED:
+        case ScenarioCommand._SCREEN_EFFECT:
+        case ScenarioCommand._SPECIAL_CHANGE:
         case ScenarioCommand._SUMMON_CUTIN:
+        case ScenarioCommand._UNIQUE_GAUGE:
         case ScenarioCommand._VOICE:
         case undefined:
           break;
@@ -1081,7 +1085,7 @@ export class BattleScenarioParser {
 
   private handleDeathScenario(
     battleData: GodsightBattleData,
-    deathScenario: DeathScenarioData,
+    deathScenario: DeathScenarioData | StopScenarioData,
     isBossAttackPhase: boolean,
   ): BattleAction {
     const action = new DeathAction(
@@ -1163,7 +1167,14 @@ export class BattleScenarioParser {
     const bossChanges = buffDebuffChangeScenario["data"]["boss"]
     const playerChanges = buffDebuffChangeScenario["data"]["player"]
     if (bossChanges) {
-      const allBossChanges = bossChanges.flat(1);
+      let allBossChanges: AppliedStatus[] = []; //bossChanges.flat(1);
+      // For some reason, damage can come as nested arrays,
+      // or as object literals that are kind of just sparse arrays...
+      if (Array.isArray(bossChanges)) {
+        allBossChanges = bossChanges.flat(1);
+      } else {
+        allBossChanges = Object.values(bossChanges).flat(1);
+      }
       const uniquePositions = new Set(allBossChanges.map(b => b["pos"]));
 
       const allBossConditionActions: Record<string, ConditionChangeAction> = {};
