@@ -82,6 +82,7 @@ export default function GodsightPanel() {
   }, [notifications]);
 
   const [selectedBattle, setSelectedBattle] = useState<number | undefined>(undefined);
+  const [lastUpdatedBattle, setLastUpdatedBattle] = useState<number | undefined>(undefined);
 
   // Only listen for network requests when we're inspecting GBF.
   useEffect(() => {
@@ -108,6 +109,8 @@ export default function GodsightPanel() {
       }
 
       storageManager.setBattleData(raidId, godsightBattleData, settings["maxRememberedBattles"]);
+      setLastUpdatedBattle(raidId);
+
       switch (settings["onRaidLoadBehavior"]) {
         case OnRaidLoadBehavior.SWITCH:
           setSelectedBattle(raidId);
@@ -149,9 +152,14 @@ export default function GodsightPanel() {
     }
 
     function withActiveBattle(callback: (battleId: number, raid: GodsightBattleData) => void) {
-      chrome.devtools.inspectedWindow.eval("window.location.hash", (url: string) => {
-        const fragment = url.split("#").at(-1);
-        const battleId = Number(((fragment || "").match(battleIdRegex) || []).at(-1));
+      chrome.devtools.inspectedWindow.eval("window.location.hash", (url: string | undefined) => {
+        let battleId = NaN;
+        if (url) {
+          const fragment = url.split("#").at(-1);
+          battleId = Number(((fragment || "").match(battleIdRegex) || []).at(-1));
+        } else if (lastUpdatedBattle !== undefined) {
+          battleId = lastUpdatedBattle;
+        }
 
         if (!isNaN(battleId)) {
           const raid = godsightStorage["battles"].find(b => b["raidId"] == battleId);
@@ -360,7 +368,7 @@ export default function GodsightPanel() {
     return () => {
       chrome.devtools.network.onRequestFinished.removeListener(onRequestFinishedListener);
     };
-  }, [onGbfPage, godsightStorage, selectedBattle, settings, notifications]);
+  }, [onGbfPage, godsightStorage, selectedBattle, lastUpdatedBattle, settings, notifications]);
 
   const allBattles = godsightStorage["battles"];
 
