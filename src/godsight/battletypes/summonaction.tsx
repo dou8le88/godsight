@@ -7,6 +7,7 @@ import { StatsUpdate, StatsUpdateHelper } from "./stats";
 import { BattleActionHelper } from "./battleactionhelper";
 import { assertNotNullOrUndefined } from "../../util/assert";
 import { GodsightSettings } from "../settings/godsightsettings";
+import { GameElementHelper } from "../../gbf/battletypes/scenariodata/mechanics/element";
 
 export class SummonAction extends BattleAction {
   public actionType: ActionType = ActionType.CALLED_SUMMON;
@@ -75,12 +76,32 @@ export class SummonAction extends BattleAction {
       }
     }
 
-    const subactionUpdates = this.subactions.map(action => action.getStats());
+    const subactionUpdates = this.subactions.map(action => action.getStats())
 
-    return subactionUpdates.reduce(
+    const mergedSubactionUpdates = subactionUpdates.reduce(
       (prev, cur) => StatsUpdateHelper.concatUpdates(prev, cur),
-      update
+      StatsUpdateHelper.getEmptyStatsUpdate(this.partySize),
     );
+
+    const subactionHitCount = mergedSubactionUpdates["generalStats"]["hitCount"];
+    const subactionSkillDamage = mergedSubactionUpdates["generalStats"]["skillDamage"];
+    const subactionDebuffCount = mergedSubactionUpdates["generalStats"]["debuffsInflictedCount"];
+
+    update["characterStats"][0]["hitCount"] += subactionHitCount;
+    update["characterStats"][0]["debuffsInflictedCount"] += subactionDebuffCount;
+    GameElementHelper.getAllElements().forEach(element => {
+      update["characterStats"][0]["skillDamage"][element] += subactionSkillDamage[element];
+    });
+
+    if (this.beforeBossTurn) {
+      update["characterBeforeBossTurnStats"][0]["hitCount"] += subactionHitCount;
+      update["characterBeforeBossTurnStats"][0]["debuffsInflictedCount"] += subactionDebuffCount;
+      GameElementHelper.getAllElements().forEach(element => {
+        update["characterBeforeBossTurnStats"][0]["skillDamage"][element] += subactionSkillDamage[element];
+      });
+    }
+
+    return StatsUpdateHelper.concatUpdates(update, mergedSubactionUpdates);
   }
 
   static override fromJSON(json: Record<string, unknown>): SummonAction | undefined {
