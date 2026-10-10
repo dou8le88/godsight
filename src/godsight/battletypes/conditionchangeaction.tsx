@@ -70,9 +70,13 @@ export class ConditionChangeAction extends BattleAction {
 
     let finalMissedStatusesJsx = <></>;
     if (this.missCount > 0) {
+      let effectWord = "effects";
+      if (this.missCount == 1) {
+        effectWord = "effect"
+      }
       finalMissedStatusesJsx = (
         <>
-          {this.missCount} status effects missed!
+          {this.missCount} status {effectWord} missed!
         </>
       );
     }
