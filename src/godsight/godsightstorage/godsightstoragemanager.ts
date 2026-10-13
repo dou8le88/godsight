@@ -82,7 +82,7 @@ export class GodsightStorageManager {
             });
           }
         } else {
-          console.log(`Ignoring update to underlying storage because it was initiated by current window ${this.instanceId}`);
+          // console.log(`Ignoring update to underlying storage because it was initiated by current window ${this.instanceId}`);
         }
       } else {
         console.error(`No instance ID set for change!`)
