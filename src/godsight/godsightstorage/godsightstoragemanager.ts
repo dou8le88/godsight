@@ -4,7 +4,10 @@ import { DefaultGodsightStorage, GodsightStorage } from "./battlestorage";
 
 export class GodsightStorageManager {
   private static godsightStorageKey = "godsightStorage";
+  private static godsightInstanceKey = "godsightInstanceId";
   private static instance: GodsightStorageManager;
+
+  private instanceId = crypto.randomUUID();
 
   private storageCache: GodsightStorage = structuredClone(DefaultGodsightStorage) as unknown as GodsightStorage;
 
@@ -47,10 +50,44 @@ export class GodsightStorageManager {
 
       this.storageCache = storage;
     } else {
-      await chrome.storage.local.set({ [GodsightStorageManager.godsightStorageKey]: JSON.stringify(this.storageCache) }).catch(reason => {
+      await chrome.storage.local.set({
+        [GodsightStorageManager.godsightStorageKey]: JSON.stringify(this.storageCache),
+        [GodsightStorageManager.godsightInstanceKey]: {
+          "id": this.instanceId,
+          "timestamp": Date.now(),
+        },
+      }).catch(reason => {
         console.error("Unable to initialize godsight storage", reason);
       });
     }
+
+    chrome.storage.local.onChanged.addListener((changes) => {
+      if (GodsightStorageManager.godsightInstanceKey in changes) {
+        const sourceId = (changes[GodsightStorageManager.godsightInstanceKey]["newValue"] as { "id": string })["id"];
+        const sourceIsCurrentPanel = sourceId == this.instanceId;
+        if (!sourceIsCurrentPanel) {
+          console.log(`Received change from other panel instance ${sourceId}`);
+          if (GodsightStorageManager.godsightStorageKey in changes) {
+            this.lastSetPromise = this.lastSetPromise.then(() => {
+              const newStorageString = changes[GodsightStorageManager.godsightStorageKey]!["newValue"]! as string;
+              const storage = JSON.parse(newStorageString) as GodsightStorage;
+
+              storage["battles"].forEach(battle => {
+                this.rehydrateTurns(battle);
+              });
+
+              this.storageCache = storage;
+
+              this.fireChangeListeners();
+            });
+          }
+        } else {
+          console.log(`Ignoring update to underlying storage because it was initiated by current window ${this.instanceId}`);
+        }
+      } else {
+        console.error(`No instance ID set for change!`)
+      }
+    });
 
     this.fireChangeListeners();
   }
@@ -63,7 +100,13 @@ export class GodsightStorageManager {
    */
   private updateUnderlyingStorageAndNotify() {
     this.lastSetPromise = this.lastSetPromise.then(() => {
-      return chrome.storage.local.set({ [GodsightStorageManager.godsightStorageKey]: JSON.stringify(this.storageCache) });
+      return chrome.storage.local.set({
+        [GodsightStorageManager.godsightStorageKey]: JSON.stringify(this.storageCache),
+        [GodsightStorageManager.godsightInstanceKey]: {
+          "id": this.instanceId,
+          "timestamp": Date.now(),
+        },
+      });
     }).catch((reason) => {
       console.error(`Failed to update godsight storage with reason ${reason}`);
     });
