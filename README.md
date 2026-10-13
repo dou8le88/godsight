@@ -26,7 +26,7 @@ The only code that interfaces with the devtools APIs is in [/src/devtools.ts](/s
 
 - **NOTE 1:** Refreshing too fast will cause the extension to miss data. The safe timing for refreshing is approximately how long it takes for your ingame honors score to update under normal conditions (actually a little sooner but it's an easy cue). If your honors update gets delayed due to server load, but your button press is being executed in the client, you are still safe to refresh.
   - A warning icon will be displayed if missing data is detected, but the extension can't detect all cases.
-- **NOTE 2:** This extension does not support multi-window gameplay. If you open the game in two windows and the extension panel on each of those, they will overwrite each others' changes.
+- **NOTE 2:** The extension **does** support multi-window gameplay, but it can only detect battle data from an inspected window. If you want to play the game in multiple windows (e.g., for speedmaxxers using Fated Chains in a second window), make sure to open the extension panel in those other windows as well. Updates will be reflected across all open extension panels.
 - Navigate to the Granblue Fantasy game website (https://game.granbluefantasy.jp or https://steam.granbluefantasy.com)
 - Open the Developer Tools with F12 or CTRL+SHIFT+I.
 - Select the Godsight tab in the Developer Tools.
