@@ -19,8 +19,8 @@ The only code that interfaces with the devtools APIs is in [/src/devtools.ts](/s
 ## Installation
 
 - Download a release and extract the zip file to its own folder.
-- In the browser you use to play GBF, go into the Extensions menu, find the "Developer mode" switch, and turn it on.
-- A "Load unpacked" button should appear in the UI. Click it and find the folder you extracted the extension zip file to, select it, and hit "Select Folder".
+- In the browser you use to play GBF, go into the Extensions menu, click "Manage Extensions", find the "Developer mode" switch, and turn it on.
+- A "Load unpacked" button should appear in the UI. Click it, find the folder you extracted the extension zip file to, and select it.
 
 ## Usage
 
@@ -60,7 +60,7 @@ This project is currently under active development.
 
 - [ ] - Verify correctness in as many raids as possible
   - [x] Dark Rapture (Hard)
-  - [ ] Hexachromatic Hierarch
+  - [x] Hexachromatic Hierarch
   - [x] Dark Rapture Zero
   - [ ] Versusia
   - [x] Daily FA stuff
