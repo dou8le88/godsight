@@ -1,13 +1,11 @@
 import { BattleActionHelper } from "../battletypes/battleactionhelper";
 import { GodsightBattleData } from "../battletypes/battledata";
+import { InstanceManager } from "../instance/instancemanager";
 import { DefaultGodsightStorage, GodsightStorage } from "./battlestorage";
 
 export class GodsightStorageManager {
   private static godsightStorageKey = "godsightStorage";
-  private static godsightInstanceKey = "godsightInstanceId";
   private static instance: GodsightStorageManager;
-
-  private instanceId = crypto.randomUUID();
 
   private storageCache: GodsightStorage = structuredClone(DefaultGodsightStorage) as unknown as GodsightStorage;
 
@@ -52,8 +50,8 @@ export class GodsightStorageManager {
     } else {
       await chrome.storage.local.set({
         [GodsightStorageManager.godsightStorageKey]: JSON.stringify(this.storageCache),
-        [GodsightStorageManager.godsightInstanceKey]: {
-          "id": this.instanceId,
+        [InstanceManager.godsightInstanceKey]: {
+          "id": InstanceManager.instanceId,
           "timestamp": Date.now(),
         },
       }).catch(reason => {
@@ -62,25 +60,21 @@ export class GodsightStorageManager {
     }
 
     chrome.storage.local.onChanged.addListener((changes) => {
-      if (GodsightStorageManager.godsightInstanceKey in changes) {
-        const sourceId = (changes[GodsightStorageManager.godsightInstanceKey]["newValue"] as { "id": string })["id"];
-        const sourceIsCurrentPanel = sourceId == this.instanceId;
-        if (!sourceIsCurrentPanel) {
-          console.log(`Received change from other panel instance ${sourceId}`);
-          if (GodsightStorageManager.godsightStorageKey in changes) {
-            this.lastSetPromise = this.lastSetPromise.then(() => {
-              const newStorageString = changes[GodsightStorageManager.godsightStorageKey]!["newValue"]! as string;
-              const storage = JSON.parse(newStorageString) as GodsightStorage;
+      if (InstanceManager.godsightInstanceKey in changes) {
+        const sourceId = (changes[InstanceManager.godsightInstanceKey]["newValue"] as { "id": string })["id"];
+        const sourceIsCurrentPanel = sourceId == InstanceManager.instanceId;
+        if (!sourceIsCurrentPanel && GodsightStorageManager.godsightStorageKey in changes) {
+          console.log(`Received storage change from other panel instance ${sourceId}`);
+          const newStorageString = changes[GodsightStorageManager.godsightStorageKey]!["newValue"]! as string;
+          const storage = JSON.parse(newStorageString) as GodsightStorage;
 
-              storage["battles"].forEach(battle => {
-                this.rehydrateTurns(battle);
-              });
+          storage["battles"].forEach(battle => {
+            this.rehydrateTurns(battle);
+          });
 
-              this.storageCache = storage;
+          this.storageCache = storage;
 
-              this.fireChangeListeners();
-            });
-          }
+          this.fireChangeListeners();
         } else {
           // console.log(`Ignoring update to underlying storage because it was initiated by current window ${this.instanceId}`);
         }
@@ -102,8 +96,8 @@ export class GodsightStorageManager {
     this.lastSetPromise = this.lastSetPromise.then(() => {
       return chrome.storage.local.set({
         [GodsightStorageManager.godsightStorageKey]: JSON.stringify(this.storageCache),
-        [GodsightStorageManager.godsightInstanceKey]: {
-          "id": this.instanceId,
+        [InstanceManager.godsightInstanceKey]: {
+          "id": InstanceManager.instanceId,
           "timestamp": Date.now(),
         },
       });

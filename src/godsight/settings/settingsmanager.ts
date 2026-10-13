@@ -1,3 +1,4 @@
+import { InstanceManager } from "../instance/instancemanager";
 import { DefaultSettings, GodsightSettings } from "./godsightsettings";
 
 export class SettingsManager {
@@ -41,10 +42,36 @@ export class SettingsManager {
 
       this.settingsCache = settings;
     } else {
-      await chrome.storage.local.set({ [SettingsManager.settingsKey]: JSON.stringify(this.settingsCache) }).catch(reason => {
+      await chrome.storage.local.set({
+        [SettingsManager.settingsKey]: JSON.stringify(this.settingsCache),
+        [InstanceManager.godsightInstanceKey]: {
+          "id": InstanceManager.instanceId,
+          "timestamp": Date.now(),
+        },
+      }).catch(reason => {
         console.error("Unable to initialize godsight settings", reason);
       });
     }
+
+    chrome.storage.local.onChanged.addListener((changes) => {
+      if (InstanceManager.godsightInstanceKey in changes) {
+        const sourceId = (changes[InstanceManager.godsightInstanceKey]["newValue"] as { "id": string })["id"];
+        const sourceIsCurrentPanel = sourceId == InstanceManager.instanceId;
+        if (!sourceIsCurrentPanel && SettingsManager.settingsKey in changes) {
+          console.log(`Received settings change from other panel instance ${sourceId}`);
+          const newSettingsString = changes[SettingsManager.settingsKey]!["newValue"]! as string;
+          const newSettings = JSON.parse(newSettingsString) as GodsightSettings;
+
+          this.settingsCache = newSettings;
+
+          this.fireChangeListeners();
+        } else {
+          // console.log(`Ignoring update to underlying storage because it was initiated by current window ${this.instanceId}`);
+        }
+      } else {
+        console.error(`No instance ID set for change!`)
+      }
+    });
 
     this.fireChangeListeners();
   }
@@ -84,7 +111,13 @@ export class SettingsManager {
  */
   private updateUnderlyingSettingsAndNotify() {
     this.lastSetPromise = this.lastSetPromise.then(() => {
-      return chrome.storage.local.set({ [SettingsManager.settingsKey]: JSON.stringify(this.settingsCache) });
+      return chrome.storage.local.set({
+        [SettingsManager.settingsKey]: JSON.stringify(this.settingsCache),
+        [InstanceManager.godsightInstanceKey]: {
+          "id": InstanceManager.instanceId,
+          "timestamp": Date.now(),
+        },
+      });
     }).catch((reason) => {
       console.error(`Failed to update godsight settings with reason ${reason}`);
     });
