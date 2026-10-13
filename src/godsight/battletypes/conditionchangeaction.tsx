@@ -36,7 +36,15 @@ export class ConditionChangeAction extends BattleAction {
 
     const gainedStatusesJsx: React.ReactNode[] | null = gainedStatuses.map((status, idx) => (
       <span className="status-wrapper" key={idx}>
-        <span className="status-text">{status.name}</span> {settings["enableImageLoading"] && status.icon && !BattleActionHelper.IconlessStatusEffects.includes(status.icon) ? <img className="status-icon" src={BattleActionHelper.getStatusUrl(status.icon)} /> : <></>}
+        <span className="status-text">{status.name}</span> {settings["enableImageLoading"] && status.icon && !BattleActionHelper.IconlessStatusEffects.includes(status.icon) ? <img className="status-icon" src={BattleActionHelper.getStatusUrl(status.icon)} /> :
+          <>
+            {status.icon && status.icon.includes("_") ?
+              <span className="status-text">
+                ({status.icon.split("_").at(-1)})
+              </span> : <></>
+            }
+          </>
+        }
       </span>
     )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, ", ", cur], null);
 
