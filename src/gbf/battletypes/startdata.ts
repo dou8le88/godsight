@@ -19,7 +19,8 @@ export type StartData = GranblueBattleData & {
   "timer": number,
   "turn": number,
   /**
-   * Seems to be number of skill presses since battle start?
+   * Number of skill button presses in battle.
+   * Increments every time a character skill is used via pressing its button.
    */
   "ability_turn": number,
   /**

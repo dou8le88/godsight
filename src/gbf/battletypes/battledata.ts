@@ -25,9 +25,8 @@ export interface BattleStatus {
   "turn": number,
   "timer": number,
   /**
-   * Number of actions taken this turn, effectively.
-   * Begins at 0 and increments every time an action is performed,
-   * resets when a new turn starts after the attack button is pressed.
+   * Number of skill button presses in battle.
+   * Increments every time a character skill is used via pressing its button.
    */
   "ability_turn": number,
   "is_guard_status": GuardStatus[],

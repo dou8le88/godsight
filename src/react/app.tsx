@@ -15,6 +15,7 @@ import { useGodsightSettings } from "../godsight/settings/usegodsightsettings";
 import { GodsightNotification, Notification, NotificationType } from "./notifications/notification";
 import { OnRaidLoadBehavior } from "../godsight/settings/godsightsettings";
 import SearchHandler from "./search/searchhandler";
+import { range } from "../util/range";
 
 const NoKnownActiveBattleNotificationKey = "NoKnownActiveBattle";
 const LoadedIntoRaidNotificationKey = "LoadedIntoRaid";
@@ -101,6 +102,14 @@ export default function GodsightPanel() {
         godsightBattleData["turnData"] = existingRaid["turnData"];
         godsightBattleData["honors"] = existingRaid["honors"];
         godsightBattleData["battleStats"] = existingRaid["battleStats"];
+        const abilityTurns = [...existingRaid["abilityTurns"]];
+        godsightBattleData["abilityTurns"].forEach(t => {
+          if (!abilityTurns.includes(t)) {
+            abilityTurns.push(t);
+          }
+        });
+        godsightBattleData["abilityTurns"] = abilityTurns;
+        godsightBattleData["turnsWithSkippedOrRecordedAttackActions"] = existingRaid["turnsWithSkippedOrRecordedAttackActions"];
       }
 
       if ("updateTurnTo" in godsightBattleData) {
@@ -212,6 +221,10 @@ export default function GodsightPanel() {
           const newActions = data["scenario"] ? battleScenarioParser.parseScenarioData(data["scenario"], data, draft) : [];
           const newTurnData = battleScenarioParser.processTurnActionData(newActions, draft["party"]);
 
+          if (!draft["abilityTurns"].includes(data["status"]["ability_turn"])) {
+            draft["abilityTurns"].push(data["status"]["ability_turn"]);
+          }
+
           // Merge previous actions and stats into the new stuff.
           // First merge the new data into the raidwide data.
           StatsUpdateHelper.mergeStats(newTurnData["turnStats"], draft["battleStats"]["generalStats"]);
@@ -243,7 +256,10 @@ export default function GodsightPanel() {
           draft["lastUpdated"] = Date.now();
 
           if ("updateTurnTo" in draft) {
-            draft["currentTurn"] = draft["updateTurnTo"]!;
+            const updatedTurn = draft["updateTurnTo"]!;
+            draft["turnsWithSkippedOrRecordedAttackActions"]
+              .push(...range(draft["currentTurn"], updatedTurn - 1));
+            draft["currentTurn"] = updatedTurn;
             delete draft["updateTurnTo"];
           }
         });

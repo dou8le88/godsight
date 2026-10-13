@@ -29,6 +29,26 @@ export default function BattleTracker({ battleData }: { battleData: GodsightBatt
 
   const [selectedTab, setSelectedTab] = useState(initialTab);
 
+
+  const isMissingAbilities: boolean = battleData !== undefined ?
+    battleData["abilityTurns"].length < ((battleData["abilityTurns"].at(-1) || 0) + 1) : false;
+  const isMissingFinishedTurns: boolean = battleData !== undefined ?
+    battleData["turnsWithSkippedOrRecordedAttackActions"].length <
+    (battleData["currentTurn"] - 1) : false;
+
+  const bossName = battleData !== undefined ? battleData["boss"][0]["name"] : "Unknown";
+  const crossTabHeader = (
+    <div className="battle-metadata">
+      Vs. {bossName}&nbsp;
+      {(isMissingAbilities || isMissingFinishedTurns) ?
+        <span className="missing-info-warning" title="Missing battle data detected. The stats and actions shown may not match the ingame battle log.">
+          ⚠
+        </span> :
+        <></>
+      }
+    </div>
+  )
+
   return (
     <div className="battle-info">
       <div className="tab-header">
@@ -49,9 +69,11 @@ export default function BattleTracker({ battleData }: { battleData: GodsightBatt
         <div className="end-spacer"></div>
       </div>
       <div className="tab-container" style={{ "display": selectedTab == BattleViewTab.STATS ? "flex" : "none" }}>
+        {crossTabHeader}
         <BattleStats battleData={battleData} />
       </div>
       <div className="tab-container" style={{ "display": selectedTab == BattleViewTab.TURN_ACTIONS ? "flex" : "none" }}>
+        {crossTabHeader}
         <TurnTracker battleData={battleData} />
       </div>
     </div>

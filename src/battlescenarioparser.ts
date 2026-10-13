@@ -1373,6 +1373,8 @@ export class BattleScenarioParser {
        */
       "expirationTime": Date.now() + (startData["timer"] * 1000),
       "lastUpdated": Date.now(),
+      "abilityTurns": [0],
+      "turnsWithSkippedOrRecordedAttackActions": [],
       "party": party,
       "boss": startData["boss"]["param"].map((b) => this.getBossData(b)),
       "turnData": {},

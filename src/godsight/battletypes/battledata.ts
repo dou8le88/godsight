@@ -11,6 +11,8 @@ export interface GodsightBattleData {
   "isHost": boolean,
   "currentTurn": number,
   "updateTurnTo"?: number,
+  "abilityTurns": number[],
+  "turnsWithSkippedOrRecordedAttackActions": number[],
   "honors": number,
   "fatedChainGauge": number,
   "battleProgressStatus": BattleProgressStatus,

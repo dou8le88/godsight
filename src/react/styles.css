@@ -714,6 +714,14 @@ body,
         margin: 10px;
         align-self: flex-start;
         font-size: 20px;
+        vertical-align: middle;
+
+        .missing-info-warning {
+            display: inline-block;
+            color: #F5BD32;
+            margin-left: 5px;
+            cursor: default;
+        }
     }
 
     .breakdown-name {
