@@ -36,13 +36,13 @@ export class ConditionChangeAction extends BattleAction {
 
     const gainedStatusesJsx: React.ReactNode[] | null = gainedStatuses.map((status, idx) => (
       <span className="status-wrapper" key={idx}>
-        <span className="status-text">{status.name}</span> {!settings["disableImageLoading"] && status.icon && !BattleActionHelper.IconlessStatusEffects.includes(status.icon) ? <img className="status-icon" src={BattleActionHelper.getStatusUrl(status.icon)} /> : <></>}
+        <span className="status-text">{status.name}</span> {settings["enableImageLoading"] && status.icon && !BattleActionHelper.IconlessStatusEffects.includes(status.icon) ? <img className="status-icon" src={BattleActionHelper.getStatusUrl(status.icon)} /> : <></>}
       </span>
     )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, ", ", cur], null);
 
     const dispelledStatusesJsx: React.ReactNode[] | null = dispelledStatuses.map((status, idx) => (
       <span className="status-wrapper" key={idx}>
-        <span className="status-text">{status.name}</span> {!settings["disableImageLoading"] ? <img className="status-icon" src={BattleActionHelper.getStatusUrl(status.icon)} /> : <></>}
+        <span className="status-text">{status.name}</span> {settings["enableImageLoading"] ? <img className="status-icon" src={BattleActionHelper.getStatusUrl(status.icon)} /> : <></>}
       </span>
     )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, ", ", cur], null);
 

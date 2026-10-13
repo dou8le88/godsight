@@ -348,21 +348,21 @@ export function Config({ onExit }: { onExit: () => void }) {
             </tr>
             <tr className="config-option">
               <td className="config-description">
-                Disable loading images from the GBF CDN:
+                Enable loading images from the GBF CDN:
               </td>
               <td className="config-input-container">
                 <input
                   type="checkbox"
                   className="config-checkbox"
-                  checked={settings["disableImageLoading"]}
+                  checked={settings["enableImageLoading"]}
                   onChange={(e) => {
-                    settingsManager.updateSingleSetting("disableImageLoading", e.target.checked);
+                    settingsManager.updateSingleSetting("enableImageLoading", e.target.checked);
                   }}
                 />
               </td>
               <td className="config-explanation">
-                Disables all usage of GBF images. Prevents a potential sidechannel attack which could detect this extension.<br />
-                For the paranoid.
+                Enables loading of party member portraits and status effect icons from the GBF CDN.<br />
+                As your browser must load this data anyway to display the images ingame, these requests are cached and should have minimal impact on the game servers.
               </td>
             </tr>
           </tbody>

@@ -22,7 +22,7 @@ export function TurnTracker({ battleData }: { battleData: GodsightBattleData | u
     return (
       <>
         <div className="battle-metadata">Vs. {battleData["boss"][0]["name"]}</div>
-        {!settings["disableImageLoading"] ?
+        {settings["enableImageLoading"] ?
           <div className="party-container">
             {frontliners.map(char => {
               return (

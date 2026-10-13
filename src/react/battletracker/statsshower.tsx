@@ -56,7 +56,7 @@ export function StatsShower({ stats, header, character, backline, searchable, on
 
   return (
     <div className={className} {...(onClick && { "onClick": () => onClick() })}>
-      {character && !settings["disableImageLoading"] ?
+      {character && settings["enableImageLoading"] ?
         <>
           <Avatar key={character["characterId"]} characterData={character} backline={backline} />
         </> :
