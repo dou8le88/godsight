@@ -275,7 +275,10 @@ export default function GodsightPanel() {
             draft['party'],
           );
 
-          if (!draft['abilityTurns'].includes(data['status']['ability_turn'])) {
+          if (
+            data['status'] &&
+            !draft['abilityTurns'].includes(data['status']['ability_turn'])
+          ) {
             draft['abilityTurns'].push(data['status']['ability_turn']);
           }
 

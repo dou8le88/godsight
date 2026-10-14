@@ -54,7 +54,10 @@ import { ReplaceCharacterAction } from './godsight/battletypes/replacecharactera
 import { SingularNormalAttackAction } from './godsight/battletypes/singularnormalattackaction';
 import { WindowEffectAction } from './godsight/battletypes/windoweffectaction';
 import { HealingAction } from './godsight/battletypes/healingaction';
-import { SummonScenarioData } from './gbf/battletypes/scenariodata/summonscenariodata';
+import {
+  SummonDamageInstance,
+  SummonScenarioData,
+} from './gbf/battletypes/scenariodata/summonscenariodata';
 import { SummonAction } from './godsight/battletypes/summonaction';
 import { BattleProgressStatus } from './godsight/battletypes/battleprogressstatus';
 import { WonBattleScenarioData } from './gbf/battletypes/scenariodata/wonbattlescenariodata';
@@ -114,6 +117,7 @@ export class BattleScenarioParser {
   private containsJapaneseRegex =
     /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u;
   private summonHitCountRegex = /(\d+)-hit/;
+  private summonTargetRegex = /DMG[^/]*?to all foes/;
 
   private filteredAbilityNames = ['Paralyze effect to a foe'];
 
@@ -879,24 +883,47 @@ export class BattleScenarioParser {
             godsightBattleData,
             isBossAttackPhase,
           );
-          let trueSummonHitCount: number | undefined;
-          if (summonScenario['name']) {
-            const currentSummon = gbfBattleData['status']['summon'].find(
-              (summon) => summon['skill'] == summonScenario['name'],
-            );
-            if (currentSummon) {
-              const matchResult = currentSummon['comment'].match(
-                this.summonHitCountRegex,
-              );
-              if (matchResult) {
-                trueSummonHitCount = Number(matchResult.at(-1)!);
-              }
-            } else {
-              console.log(
-                `Unable to find summon matching ${summonScenario['name']}! Hitcount may be inaccurate!`,
-              );
-            }
+          let summonDamage: SummonDamageInstance[] = [];
+          const unfixedSummonDamage = summonScenario['list'].map(
+            (l) => l['damage'],
+          );
+          if (Array.isArray(unfixedSummonDamage[0])) {
+            summonDamage = (
+              unfixedSummonDamage as SummonDamageInstance[][]
+            ).flat(1);
+          } else {
+            summonDamage = (
+              unfixedSummonDamage as Record<
+                string | number,
+                SummonDamageInstance
+              >[]
+            )
+              .map((l) => Object.values(l))
+              .flat(1);
           }
+          const damageInstances = summonDamage.map((damage) => {
+            const receiverIndex = Number(damage['pos']);
+            const receiverName = BattleActionHelper.getActorName(
+              godsightBattleData['boss'],
+              godsightBattleData['party'],
+              Actor.BOSS,
+              damage['pos'],
+            );
+            return {
+              'receiverIndex': receiverIndex,
+              'receiverName': receiverName,
+              'element':
+                'color' in damage && damage['color'] !== ''
+                  ? damage['color']
+                  : GameElement.NULL_PLAIN,
+              'value': damage['value'],
+              'receiverHpAfterDamage': damage['hp'],
+              'critical': damage['critical'],
+              'guarded': damage['guard'],
+              // Summon "misses" just show up as damage value 0, so they technically can't miss.
+              'miss': AttackAccuracyResult.HIT,
+            } as DamageInstance;
+          });
           const summonAction = new SummonAction(
             summonScenario['name'],
             BattleActionHelper.getMainCharacterName(
@@ -904,33 +931,9 @@ export class BattleScenarioParser {
             ),
             godsightBattleData['party']['partyMemberCount'],
             !isBossAttackPhase,
-            summonScenario['list']
-              .flatMap((l) => l['damage'])
-              .map((damage) => {
-                const receiverIndex = damage['pos'];
-                const receiverName = BattleActionHelper.getActorName(
-                  godsightBattleData['boss'],
-                  godsightBattleData['party'],
-                  Actor.BOSS,
-                  damage['pos'],
-                );
-                return {
-                  'receiverIndex': receiverIndex,
-                  'receiverName': receiverName,
-                  'element':
-                    'color' in damage && damage['color'] !== ''
-                      ? damage['color']
-                      : GameElement.NULL_PLAIN,
-                  'value': damage['value'],
-                  'receiverHpAfterDamage': damage['hp'],
-                  'critical': damage['critical'],
-                  'guarded': damage['guard'],
-                  // Summon "misses" just show up as damage value 0, so they technically can't miss.
-                  'miss': AttackAccuracyResult.HIT,
-                } as DamageInstance;
-              }),
+            damageInstances,
             subactions.actions,
-            trueSummonHitCount,
+            undefined,
           );
           // This occurs due to the fact that you can reskin summons. There are two summon commands,
           // one to show the summon animation and one to show the actual damage.
@@ -941,6 +944,34 @@ export class BattleScenarioParser {
             summonAction.damageInstances = subsummonaction.damageInstances;
             summonAction.subactions = subsummonaction.subactions;
           }
+          let trueSummonHitCount: number | undefined;
+          if (summonScenario['name']) {
+            const currentSummon =
+              gbfBattleData['status'] &&
+              gbfBattleData['status']['summon'].find(
+                (summon) => summon['skill'] == summonScenario['name'],
+              );
+            if (currentSummon) {
+              const matchResult = currentSummon['comment'].match(
+                this.summonHitCountRegex,
+              );
+              if (matchResult) {
+                trueSummonHitCount = Number(matchResult.at(-1)!);
+
+                if (this.summonTargetRegex.test(currentSummon['comment'])) {
+                  const uniqueTargets = new Set(
+                    summonAction.damageInstances.map((d) => d['receiverIndex']),
+                  );
+                  trueSummonHitCount *= [...uniqueTargets.values()].length;
+                }
+              }
+            } else {
+              console.log(
+                `Unable to find summon matching ${summonScenario['name']}! Hitcount may be inaccurate!`,
+              );
+            }
+          }
+          summonAction.trueSummonHitCount = trueSummonHitCount;
           actions.push(summonAction);
           i += subactions.lastIndex;
           break;

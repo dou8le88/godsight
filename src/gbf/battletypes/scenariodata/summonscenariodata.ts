@@ -12,7 +12,8 @@ export interface SummonDamageInstance {
 }
 
 export interface SummonDamageDescription {
-  'damage': SummonDamageInstance[];
+  'damage':
+    SummonDamageInstance[] | Record<string | number, SummonDamageInstance>;
 }
 
 export interface SummonScenarioData extends GenericScenarioData {

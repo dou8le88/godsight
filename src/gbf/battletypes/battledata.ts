@@ -43,5 +43,5 @@ export interface SummonData {
 
 export interface GranblueBattleData {
   'scenario': GenericScenarioData[];
-  'status': BattleStatus;
+  'status'?: BattleStatus;
 }
