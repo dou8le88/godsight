@@ -1,30 +1,30 @@
-import { AbilityAction } from "./abilityaction";
-import { ActionType } from "./actiontype";
-import { BattleAction } from "./battleaction";
-import { BossSpecialAttackAction } from "./bossspecialattackaction";
-import { CAMeterChangedAction } from "./cameterchangedaction";
-import { ChainBurstAction } from "./chainburstaction";
-import { ChargedAttackAction } from "./chargedattackaction";
-import { ConditionChangeAction } from "./conditionchangeaction";
-import { DamageAction } from "./damageaction";
-import { DeathAction } from "./deathaction";
-import { FullElixirAction } from "./fullelixiraction";
-import { HealingAction } from "./healingaction";
-import { MultihitDamageAction } from "./multihitdamageaction";
-import { NormalAttackAction } from "./normalattackaction";
-import { OmenCancelAction } from "./omencancelaction";
-import { ReplaceCharacterAction } from "./replacecharacteraction";
-import { ResurrectedAction } from "./resurrectedaction";
-import { RetreatAction } from "./retreataction";
-import { SingularNormalAttackAction } from "./singularnormalattackaction";
-import { StandbyAction } from "./standbyaction";
-import { SummonAction } from "./summonaction";
-import { TurnChangeAction } from "./turnchangeaction";
-import { WindowEffectAction } from "./windoweffectaction";
+import { AbilityAction } from './abilityaction';
+import { ActionType } from './actiontype';
+import { BattleAction } from './battleaction';
+import { BossSpecialAttackAction } from './bossspecialattackaction';
+import { CAMeterChangedAction } from './cameterchangedaction';
+import { ChainBurstAction } from './chainburstaction';
+import { ChargedAttackAction } from './chargedattackaction';
+import { ConditionChangeAction } from './conditionchangeaction';
+import { DamageAction } from './damageaction';
+import { DeathAction } from './deathaction';
+import { FullElixirAction } from './fullelixiraction';
+import { HealingAction } from './healingaction';
+import { MultihitDamageAction } from './multihitdamageaction';
+import { NormalAttackAction } from './normalattackaction';
+import { OmenCancelAction } from './omencancelaction';
+import { ReplaceCharacterAction } from './replacecharacteraction';
+import { ResurrectedAction } from './resurrectedaction';
+import { RetreatAction } from './retreataction';
+import { SingularNormalAttackAction } from './singularnormalattackaction';
+import { StandbyAction } from './standbyaction';
+import { SummonAction } from './summonaction';
+import { TurnChangeAction } from './turnchangeaction';
+import { WindowEffectAction } from './windoweffectaction';
 
 export class BattleActionParser {
   static fromJSON(json: Record<string, unknown>): BattleAction | undefined {
-    const actionType = json["actionType"];
+    const actionType = json['actionType'];
     if (actionType) {
       switch (actionType as ActionType) {
         case ActionType.ACTIVATED_ABILITY:

@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 
 const debounceTime = 100;
 let debounceId = 0;
 
 export default function SearchHandler() {
   const [visible, setVisible] = useState(false);
-  const [query, setQuery] = useState({ query: "" });
+  const [query, setQuery] = useState({ query: '' });
 
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -17,7 +17,7 @@ export default function SearchHandler() {
 
         if (!visible) {
           setVisible(true);
-          const newQuery = window.getSelection()?.toString() || "";
+          const newQuery = window.getSelection()?.toString() || '';
           setQuery({ query: newQuery });
           if (searchRef.current) {
             searchRef.current.value = newQuery;
@@ -37,7 +37,7 @@ export default function SearchHandler() {
           }
         }
       }
-    }
+    };
 
     window.addEventListener('keydown', listener, true);
 
@@ -58,7 +58,7 @@ export default function SearchHandler() {
     }
 
     debounceId = setTimeout(() => {
-      setQuery({ query: newQuery || "" });
+      setQuery({ query: newQuery || '' });
     }, debounceTime);
   }
 
@@ -67,12 +67,14 @@ export default function SearchHandler() {
 
   function getMatchingActions() {
     const newMatchingActions: Element[] = [];
-    const allActions = document.querySelectorAll(".action-container, .battle-summary-container, .stats-list.searchable");
-    allActions.forEach(container => {
+    const allActions = document.querySelectorAll(
+      '.action-container, .battle-summary-container, .stats-list.searchable',
+    );
+    allActions.forEach((container) => {
       if (container.checkVisibility()) {
         const regex = new RegExp(RegExp.escape(query.query), 'i');
-        if (query.query != "" && regex.test(container.textContent)) {
-          if (container.className.includes("action-container")) {
+        if (query.query != '' && regex.test(container.textContent)) {
+          if (container.className.includes('action-container')) {
             newMatchingActions.unshift(container);
           } else {
             newMatchingActions.push(container);
@@ -84,33 +86,36 @@ export default function SearchHandler() {
   }
 
   function clearSearchClassName(className: string): string {
-    return className.replace(" highlighted", "").replace(" selected", "");
+    return className.replace(' highlighted', '').replace(' selected', '');
   }
 
   useEffect(() => {
     // clear any old search data
-    matchingActions.forEach(container => {
+    matchingActions.forEach((container) => {
       container.className = clearSearchClassName(container.className);
     });
     const newMatchingActions = getMatchingActions();
 
     if (newMatchingActions.length > 0) {
-      const firstInOrBelowViewIndex = newMatchingActions.findIndex(container => {
-        const rect = container.getBoundingClientRect();
-        return (
-          rect.top >= 0 &&
-          rect.left >= 0 //&&
-          //rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) && /* or $(window).height() */
-          //rect.right <= (window.innerWidth || document.documentElement.clientWidth) /* or $(window).width() */
-        );
-      });
+      const firstInOrBelowViewIndex = newMatchingActions.findIndex(
+        (container) => {
+          const rect = container.getBoundingClientRect();
+          return (
+            rect.top >= 0 && rect.left >= 0 //&&
+            //rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) && /* or $(window).height() */
+            //rect.right <= (window.innerWidth || document.documentElement.clientWidth) /* or $(window).width() */
+          );
+        },
+      );
 
       newMatchingActions.forEach((container, index) => {
         if (firstInOrBelowViewIndex == index) {
-          container.className = clearSearchClassName(container.className) + " highlighted selected";
+          container.className =
+            clearSearchClassName(container.className) + ' highlighted selected';
           setCurrentActionIndex(index);
         } else {
-          container.className = clearSearchClassName(container.className) + " highlighted";
+          container.className =
+            clearSearchClassName(container.className) + ' highlighted';
         }
       });
     }
@@ -124,12 +129,15 @@ export default function SearchHandler() {
       if (matchingAction) {
         if (document.body.contains(matchingAction)) {
           matchingAction.scrollIntoView({
-            "block": "nearest",
+            'block': 'nearest',
           });
-          matchingActions.forEach(action => {
-            action.className = clearSearchClassName(action.className) + " highlighted";
+          matchingActions.forEach((action) => {
+            action.className =
+              clearSearchClassName(action.className) + ' highlighted';
           });
-          matchingAction.className = clearSearchClassName(matchingAction.className) + " highlighted selected";
+          matchingAction.className =
+            clearSearchClassName(matchingAction.className) +
+            ' highlighted selected';
         } else {
           setQuery({ query: query.query });
         }
@@ -146,13 +154,19 @@ export default function SearchHandler() {
 
   function selectPrevious() {
     if (matchingActions.length) {
-      const newIndex = (currentActionIndex - 1) < 0 ? matchingActions.length - 1 : currentActionIndex - 1;
+      const newIndex =
+        currentActionIndex - 1 < 0
+          ? matchingActions.length - 1
+          : currentActionIndex - 1;
       setCurrentActionIndex(newIndex);
     }
   }
 
   return (
-    <div id="custom-search-container" style={{ "display": visible ? "flex" : "none" }}>
+    <div
+      id="custom-search-container"
+      style={{ 'display': visible ? 'flex' : 'none' }}
+    >
       <div className="search-icon">🔎︎</div>
       <input
         id="custom-search-input"
@@ -160,8 +174,11 @@ export default function SearchHandler() {
         type="search"
         onInput={(e) => setQueryDebounced(e.currentTarget.value)}
         onKeyDown={(e) => {
-          if (e.key == "Enter") {
-            if (matchingActions.some(a => !document.body.contains(a)) || getMatchingActions().length != matchingActions.length) {
+          if (e.key == 'Enter') {
+            if (
+              matchingActions.some((a) => !document.body.contains(a)) ||
+              getMatchingActions().length != matchingActions.length
+            ) {
               setQueryDebounced(query.query);
             } else {
               if (e.shiftKey) {
@@ -170,8 +187,8 @@ export default function SearchHandler() {
                 selectNext();
               }
             }
-          } else if (e.key == "Escape") {
-            if (searchRef.current && searchRef.current.value == "") {
+          } else if (e.key == 'Escape') {
+            if (searchRef.current && searchRef.current.value == '') {
               setVisible(false);
               e.preventDefault();
               e.stopPropagation();
@@ -180,15 +197,36 @@ export default function SearchHandler() {
         }}
       />
       <div id="custom-search-result">
-        {matchingActions.length > 0 ?
-          <>{currentActionIndex + 1} of {matchingActions.length}</> :
+        {matchingActions.length > 0 ? (
+          <>
+            {currentActionIndex + 1} of {matchingActions.length}
+          </>
+        ) : (
           <></>
-        }
+        )}
       </div>
       <div className="button-container">
-        <div className="button" onClick={() => selectPrevious()}>⮝</div>
-        <div className="button" onClick={() => selectNext()}>⮟</div>
-        <div className="button" onClick={() => { setVisible(false); setQuery({ query: "" }); }}>X</div>
+        <div
+          className="button"
+          onClick={() => selectPrevious()}
+        >
+          ⮝
+        </div>
+        <div
+          className="button"
+          onClick={() => selectNext()}
+        >
+          ⮟
+        </div>
+        <div
+          className="button"
+          onClick={() => {
+            setVisible(false);
+            setQuery({ query: '' });
+          }}
+        >
+          X
+        </div>
       </div>
     </div>
   );

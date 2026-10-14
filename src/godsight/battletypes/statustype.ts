@@ -1,5 +1,5 @@
 export enum GodsightStatusType {
-  BUFF = "buff",
-  DEBUFF = "debuff",
-  UNKNOWN = "unknown",
+  BUFF = 'buff',
+  DEBUFF = 'debuff',
+  UNKNOWN = 'unknown',
 }

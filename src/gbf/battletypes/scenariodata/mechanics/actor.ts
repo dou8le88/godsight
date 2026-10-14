@@ -1,4 +1,4 @@
 export enum Actor {
-  BOSS = "boss",
-  PLAYER = "player",
+  BOSS = 'boss',
+  PLAYER = 'player',
 }

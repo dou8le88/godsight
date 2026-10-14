@@ -1,17 +1,17 @@
-import { JSX } from "react/jsx-runtime";
-import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
-import { GameElementHelper } from "../../gbf/battletypes/scenariodata/mechanics/element";
-import { ActionType } from "./actiontype";
-import { BattleAction } from "./battleaction";
-import { BattleActionParser } from "./battleactionparser";
-import { StatsUpdate, StatsUpdateHelper } from "./stats";
-import { assertNotNullOrUndefined } from "../../util/assert";
-import { GodsightSettings } from "../settings/godsightsettings";
-import { DamageAction } from "./damageaction";
+import { JSX } from 'react/jsx-runtime';
+import { Actor } from '../../gbf/battletypes/scenariodata/mechanics/actor';
+import { GameElementHelper } from '../../gbf/battletypes/scenariodata/mechanics/element';
+import { ActionType } from './actiontype';
+import { BattleAction } from './battleaction';
+import { BattleActionParser } from './battleactionparser';
+import { StatsUpdate, StatsUpdateHelper } from './stats';
+import { assertNotNullOrUndefined } from '../../util/assert';
+import { GodsightSettings } from '../settings/godsightsettings';
+import { DamageAction } from './damageaction';
 
 export class AbilityAction extends BattleAction {
   public actionType: ActionType = ActionType.ACTIVATED_ABILITY;
-  public overrideMessage = "";
+  public overrideMessage = '';
 
   constructor(
     public name: string,
@@ -29,34 +29,44 @@ export class AbilityAction extends BattleAction {
   getDescription(key: number, settings: GodsightSettings): JSX.Element {
     if (this.overrideMessage) {
       return (
-        <div key={key} className="action-description" >{this.overrideMessage}
-          {
-            this.subactions.map((subaction, idx) => (
-              subaction.getDescription(idx, settings)
-            ))
-          }
+        <div
+          key={key}
+          className="action-description"
+        >
+          {this.overrideMessage}
+          {this.subactions.map((subaction, idx) =>
+            subaction.getDescription(idx, settings),
+          )}
         </div>
       );
     } else {
       return (
-        <div key={key} className="action-description"> {this.sourceName} activated {this.name}!
-          {
-            this.subactions.map((subaction, idx) => (
-              subaction.getDescription(idx, settings)
-            ))
-          }
+        <div
+          key={key}
+          className="action-description"
+        >
+          {' '}
+          {this.sourceName} activated {this.name}!
+          {this.subactions.map((subaction, idx) =>
+            subaction.getDescription(idx, settings),
+          )}
         </div>
       );
     }
-
   }
 
   getStats(): StatsUpdate {
     const update = StatsUpdateHelper.getEmptyStatsUpdate(this.partySize);
-    const firstDamageAction = this.subactions.find(action => action instanceof DamageAction);
+    const firstDamageAction = this.subactions.find(
+      (action) => action instanceof DamageAction,
+    );
     // The first damage action might be relevant if this is a Fated Chain.
-    const firstDamageActionStats = firstDamageAction ? firstDamageAction.getStats() : StatsUpdateHelper.getEmptyStatsUpdate(this.partySize);
-    const subactionStatsUpdates = this.subactions.map(action => action.getStats());
+    const firstDamageActionStats = firstDamageAction
+      ? firstDamageAction.getStats()
+      : StatsUpdateHelper.getEmptyStatsUpdate(this.partySize);
+    const subactionStatsUpdates = this.subactions.map((action) =>
+      action.getStats(),
+    );
     const allUpdates = subactionStatsUpdates.reduce(
       (prev, cur) => StatsUpdateHelper.concatUpdates(prev, cur),
       update,
@@ -65,37 +75,57 @@ export class AbilityAction extends BattleAction {
       case Actor.PLAYER: {
         // The subactions have no way to associate certain general stats with
         // a specific character, so we must do it here.
-        const subactionHitCount = allUpdates["generalStats"]["hitCount"];
-        const subactionDebuffs = allUpdates["generalStats"]["debuffsInflictedCount"];
-        const subactionNormalAttackDamage = allUpdates["generalStats"]["normalAttackDamage"];
-        const subactionSkillDamage = allUpdates["generalStats"]["skillDamage"];
-        const subactionOtherDamage = allUpdates["generalStats"]["otherDamage"];
+        const subactionHitCount = allUpdates['generalStats']['hitCount'];
+        const subactionDebuffs =
+          allUpdates['generalStats']['debuffsInflictedCount'];
+        const subactionNormalAttackDamage =
+          allUpdates['generalStats']['normalAttackDamage'];
+        const subactionSkillDamage = allUpdates['generalStats']['skillDamage'];
+        const subactionOtherDamage = allUpdates['generalStats']['otherDamage'];
 
         if (this.isFatedChain) {
           // The first damage subaction should be the fated chain damage.
           // It will have been incorrectly calculated as skill damage, when it should be Other.
-          GameElementHelper.getAllElements().forEach(element => {
-            subactionSkillDamage[element] -= firstDamageActionStats["generalStats"]["skillDamage"][element];
-            subactionOtherDamage[element] += firstDamageActionStats["generalStats"]["skillDamage"][element];
+          GameElementHelper.getAllElements().forEach((element) => {
+            subactionSkillDamage[element] -=
+              firstDamageActionStats['generalStats']['skillDamage'][element];
+            subactionOtherDamage[element] +=
+              firstDamageActionStats['generalStats']['skillDamage'][element];
           });
         }
 
-        allUpdates["characterStats"][this.sourceIndex]["hitCount"] += subactionHitCount;
-        allUpdates["characterStats"][this.sourceIndex]["debuffsInflictedCount"] += subactionDebuffs;
+        allUpdates['characterStats'][this.sourceIndex]['hitCount'] +=
+          subactionHitCount;
+        allUpdates['characterStats'][this.sourceIndex][
+          'debuffsInflictedCount'
+        ] += subactionDebuffs;
         if (this.beforeBossTurn) {
-          allUpdates["characterBeforeBossTurnStats"][this.sourceIndex]["hitCount"] += subactionHitCount;
-          allUpdates["characterBeforeBossTurnStats"][this.sourceIndex]["debuffsInflictedCount"] += subactionDebuffs;
+          allUpdates['characterBeforeBossTurnStats'][this.sourceIndex][
+            'hitCount'
+          ] += subactionHitCount;
+          allUpdates['characterBeforeBossTurnStats'][this.sourceIndex][
+            'debuffsInflictedCount'
+          ] += subactionDebuffs;
         }
-        GameElementHelper.getAllElements().forEach(element => {
-          allUpdates["characterStats"][this.sourceIndex]["skillDamage"][element] += subactionSkillDamage[element];
-          allUpdates["characterStats"][this.sourceIndex]["normalAttackDamage"][element] += subactionNormalAttackDamage[element];
-          allUpdates["characterStats"][0]["otherDamage"][element] += subactionOtherDamage[element];
+        GameElementHelper.getAllElements().forEach((element) => {
+          allUpdates['characterStats'][this.sourceIndex]['skillDamage'][
+            element
+          ] += subactionSkillDamage[element];
+          allUpdates['characterStats'][this.sourceIndex]['normalAttackDamage'][
+            element
+          ] += subactionNormalAttackDamage[element];
+          allUpdates['characterStats'][0]['otherDamage'][element] +=
+            subactionOtherDamage[element];
           if (this.beforeBossTurn) {
-            allUpdates["characterBeforeBossTurnStats"][this.sourceIndex]["skillDamage"][element] +=
-              subactionSkillDamage[element];
-            allUpdates["characterBeforeBossTurnStats"][this.sourceIndex]["normalAttackDamage"][element] +=
-              subactionNormalAttackDamage[element];
-            allUpdates["characterBeforeBossTurnStats"][0]["otherDamage"][element] += subactionOtherDamage[element];
+            allUpdates['characterBeforeBossTurnStats'][this.sourceIndex][
+              'skillDamage'
+            ][element] += subactionSkillDamage[element];
+            allUpdates['characterBeforeBossTurnStats'][this.sourceIndex][
+              'normalAttackDamage'
+            ][element] += subactionNormalAttackDamage[element];
+            allUpdates['characterBeforeBossTurnStats'][0]['otherDamage'][
+              element
+            ] += subactionOtherDamage[element];
           }
         });
         break;
@@ -113,23 +143,25 @@ export class AbilityAction extends BattleAction {
     return allUpdates;
   }
 
-  static override fromJSON(json: Record<string, unknown>): AbilityAction | undefined {
-    const actionType = json["actionType"];
+  static override fromJSON(
+    json: Record<string, unknown>,
+  ): AbilityAction | undefined {
+    const actionType = json['actionType'];
     if (actionType == ActionType.ACTIVATED_ABILITY) {
       const action = new AbilityAction(
-        assertNotNullOrUndefined(json["name"] as string),
-        assertNotNullOrUndefined(json["actor"] as Actor),
-        assertNotNullOrUndefined(json["sourceName"] as string),
-        assertNotNullOrUndefined(json["sourceIndex"] as number),
-        assertNotNullOrUndefined(json["partySize"] as number),
-        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
-        assertNotNullOrUndefined(json["isFatedChain"] as boolean),
-        (json["subactions"] as Record<string, unknown>[]).map(action => {
+        assertNotNullOrUndefined(json['name'] as string),
+        assertNotNullOrUndefined(json['actor'] as Actor),
+        assertNotNullOrUndefined(json['sourceName'] as string),
+        assertNotNullOrUndefined(json['sourceIndex'] as number),
+        assertNotNullOrUndefined(json['partySize'] as number),
+        assertNotNullOrUndefined(json['beforeBossTurn'] as boolean),
+        assertNotNullOrUndefined(json['isFatedChain'] as boolean),
+        (json['subactions'] as Record<string, unknown>[]).map((action) => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],
       );
-      if (json["overrideMessage"]) {
-        action.overrideMessage = json["overrideMessage"] as string;
+      if (json['overrideMessage']) {
+        action.overrideMessage = json['overrideMessage'] as string;
       }
       return action;
     } else {

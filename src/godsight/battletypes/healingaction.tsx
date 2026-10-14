@@ -1,12 +1,12 @@
-import { JSX } from "react/jsx-runtime";
-import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
-import { ActionType } from "./actiontype";
-import { BattleAction } from "./battleaction";
-import { HealingInstance } from "./healinginstance";
-import { StatsUpdate, StatsUpdateHelper } from "./stats";
-import { BattleActionHelper } from "./battleactionhelper";
-import { assertNotNullOrUndefined } from "../../util/assert";
-import { GodsightSettings } from "../settings/godsightsettings";
+import { JSX } from 'react/jsx-runtime';
+import { Actor } from '../../gbf/battletypes/scenariodata/mechanics/actor';
+import { ActionType } from './actiontype';
+import { BattleAction } from './battleaction';
+import { HealingInstance } from './healinginstance';
+import { StatsUpdate, StatsUpdateHelper } from './stats';
+import { BattleActionHelper } from './battleactionhelper';
+import { assertNotNullOrUndefined } from '../../util/assert';
+import { GodsightSettings } from '../settings/godsightsettings';
 
 export class HealingAction extends BattleAction {
   public actionType: ActionType = ActionType.HEAL;
@@ -27,11 +27,7 @@ export class HealingAction extends BattleAction {
       this.healingInstances,
     );
 
-    return (
-      <span key={key}>
-        {healingJsx}
-      </span>
-    );
+    return <span key={key}>{healingJsx}</span>;
   }
 
   getStats(): StatsUpdate {
@@ -39,12 +35,16 @@ export class HealingAction extends BattleAction {
 
     // Bosses can heal as well but we do not currently track that.
     if (this.target == Actor.PLAYER) {
-      this.healingInstances.forEach(instance => {
-        update["generalStats"]["healingReceived"] += instance["value"];
-        update["characterStats"][instance["receiverIndex"]]["healingReceived"] += instance["value"];
+      this.healingInstances.forEach((instance) => {
+        update['generalStats']['healingReceived'] += instance['value'];
+        update['characterStats'][instance['receiverIndex']][
+          'healingReceived'
+        ] += instance['value'];
         if (this.beforeBossTurn) {
-          update["beforeBossTurnStats"]["healingReceived"] += instance["value"];
-          update["characterBeforeBossTurnStats"][instance["receiverIndex"]]["healingReceived"] += instance["value"];
+          update['beforeBossTurnStats']['healingReceived'] += instance['value'];
+          update['characterBeforeBossTurnStats'][instance['receiverIndex']][
+            'healingReceived'
+          ] += instance['value'];
         }
       });
     }
@@ -52,14 +52,16 @@ export class HealingAction extends BattleAction {
     return update;
   }
 
-  static override fromJSON(json: Record<string, unknown>): HealingAction | undefined {
-    const actionType = json["actionType"];
+  static override fromJSON(
+    json: Record<string, unknown>,
+  ): HealingAction | undefined {
+    const actionType = json['actionType'];
     if (actionType == ActionType.HEAL) {
       return new HealingAction(
-        assertNotNullOrUndefined(json["target"] as Actor),
-        assertNotNullOrUndefined(json["partySize"] as number),
-        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
-        assertNotNullOrUndefined(json["healingInstances"] as HealingInstance[]),
+        assertNotNullOrUndefined(json['target'] as Actor),
+        assertNotNullOrUndefined(json['partySize'] as number),
+        assertNotNullOrUndefined(json['beforeBossTurn'] as boolean),
+        assertNotNullOrUndefined(json['healingInstances'] as HealingInstance[]),
       );
     } else {
       console.error(`HealingAction.fromJSON called on ${json}`);

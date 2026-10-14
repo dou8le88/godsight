@@ -1,40 +1,73 @@
-
-import { PieSectorShapeProps, useActiveTooltipDataPoints, useIsTooltipActive, Sector, PieChart, Pie, Legend, PieLabelRenderProps, Tooltip } from "recharts";
-import { Stats } from "../../godsight/battletypes/stats";
-import { Breakdown } from "./breakdown";
-import { GameElement, GameElementHelper, NumericGameElement } from "../../gbf/battletypes/scenariodata/mechanics/element";
-import { DamageTypeColors } from "./damagetypecolors";
-import { CSSProperties } from "react";
+import {
+  PieSectorShapeProps,
+  useActiveTooltipDataPoints,
+  useIsTooltipActive,
+  Sector,
+  PieChart,
+  Pie,
+  Legend,
+  PieLabelRenderProps,
+  Tooltip,
+} from 'recharts';
+import { Stats } from '../../godsight/battletypes/stats';
+import { Breakdown } from './breakdown';
+import {
+  GameElement,
+  GameElementHelper,
+  NumericGameElement,
+} from '../../gbf/battletypes/scenariodata/mechanics/element';
+import { DamageTypeColors } from './damagetypecolors';
+import { CSSProperties } from 'react';
 
 const tooltipStyle: CSSProperties = {
-  backgroundColor: "#282828",
-  color: "#B4D3E0",
+  backgroundColor: '#282828',
+  color: '#B4D3E0',
 };
 
 function byTypeBreakdown(stats: Stats) {
-  const totalNormalAttackDamage = Math.round(Object.keys(stats["normalAttackDamage"]).map(element => {
-    return stats["normalAttackDamage"][element];
-  }).reduce((prev, cur) => prev + cur, 0));
+  const totalNormalAttackDamage = Math.round(
+    Object.keys(stats['normalAttackDamage'])
+      .map((element) => {
+        return stats['normalAttackDamage'][element];
+      })
+      .reduce((prev, cur) => prev + cur, 0),
+  );
 
-  const totalChargedAttackDamage = Math.round(Object.keys(stats["chargedAttackDamage"]).map(element => {
-    return stats["chargedAttackDamage"][element];
-  }).reduce((prev, cur) => prev + cur, 0));
+  const totalChargedAttackDamage = Math.round(
+    Object.keys(stats['chargedAttackDamage'])
+      .map((element) => {
+        return stats['chargedAttackDamage'][element];
+      })
+      .reduce((prev, cur) => prev + cur, 0),
+  );
 
-  const totalSkillDamage = Math.round(Object.keys(stats["skillDamage"]).map(element => {
-    return stats["skillDamage"][element];
-  }).reduce((prev, cur) => prev + cur, 0));
+  const totalSkillDamage = Math.round(
+    Object.keys(stats['skillDamage'])
+      .map((element) => {
+        return stats['skillDamage'][element];
+      })
+      .reduce((prev, cur) => prev + cur, 0),
+  );
 
-  const totalOtherDamage = Math.round(Object.keys(stats["otherDamage"]).map(element => {
-    return stats["otherDamage"][element];
-  }).reduce((prev, cur) => prev + cur, 0));
+  const totalOtherDamage = Math.round(
+    Object.keys(stats['otherDamage'])
+      .map((element) => {
+        return stats['otherDamage'][element];
+      })
+      .reduce((prev, cur) => prev + cur, 0),
+  );
 
-  const totalDamage = (totalNormalAttackDamage +
-    totalChargedAttackDamage +
-    totalSkillDamage +
-    totalOtherDamage +
-    stats["dotDamage"]) || 1;
+  const totalDamage =
+    totalNormalAttackDamage +
+      totalChargedAttackDamage +
+      totalSkillDamage +
+      totalOtherDamage +
+      stats['dotDamage'] || 1;
 
-  function getDamageByTypePieChartData(): [{ name: string, value: number, fill: string }[], string[]] {
+  function getDamageByTypePieChartData(): [
+    { name: string; value: number; fill: string }[],
+    string[],
+  ] {
     const damageTypeSectorColors: string[] = [];
 
     const data: {
@@ -45,7 +78,7 @@ function byTypeBreakdown(stats: Stats) {
 
     if (totalNormalAttackDamage > 0) {
       data.push({
-        name: "NA",
+        name: 'NA',
         value: totalNormalAttackDamage,
         fill: DamageTypeColors.NORMAL_ATTACK,
       });
@@ -53,7 +86,7 @@ function byTypeBreakdown(stats: Stats) {
     }
     if (totalChargedAttackDamage > 0) {
       data.push({
-        name: "CA",
+        name: 'CA',
         value: totalChargedAttackDamage,
         fill: DamageTypeColors.CHARGED_ATTACK,
       });
@@ -61,7 +94,7 @@ function byTypeBreakdown(stats: Stats) {
     }
     if (totalSkillDamage > 0) {
       data.push({
-        name: "Skill",
+        name: 'Skill',
         value: totalSkillDamage,
         fill: DamageTypeColors.SKILL,
       });
@@ -69,7 +102,7 @@ function byTypeBreakdown(stats: Stats) {
     }
     if (totalOtherDamage > 0) {
       data.push({
-        name: "Other",
+        name: 'Other',
         value: totalOtherDamage,
         fill: DamageTypeColors.OTHER,
       });
@@ -114,7 +147,13 @@ function byTypeBreakdown(stats: Stats) {
     <>
       <div className="battle-stats-deepdive">
         <PieChart
-          style={{ width: '100%', height: '100%', maxWidth: '500px', maxHeight: '500px', aspectRatio: 1 }}
+          style={{
+            width: '100%',
+            height: '100%',
+            maxWidth: '500px',
+            maxHeight: '500px',
+            aspectRatio: 1,
+          }}
           responsive
         >
           <Pie
@@ -128,13 +167,17 @@ function byTypeBreakdown(stats: Stats) {
             label={customLabel}
             labelLine={false}
             minAngle={2}
-          >
-          </Pie>
+          ></Pie>
           <Tooltip
             contentStyle={tooltipStyle}
-            formatter={(a) => `${a?.toLocaleString()} (${((Number(a) / totalDamage) * 100).toFixed(0)}%)`}
+            formatter={(a) =>
+              `${a?.toLocaleString()} (${((Number(a) / totalDamage) * 100).toFixed(0)}%)`
+            }
           />
-          <Legend iconType="circle" itemSorter={null} />
+          <Legend
+            iconType="circle"
+            itemSorter={null}
+          />
         </PieChart>
       </div>
     </>
@@ -143,27 +186,34 @@ function byTypeBreakdown(stats: Stats) {
 
 function byElementBreakdown(stats: Stats) {
   const allElements = GameElementHelper.getAllElements();
-  const elementTotals: Record<NumericGameElement, number> = {} as Record<NumericGameElement, number>;
+  const elementTotals: Record<NumericGameElement, number> = {} as Record<
+    NumericGameElement,
+    number
+  >;
 
-  allElements.forEach(elt => {
+  allElements.forEach((elt) => {
     elementTotals[elt] = 0;
   });
 
-  allElements.forEach(elt => {
-    elementTotals[elt] += stats["normalAttackDamage"][elt];
-    elementTotals[elt] += stats["chargedAttackDamage"][elt];
-    elementTotals[elt] += stats["skillDamage"][elt];
-    elementTotals[elt] += stats["otherDamage"][elt];
+  allElements.forEach((elt) => {
+    elementTotals[elt] += stats['normalAttackDamage'][elt];
+    elementTotals[elt] += stats['chargedAttackDamage'][elt];
+    elementTotals[elt] += stats['skillDamage'][elt];
+    elementTotals[elt] += stats['otherDamage'][elt];
     if (elt == GameElement.NULL_PLAIN) {
-      elementTotals[elt] += stats["dotDamage"];
+      elementTotals[elt] += stats['dotDamage'];
     }
   });
 
-  const totalDamage = allElements.reduce<number>((prev, cur) => {
-    return prev + elementTotals[cur];
-  }, 0) || 1;
+  const totalDamage =
+    allElements.reduce<number>((prev, cur) => {
+      return prev + elementTotals[cur];
+    }, 0) || 1;
 
-  function getDamageByElementPieChartData(): [{ name: string, value: number, fill: string }[], string[]] {
+  function getDamageByElementPieChartData(): [
+    { name: string; value: number; fill: string }[],
+    string[],
+  ] {
     const damageElementSectorColors: string[] = [];
 
     const data: {
@@ -172,7 +222,7 @@ function byElementBreakdown(stats: Stats) {
       fill: string;
     }[] = [];
 
-    allElements.forEach(elt => {
+    allElements.forEach((elt) => {
       if (elementTotals[elt] > 0) {
         const color = GameElementHelper.getElementColor(elt);
         data.push({
@@ -222,7 +272,13 @@ function byElementBreakdown(stats: Stats) {
     <>
       <div className="battle-stats-deepdive">
         <PieChart
-          style={{ width: '100%', height: '100%', maxWidth: '500px', maxHeight: '500px', aspectRatio: 1 }}
+          style={{
+            width: '100%',
+            height: '100%',
+            maxWidth: '500px',
+            maxHeight: '500px',
+            aspectRatio: 1,
+          }}
           responsive
         >
           <Pie
@@ -236,28 +292,38 @@ function byElementBreakdown(stats: Stats) {
             label={customLabel}
             labelLine={false}
             minAngle={2}
-          >
-          </Pie>
+          ></Pie>
           <Tooltip
             contentStyle={tooltipStyle}
-            formatter={(a) => `${a?.toLocaleString()} (${((Number(a) / totalDamage) * 100).toFixed(0)}%)`}
+            formatter={(a) =>
+              `${a?.toLocaleString()} (${((Number(a) / totalDamage) * 100).toFixed(0)}%)`
+            }
           />
-          <Legend iconType="circle" itemSorter={null} />
+          <Legend
+            iconType="circle"
+            itemSorter={null}
+          />
         </PieChart>
       </div>
     </>
   );
 }
 
-export function DeepDivePieGraph({ stats, breakdown }: { stats: Stats, breakdown: Breakdown }) {
+export function DeepDivePieGraph({
+  stats,
+  breakdown,
+}: {
+  stats: Stats;
+  breakdown: Breakdown;
+}) {
   switch (breakdown) {
     case Breakdown.BY_TYPE:
       return byTypeBreakdown(stats);
     case Breakdown.BY_ELEMENT:
       return byElementBreakdown(stats);
     case Breakdown.BY_CHARACTER:
-      return <>Character breakdown not supported for this view.</>
+      return <>Character breakdown not supported for this view.</>;
     case Breakdown.BY_TURN:
-      return <>Turn breakdown not supported for this view.</>
+      return <>Turn breakdown not supported for this view.</>;
   }
 }

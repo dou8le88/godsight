@@ -1,10 +1,10 @@
-import { JSX } from "react/jsx-runtime";
-import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
-import { ActionType } from "./actiontype";
-import { BattleAction } from "./battleaction";
-import { StatsUpdate, StatsUpdateHelper } from "./stats";
-import { assertNotNullOrUndefined } from "../../util/assert";
-import { GodsightSettings } from "../settings/godsightsettings";
+import { JSX } from 'react/jsx-runtime';
+import { Actor } from '../../gbf/battletypes/scenariodata/mechanics/actor';
+import { ActionType } from './actiontype';
+import { BattleAction } from './battleaction';
+import { StatsUpdate, StatsUpdateHelper } from './stats';
+import { assertNotNullOrUndefined } from '../../util/assert';
+import { GodsightSettings } from '../settings/godsightsettings';
 
 export class CAMeterChangedAction extends BattleAction {
   public actionType: ActionType = ActionType.CA_METER_CHANGED;
@@ -22,26 +22,30 @@ export class CAMeterChangedAction extends BattleAction {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getDescription(key: number, settings: GodsightSettings): JSX.Element {
-    let changeWord = "";
+    let changeWord = '';
     if (this.change > 0) {
-      changeWord = "gained";
+      changeWord = 'gained';
     } else {
-      changeWord = "lost";
+      changeWord = 'lost';
     }
 
-    let meterWord = "meter";
+    let meterWord = 'meter';
     if (this.target == Actor.BOSS) {
       if (Math.abs(this.change) != 1) {
-        meterWord = "charge diamonds";
+        meterWord = 'charge diamonds';
       } else {
-        meterWord = "charge diamond";
+        meterWord = 'charge diamond';
       }
     } else if (this.target == Actor.PLAYER) {
-      meterWord = "charge bar";
+      meterWord = 'charge bar';
     }
 
     return (
-      <div key={key} className="action-description">{this.targetName} {changeWord} {Math.abs(this.change)} {meterWord}!
+      <div
+        key={key}
+        className="action-description"
+      >
+        {this.targetName} {changeWord} {Math.abs(this.change)} {meterWord}!
       </div>
     );
   }
@@ -50,15 +54,17 @@ export class CAMeterChangedAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
-  static override fromJSON(json: Record<string, unknown>): CAMeterChangedAction | undefined {
-    const actionType = json["actionType"];
+  static override fromJSON(
+    json: Record<string, unknown>,
+  ): CAMeterChangedAction | undefined {
+    const actionType = json['actionType'];
     if (actionType == ActionType.CA_METER_CHANGED) {
       return new CAMeterChangedAction(
-        assertNotNullOrUndefined(json["target"] as Actor),
-        assertNotNullOrUndefined(json["targetName"] as string),
-        assertNotNullOrUndefined(json["newValue"] as number),
-        assertNotNullOrUndefined(json["change"] as number),
-        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
+        assertNotNullOrUndefined(json['target'] as Actor),
+        assertNotNullOrUndefined(json['targetName'] as string),
+        assertNotNullOrUndefined(json['newValue'] as number),
+        assertNotNullOrUndefined(json['change'] as number),
+        assertNotNullOrUndefined(json['beforeBossTurn'] as boolean),
       );
     } else {
       console.error(`CAMeterChangedAction.fromJSON called on ${json}`);

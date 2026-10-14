@@ -1,7 +1,7 @@
-import { GenericScenarioData } from "./genericscenariodata";
-import { ScenarioCommand } from "./scenariocommand";
+import { GenericScenarioData } from './genericscenariodata';
+import { ScenarioCommand } from './scenariocommand';
 
 export interface TurnChangeScenarioData extends GenericScenarioData {
-  "cmd": ScenarioCommand.TURN_CHANGE,
-  "turn": number | string,
+  'cmd': ScenarioCommand.TURN_CHANGE;
+  'turn': number | string;
 }

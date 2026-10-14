@@ -1,9 +1,12 @@
-import { JSX } from "react/jsx-runtime";
-import { ActionType } from "./actiontype";
-import { BattleAction } from "./battleaction";
-import { StatsUpdate, StatsUpdateHelper } from "./stats";
-import { assertNotNullOrUndefined, assertNotUndefined } from "../../util/assert";
-import { GodsightSettings } from "../settings/godsightsettings";
+import { JSX } from 'react/jsx-runtime';
+import { ActionType } from './actiontype';
+import { BattleAction } from './battleaction';
+import { StatsUpdate, StatsUpdateHelper } from './stats';
+import {
+  assertNotNullOrUndefined,
+  assertNotUndefined,
+} from '../../util/assert';
+import { GodsightSettings } from '../settings/godsightsettings';
 
 export class StandbyAction extends BattleAction {
   public actionType: ActionType = ActionType.STANDBY;
@@ -30,18 +33,25 @@ export class StandbyAction extends BattleAction {
     }
 
     return (
-      <div key={key} className="action-description">{message}</div>
+      <div
+        key={key}
+        className="action-description"
+      >
+        {message}
+      </div>
     );
   }
 
-  static override fromJSON(json: Record<string, unknown>): StandbyAction | undefined {
-    const actionType = json["actionType"];
+  static override fromJSON(
+    json: Record<string, unknown>,
+  ): StandbyAction | undefined {
+    const actionType = json['actionType'];
     if (actionType == ActionType.STANDBY) {
       return new StandbyAction(
-        assertNotNullOrUndefined(json["actorName"] as string),
-        assertNotNullOrUndefined(json["standby"] as boolean),
-        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
-        assertNotUndefined(json["battleMessage"] as string | null),
+        assertNotNullOrUndefined(json['actorName'] as string),
+        assertNotNullOrUndefined(json['standby'] as boolean),
+        assertNotNullOrUndefined(json['beforeBossTurn'] as boolean),
+        assertNotUndefined(json['battleMessage'] as string | null),
       );
     } else {
       console.error(`StandbyAction.fromJSON called on ${json}`);

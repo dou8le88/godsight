@@ -1,49 +1,62 @@
-import { GodsightBattleData } from "../../godsight/battletypes/battledata";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, createHorizontalChart, TooltipContentProps } from 'recharts';
-import { StatsView } from "./statsview";
-import { DamageTypeColors } from "./damagetypecolors";
-import { useState } from "react";
-import { Breakdown } from "./breakdown";
-import { GameElement, GameElementHelper } from "../../gbf/battletypes/scenariodata/mechanics/element";
-import { CharacterColors } from "./charactercolors";
-import { Stats } from "../../godsight/battletypes/stats";
+import { GodsightBattleData } from '../../godsight/battletypes/battledata';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  createHorizontalChart,
+  TooltipContentProps,
+} from 'recharts';
+import { StatsView } from './statsview';
+import { DamageTypeColors } from './damagetypecolors';
+import { useState } from 'react';
+import { Breakdown } from './breakdown';
+import {
+  GameElement,
+  GameElementHelper,
+} from '../../gbf/battletypes/scenariodata/mechanics/element';
+import { CharacterColors } from './charactercolors';
+import { Stats } from '../../godsight/battletypes/stats';
 
 interface ByTypeChartData {
-  turn: string,
-  normalAttackDamage: number,
-  skillDamage: number,
-  chargedAttackDamage: number,
-  otherDamage: number,
-  totalDamage: number,
+  turn: string;
+  normalAttackDamage: number;
+  skillDamage: number;
+  chargedAttackDamage: number;
+  otherDamage: number;
+  totalDamage: number;
 }
 
 interface ByElementChartData {
-  turn: string,
-  total: number,
-  [GameElement.NULL_PLAIN]: number,
-  [GameElement.FIRE]: number,
-  [GameElement.WATER]: number,
-  [GameElement.EARTH]: number,
-  [GameElement.WIND]: number,
-  [GameElement.LIGHT]: number,
-  [GameElement.DARK]: number,
-  [GameElement.DESTRUCTION]: number,
+  turn: string;
+  total: number;
+  [GameElement.NULL_PLAIN]: number;
+  [GameElement.FIRE]: number;
+  [GameElement.WATER]: number;
+  [GameElement.EARTH]: number;
+  [GameElement.WIND]: number;
+  [GameElement.LIGHT]: number;
+  [GameElement.DARK]: number;
+  [GameElement.DESTRUCTION]: number;
 }
 
 interface ByCharacterChartData {
-  turn: string,
-  totalDamage: number,
-  [key: number]: number,
+  turn: string;
+  totalDamage: number;
+  [key: number]: number;
 }
 
 interface TurnStats {
-  turn: number,
-  stats: Stats,
+  turn: number;
+  stats: Stats;
 }
 
 interface ByCharacterTurnStats {
-  turn: number,
-  stats: Record<string | number, Stats>,
+  turn: number;
+  stats: Record<string | number, Stats>;
 }
 
 const ByType = createHorizontalChart<ByTypeChartData, string, number>()({
@@ -62,7 +75,11 @@ const ByElement = createHorizontalChart<ByElementChartData, string, number>()({
   Tooltip,
 });
 
-const ByCharacter = createHorizontalChart<ByCharacterChartData, string, number>()({
+const ByCharacter = createHorizontalChart<
+  ByCharacterChartData,
+  string,
+  number
+>()({
   BarChart,
   Bar,
   XAxis,
@@ -71,22 +88,38 @@ const ByCharacter = createHorizontalChart<ByCharacterChartData, string, number>(
 });
 
 function getDamageByTypeData(turnStats: TurnStats[]): ByTypeChartData[] {
-  return turnStats.map(statsByTurn => {
-    const totalNormalAttackDamage = Math.round(Object.keys(statsByTurn.stats["normalAttackDamage"]).map(element => {
-      return statsByTurn.stats["normalAttackDamage"][element];
-    }).reduce((prev, cur) => prev + cur, 0));
+  return turnStats.map((statsByTurn) => {
+    const totalNormalAttackDamage = Math.round(
+      Object.keys(statsByTurn.stats['normalAttackDamage'])
+        .map((element) => {
+          return statsByTurn.stats['normalAttackDamage'][element];
+        })
+        .reduce((prev, cur) => prev + cur, 0),
+    );
 
-    const totalChargedAttackDamage = Math.round(Object.keys(statsByTurn.stats["chargedAttackDamage"]).map(element => {
-      return statsByTurn.stats["chargedAttackDamage"][element];
-    }).reduce((prev, cur) => prev + cur, 0));
+    const totalChargedAttackDamage = Math.round(
+      Object.keys(statsByTurn.stats['chargedAttackDamage'])
+        .map((element) => {
+          return statsByTurn.stats['chargedAttackDamage'][element];
+        })
+        .reduce((prev, cur) => prev + cur, 0),
+    );
 
-    const totalSkillDamage = Math.round(Object.keys(statsByTurn.stats["skillDamage"]).map(element => {
-      return statsByTurn.stats["skillDamage"][element];
-    }).reduce((prev, cur) => prev + cur, 0));
+    const totalSkillDamage = Math.round(
+      Object.keys(statsByTurn.stats['skillDamage'])
+        .map((element) => {
+          return statsByTurn.stats['skillDamage'][element];
+        })
+        .reduce((prev, cur) => prev + cur, 0),
+    );
 
-    const totalOtherDamage = Math.round(Object.keys(statsByTurn.stats["otherDamage"]).map(element => {
-      return statsByTurn.stats["otherDamage"][element];
-    }).reduce((prev, cur) => prev + cur, 0));
+    const totalOtherDamage = Math.round(
+      Object.keys(statsByTurn.stats['otherDamage'])
+        .map((element) => {
+          return statsByTurn.stats['otherDamage'][element];
+        })
+        .reduce((prev, cur) => prev + cur, 0),
+    );
 
     return {
       turn: `${statsByTurn.turn}`,
@@ -94,35 +127,40 @@ function getDamageByTypeData(turnStats: TurnStats[]): ByTypeChartData[] {
       skillDamage: totalSkillDamage,
       chargedAttackDamage: totalChargedAttackDamage,
       otherDamage: totalOtherDamage,
-      totalDamage: totalNormalAttackDamage + totalSkillDamage + totalChargedAttackDamage + totalOtherDamage + statsByTurn["stats"]["dotDamage"],
+      totalDamage:
+        totalNormalAttackDamage +
+        totalSkillDamage +
+        totalChargedAttackDamage +
+        totalOtherDamage +
+        statsByTurn['stats']['dotDamage'],
     };
   });
 }
 
 function getDamageByElementData(turnStats: TurnStats[]): ByElementChartData[] {
-  return turnStats.map(statsByTurn => {
+  return turnStats.map((statsByTurn) => {
     const allElements = GameElementHelper.getAllElements();
     const elementTotals: ByElementChartData = {
       turn: `${statsByTurn.turn}`,
       total: 0,
     } as ByElementChartData;
 
-    allElements.forEach(elt => {
+    allElements.forEach((elt) => {
       elementTotals[elt] = 0;
     });
 
-    allElements.forEach(elt => {
-      elementTotals[elt] += statsByTurn.stats["normalAttackDamage"][elt];
-      elementTotals["total"] += statsByTurn.stats["normalAttackDamage"][elt];
-      elementTotals[elt] += statsByTurn.stats["chargedAttackDamage"][elt];
-      elementTotals["total"] += statsByTurn.stats["chargedAttackDamage"][elt];
-      elementTotals[elt] += statsByTurn.stats["skillDamage"][elt];
-      elementTotals["total"] += statsByTurn.stats["skillDamage"][elt];
-      elementTotals[elt] += statsByTurn.stats["otherDamage"][elt];
-      elementTotals["total"] += statsByTurn.stats["otherDamage"][elt];
+    allElements.forEach((elt) => {
+      elementTotals[elt] += statsByTurn.stats['normalAttackDamage'][elt];
+      elementTotals['total'] += statsByTurn.stats['normalAttackDamage'][elt];
+      elementTotals[elt] += statsByTurn.stats['chargedAttackDamage'][elt];
+      elementTotals['total'] += statsByTurn.stats['chargedAttackDamage'][elt];
+      elementTotals[elt] += statsByTurn.stats['skillDamage'][elt];
+      elementTotals['total'] += statsByTurn.stats['skillDamage'][elt];
+      elementTotals[elt] += statsByTurn.stats['otherDamage'][elt];
+      elementTotals['total'] += statsByTurn.stats['otherDamage'][elt];
       if (elt == GameElement.NULL_PLAIN) {
-        elementTotals[elt] += statsByTurn.stats["dotDamage"];
-        elementTotals["total"] += statsByTurn.stats["dotDamage"];
+        elementTotals[elt] += statsByTurn.stats['dotDamage'];
+        elementTotals['total'] += statsByTurn.stats['dotDamage'];
       }
     });
 
@@ -130,33 +168,60 @@ function getDamageByElementData(turnStats: TurnStats[]): ByElementChartData[] {
   });
 }
 
-function getDamageByCharacterData(turnStats: ByCharacterTurnStats[], allCharacters: number[]): ByCharacterChartData[] {
-  return turnStats.map(statsByTurn => {
-    const characterData = allCharacters.map(charIdx => {
-      const totalNormalAttackDamage = Math.round(Object.keys(statsByTurn.stats[charIdx]["normalAttackDamage"]).map(element => {
-        return statsByTurn.stats[charIdx]["normalAttackDamage"][element];
-      }).reduce((prev, cur) => prev + cur, 0));
+function getDamageByCharacterData(
+  turnStats: ByCharacterTurnStats[],
+  allCharacters: number[],
+): ByCharacterChartData[] {
+  return turnStats.map((statsByTurn) => {
+    const characterData = allCharacters
+      .map((charIdx) => {
+        const totalNormalAttackDamage = Math.round(
+          Object.keys(statsByTurn.stats[charIdx]['normalAttackDamage'])
+            .map((element) => {
+              return statsByTurn.stats[charIdx]['normalAttackDamage'][element];
+            })
+            .reduce((prev, cur) => prev + cur, 0),
+        );
 
-      const totalChargedAttackDamage = Math.round(Object.keys(statsByTurn.stats[charIdx]["chargedAttackDamage"]).map(element => {
-        return statsByTurn.stats[charIdx]["chargedAttackDamage"][element];
-      }).reduce((prev, cur) => prev + cur, 0));
+        const totalChargedAttackDamage = Math.round(
+          Object.keys(statsByTurn.stats[charIdx]['chargedAttackDamage'])
+            .map((element) => {
+              return statsByTurn.stats[charIdx]['chargedAttackDamage'][element];
+            })
+            .reduce((prev, cur) => prev + cur, 0),
+        );
 
-      const totalSkillDamage = Math.round(Object.keys(statsByTurn.stats[charIdx]["skillDamage"]).map(element => {
-        return statsByTurn.stats[charIdx]["skillDamage"][element];
-      }).reduce((prev, cur) => prev + cur, 0));
+        const totalSkillDamage = Math.round(
+          Object.keys(statsByTurn.stats[charIdx]['skillDamage'])
+            .map((element) => {
+              return statsByTurn.stats[charIdx]['skillDamage'][element];
+            })
+            .reduce((prev, cur) => prev + cur, 0),
+        );
 
-      const totalOtherDamage = Math.round(Object.keys(statsByTurn.stats[charIdx]["otherDamage"]).map(element => {
-        return statsByTurn.stats[charIdx]["otherDamage"][element];
-      }).reduce((prev, cur) => prev + cur, 0));
+        const totalOtherDamage = Math.round(
+          Object.keys(statsByTurn.stats[charIdx]['otherDamage'])
+            .map((element) => {
+              return statsByTurn.stats[charIdx]['otherDamage'][element];
+            })
+            .reduce((prev, cur) => prev + cur, 0),
+        );
 
-      return {
-        [charIdx]: totalNormalAttackDamage + totalChargedAttackDamage + totalSkillDamage + totalOtherDamage,
-      };
-    }).reduce((acc, cur) => {
-      return { ...acc, ...cur };
-    }, {});
+        return {
+          [charIdx]:
+            totalNormalAttackDamage +
+            totalChargedAttackDamage +
+            totalSkillDamage +
+            totalOtherDamage,
+        };
+      })
+      .reduce((acc, cur) => {
+        return { ...acc, ...cur };
+      }, {});
 
-    const totalDamage = Object.values(characterData).reduce((prev, cur) => prev + cur);
+    const totalDamage = Object.values(characterData).reduce(
+      (prev, cur) => prev + cur,
+    );
 
     return {
       turn: `${statsByTurn.turn}`,
@@ -168,21 +233,28 @@ function getDamageByCharacterData(turnStats: ByCharacterTurnStats[], allCharacte
 
 function damageByTypeTimeSeries(data: ByTypeChartData[]) {
   const labelColors = {
-    "NA": DamageTypeColors.NORMAL_ATTACK,
-    "CA": DamageTypeColors.CHARGED_ATTACK,
-    "Skill": DamageTypeColors.SKILL,
-    "Other": DamageTypeColors.OTHER,
+    'NA': DamageTypeColors.NORMAL_ATTACK,
+    'CA': DamageTypeColors.CHARGED_ATTACK,
+    'Skill': DamageTypeColors.SKILL,
+    'Other': DamageTypeColors.OTHER,
   };
 
-  const CustomTooltip = ({ active, payload, label, activeIndex }: TooltipContentProps) => {
+  const CustomTooltip = ({
+    active,
+    payload,
+    label,
+    activeIndex,
+  }: TooltipContentProps) => {
     if (active && payload && payload.length) {
       // Filter out items with a value of 0 (and optionally null/undefined)
-      const filteredPayload = payload.filter((item) => item.value !== 0 && item.value != null);
+      const filteredPayload = payload.filter(
+        (item) => item.value !== 0 && item.value != null,
+      );
 
       // If everything is filtered out, render nothing
       if (filteredPayload.length === 0) return null;
 
-      const totalDamage = data[Number(activeIndex)]["totalDamage"];
+      const totalDamage = data[Number(activeIndex)]['totalDamage'];
 
       return (
         <div
@@ -190,13 +262,20 @@ function damageByTypeTimeSeries(data: ByTypeChartData[]) {
           style={{
             backgroundColor: '#282828',
             padding: '10px',
-            border: "1px solid #c2c2c2"
-          }}>
+            border: '1px solid #c2c2c2',
+          }}
+        >
           <p className="label">Turn {label}</p>
           <p className="label">Total: {totalDamage.toLocaleString()}</p>
           {filteredPayload.map((entry, index) => (
-            <p key={`item-${index}`} style={{ color: labelColors[entry.name as keyof typeof labelColors] }}>
-              {entry.name}: {entry.value?.toLocaleString()} ({((Number(entry.value) / totalDamage) * 100).toFixed(0)}%)
+            <p
+              key={`item-${index}`}
+              style={{
+                color: labelColors[entry.name as keyof typeof labelColors],
+              }}
+            >
+              {entry.name}: {entry.value?.toLocaleString()} (
+              {((Number(entry.value) / totalDamage) * 100).toFixed(0)}%)
             </p>
           ))}
         </div>
@@ -208,7 +287,12 @@ function damageByTypeTimeSeries(data: ByTypeChartData[]) {
 
   return (
     <ByType.BarChart
-      style={{ width: '100%', maxWidth: '700px', maxHeight: '70vh', aspectRatio: 1.618 }}
+      style={{
+        width: '100%',
+        maxWidth: '700px',
+        maxHeight: '70vh',
+        aspectRatio: 1.618,
+      }}
       responsive
       data={data}
       margin={{
@@ -219,38 +303,81 @@ function damageByTypeTimeSeries(data: ByTypeChartData[]) {
       }}
     >
       <CartesianGrid />
-      <ByType.XAxis dataKey="turn" niceTicks="snap125" />
-      <ByType.YAxis width="auto" niceTicks="snap125" tickFormatter={(value) => Number(value).toLocaleString()} />
+      <ByType.XAxis
+        dataKey="turn"
+        niceTicks="snap125"
+      />
+      <ByType.YAxis
+        width="auto"
+        niceTicks="snap125"
+        tickFormatter={(value) => Number(value).toLocaleString()}
+      />
       <Tooltip
         labelFormatter={(label) => `Turn ${label}`}
         formatter={(a) => a?.toLocaleString()}
         content={CustomTooltip}
       />
       <Legend itemSorter={null} />
-      <ByType.Bar name="NA" maxBarSize={50} dataKey="normalAttackDamage" stackId="turn" fill={DamageTypeColors.NORMAL_ATTACK} />
-      <ByType.Bar name="CA" maxBarSize={50} dataKey="chargedAttackDamage" stackId="turn" fill={DamageTypeColors.CHARGED_ATTACK} />
-      <ByType.Bar name="Skill" maxBarSize={50} dataKey="skillDamage" stackId="turn" fill={DamageTypeColors.SKILL} />
-      <ByType.Bar name="Other" maxBarSize={50} dataKey="otherDamage" stackId="turn" fill={DamageTypeColors.OTHER} />
+      <ByType.Bar
+        name="NA"
+        maxBarSize={50}
+        dataKey="normalAttackDamage"
+        stackId="turn"
+        fill={DamageTypeColors.NORMAL_ATTACK}
+      />
+      <ByType.Bar
+        name="CA"
+        maxBarSize={50}
+        dataKey="chargedAttackDamage"
+        stackId="turn"
+        fill={DamageTypeColors.CHARGED_ATTACK}
+      />
+      <ByType.Bar
+        name="Skill"
+        maxBarSize={50}
+        dataKey="skillDamage"
+        stackId="turn"
+        fill={DamageTypeColors.SKILL}
+      />
+      <ByType.Bar
+        name="Other"
+        maxBarSize={50}
+        dataKey="otherDamage"
+        stackId="turn"
+        fill={DamageTypeColors.OTHER}
+      />
     </ByType.BarChart>
   );
 }
 
 function damageByElementTimeSeries(data: ByElementChartData[]) {
-  const labelColors = GameElementHelper.getAllElements().map(elt => {
-    return { [GameElementHelper.getPrettyElementName(elt)]: GameElementHelper.getElementColor(elt) };
-  }).reduce((acc, cur) => {
-    return { ...acc, ...cur };
-  }, {});
+  const labelColors = GameElementHelper.getAllElements()
+    .map((elt) => {
+      return {
+        [GameElementHelper.getPrettyElementName(elt)]:
+          GameElementHelper.getElementColor(elt),
+      };
+    })
+    .reduce((acc, cur) => {
+      return { ...acc, ...cur };
+    }, {});
 
-  const CustomTooltip = ({ active, payload, label, activeIndex }: TooltipContentProps) => {
+  const CustomTooltip = ({
+    active,
+    payload,
+    label,
+    activeIndex,
+  }: TooltipContentProps) => {
     if (active && payload && payload.length) {
       // Filter out items with a value of 0 (and optionally null/undefined)
-      const filteredPayload = payload.filter((item) => item.value !== 0 && item.value != null);
+      const filteredPayload = payload.filter(
+        (item) => item.value !== 0 && item.value != null,
+      );
 
       // If everything is filtered out, render nothing
       if (filteredPayload.length === 0) return null;
 
-      const totalDamage = data[Number(activeIndex)]["total"];
+      const totalDamage = data[Number(activeIndex)]['total'];
 
       return (
         <div
@@ -258,13 +385,20 @@ function damageByElementTimeSeries(data: ByElementChartData[]) {
           style={{
             backgroundColor: '#282828',
             padding: '10px',
-            border: "1px solid #c2c2c2"
-          }}>
+            border: '1px solid #c2c2c2',
+          }}
+        >
           <p className="label">Turn {label}</p>
           <p className="label">Total: {totalDamage.toLocaleString()}</p>
           {filteredPayload.map((entry, index) => (
-            <p key={`item-${index}`} style={{ color: labelColors[entry.name as keyof typeof labelColors] }}>
-              {entry.name}: {entry.value?.toLocaleString()} ({((Number(entry.value) / totalDamage) * 100).toFixed(0)}%)
+            <p
+              key={`item-${index}`}
+              style={{
+                color: labelColors[entry.name as keyof typeof labelColors],
+              }}
+            >
+              {entry.name}: {entry.value?.toLocaleString()} (
+              {((Number(entry.value) / totalDamage) * 100).toFixed(0)}%)
             </p>
           ))}
         </div>
@@ -276,7 +410,12 @@ function damageByElementTimeSeries(data: ByElementChartData[]) {
 
   return (
     <ByElement.BarChart
-      style={{ width: '100%', maxWidth: '700px', maxHeight: '70vh', aspectRatio: 1.618 }}
+      style={{
+        width: '100%',
+        maxWidth: '700px',
+        maxHeight: '70vh',
+        aspectRatio: 1.618,
+      }}
       responsive
       data={data}
       margin={{
@@ -287,8 +426,15 @@ function damageByElementTimeSeries(data: ByElementChartData[]) {
       }}
     >
       <CartesianGrid />
-      <ByElement.XAxis dataKey="turn" niceTicks="snap125" />
-      <ByElement.YAxis width="auto" niceTicks="snap125" tickFormatter={(value) => Number(value).toLocaleString()} />
+      <ByElement.XAxis
+        dataKey="turn"
+        niceTicks="snap125"
+      />
+      <ByElement.YAxis
+        width="auto"
+        niceTicks="snap125"
+        tickFormatter={(value) => Number(value).toLocaleString()}
+      />
       <Tooltip
         labelFormatter={(label) => `Turn ${label}`}
         formatter={(a) => a?.toLocaleString()}
@@ -355,12 +501,20 @@ function damageByElementTimeSeries(data: ByElementChartData[]) {
   );
 }
 
-function damageByCharacterTimeSeries(battleData: GodsightBattleData, data: ByCharacterChartData[], allCharacters: number[]) {
-  const CustomTooltip = ({ active, payload, label, activeIndex }: TooltipContentProps) => {
+function damageByCharacterTimeSeries(
+  battleData: GodsightBattleData,
+  data: ByCharacterChartData[],
+  allCharacters: number[],
+) {
+  const CustomTooltip = ({
+    active,
+    payload,
+    label,
+    activeIndex,
+  }: TooltipContentProps) => {
     if (active && payload && payload.length) {
-
       const numericIndex = Number(activeIndex);
-      const totalDamage = data[numericIndex]["totalDamage"];
+      const totalDamage = data[numericIndex]['totalDamage'];
 
       return (
         <div
@@ -368,17 +522,24 @@ function damageByCharacterTimeSeries(battleData: GodsightBattleData, data: ByCha
           style={{
             backgroundColor: '#282828',
             padding: '10px',
-            border: "1px solid #c2c2c2"
-          }}>
+            border: '1px solid #c2c2c2',
+          }}
+        >
           <p className="label">Turn {label}</p>
           <p className="label">Total: {totalDamage.toLocaleString()}</p>
-          {payload.map((entry, index) => (
-            entry.value !== 0 && entry.value != null ?
-              <p key={`item-${index}`} style={{ color: CharacterColors[index] }}>
-                {entry.name}: {entry.value?.toLocaleString()} ({((Number(entry.value) / totalDamage) * 100).toFixed(0)}%)
-              </p> :
+          {payload.map((entry, index) =>
+            entry.value !== 0 && entry.value != null ? (
+              <p
+                key={`item-${index}`}
+                style={{ color: CharacterColors[index] }}
+              >
+                {entry.name}: {entry.value?.toLocaleString()} (
+                {((Number(entry.value) / totalDamage) * 100).toFixed(0)}%)
+              </p>
+            ) : (
               <span key={`item-${index}`}></span>
-          ))}
+            ),
+          )}
         </div>
       );
     }
@@ -388,7 +549,12 @@ function damageByCharacterTimeSeries(battleData: GodsightBattleData, data: ByCha
 
   return (
     <ByCharacter.BarChart
-      style={{ width: '100%', maxWidth: '700px', maxHeight: '70vh', aspectRatio: 1.618 }}
+      style={{
+        width: '100%',
+        maxWidth: '700px',
+        maxHeight: '70vh',
+        aspectRatio: 1.618,
+      }}
       responsive
       data={data}
       margin={{
@@ -399,36 +565,42 @@ function damageByCharacterTimeSeries(battleData: GodsightBattleData, data: ByCha
       }}
     >
       <CartesianGrid />
-      <ByCharacter.XAxis dataKey="turn" niceTicks="snap125" />
-      <ByCharacter.YAxis width="auto" niceTicks="snap125" tickFormatter={(value) => Number(value).toLocaleString()} />
+      <ByCharacter.XAxis
+        dataKey="turn"
+        niceTicks="snap125"
+      />
+      <ByCharacter.YAxis
+        width="auto"
+        niceTicks="snap125"
+        tickFormatter={(value) => Number(value).toLocaleString()}
+      />
       <Tooltip
         labelFormatter={(label) => `Turn ${label}`}
         formatter={(a) => a?.toLocaleString()}
         content={CustomTooltip}
       />
       <Legend itemSorter={null} />
-      {allCharacters.map(charIdx => (
+      {allCharacters.map((charIdx) => (
         <ByCharacter.Bar
           key={charIdx}
-          name={battleData["party"]["members"][charIdx]["name"]}
+          name={battleData['party']['members'][charIdx]['name']}
           maxBarSize={50}
           dataKey={charIdx}
           stackId="turn"
           fill={CharacterColors[charIdx]}
         />
       ))}
-
     </ByCharacter.BarChart>
   );
 }
 
 function totalDamageByElementTimeSeries(battleData: GodsightBattleData) {
-  const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t));
+  const allTurns = Object.keys(battleData['turnData']).map((t) => Number(t));
 
-  const allTurnStats: TurnStats[] = allTurns.map(t => {
+  const allTurnStats: TurnStats[] = allTurns.map((t) => {
     return {
       turn: t,
-      stats: battleData["turnData"][t]["turnStats"],
+      stats: battleData['turnData'][t]['turnStats'],
     };
   });
 
@@ -438,12 +610,12 @@ function totalDamageByElementTimeSeries(battleData: GodsightBattleData) {
 }
 
 function totalDamageByTypeTimeSeries(battleData: GodsightBattleData) {
-  const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t));
+  const allTurns = Object.keys(battleData['turnData']).map((t) => Number(t));
 
-  const allTurnStats = allTurns.map(t => {
+  const allTurnStats = allTurns.map((t) => {
     return {
       turn: t,
-      stats: battleData["turnData"][t]["turnStats"],
+      stats: battleData['turnData'][t]['turnStats'],
     };
   });
 
@@ -453,28 +625,38 @@ function totalDamageByTypeTimeSeries(battleData: GodsightBattleData) {
 }
 
 function totalDamageByCharacterTimeSeries(battleData: GodsightBattleData) {
-  const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t));
-  const allCharacters = Array.from({ length: battleData["party"]["members"].length }, (_, idx) => idx);
+  const allTurns = Object.keys(battleData['turnData']).map((t) => Number(t));
+  const allCharacters = Array.from(
+    { length: battleData['party']['members'].length },
+    (_, idx) => idx,
+  );
 
-  const allTurnStats = allTurns.map(t => {
+  const allTurnStats = allTurns.map((t) => {
     return {
       turn: t,
-      stats: battleData["turnData"][t]["characterCurrentTurnStats"],
+      stats: battleData['turnData'][t]['characterCurrentTurnStats'],
     };
   });
 
-  const data: ByCharacterChartData[] = getDamageByCharacterData(allTurnStats, allCharacters);
+  const data: ByCharacterChartData[] = getDamageByCharacterData(
+    allTurnStats,
+    allCharacters,
+  );
 
   return damageByCharacterTimeSeries(battleData, data, allCharacters);
 }
 
-function totalCharacterDamageByTypeTimeSeries(battleData: GodsightBattleData, characterIndex: number) {
-  const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t));
+function totalCharacterDamageByTypeTimeSeries(
+  battleData: GodsightBattleData,
+  characterIndex: number,
+) {
+  const allTurns = Object.keys(battleData['turnData']).map((t) => Number(t));
 
-  const allTurnStats = allTurns.map(t => {
+  const allTurnStats = allTurns.map((t) => {
     return {
       turn: t,
-      stats: battleData["turnData"][t]["characterCurrentTurnStats"][characterIndex],
+      stats:
+        battleData['turnData'][t]['characterCurrentTurnStats'][characterIndex],
     };
   });
 
@@ -483,13 +665,17 @@ function totalCharacterDamageByTypeTimeSeries(battleData: GodsightBattleData, ch
   return damageByTypeTimeSeries(data);
 }
 
-function totalCharacterDamageByElementTimeSeries(battleData: GodsightBattleData, characterIndex: number) {
-  const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t));
+function totalCharacterDamageByElementTimeSeries(
+  battleData: GodsightBattleData,
+  characterIndex: number,
+) {
+  const allTurns = Object.keys(battleData['turnData']).map((t) => Number(t));
 
-  const allTurnStats = allTurns.map(t => {
+  const allTurnStats = allTurns.map((t) => {
     return {
       turn: t,
-      stats: battleData["turnData"][t]["characterCurrentTurnStats"][characterIndex],
+      stats:
+        battleData['turnData'][t]['characterCurrentTurnStats'][characterIndex],
     };
   });
 
@@ -498,13 +684,17 @@ function totalCharacterDamageByElementTimeSeries(battleData: GodsightBattleData,
   return damageByElementTimeSeries(data);
 }
 
-function omenContributingDamageByTypeTimeSeries(battleData: GodsightBattleData) {
-  const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t)).filter(t => t != 0);
+function omenContributingDamageByTypeTimeSeries(
+  battleData: GodsightBattleData,
+) {
+  const allTurns = Object.keys(battleData['turnData'])
+    .map((t) => Number(t))
+    .filter((t) => t != 0);
 
-  const allTurnStats = allTurns.map(t => {
+  const allTurnStats = allTurns.map((t) => {
     return {
       turn: t,
-      stats: battleData["turnData"][t]["beforeBossTurnStats"],
+      stats: battleData['turnData'][t]['beforeBossTurnStats'],
     };
   });
 
@@ -513,13 +703,17 @@ function omenContributingDamageByTypeTimeSeries(battleData: GodsightBattleData) 
   return damageByTypeTimeSeries(data);
 }
 
-function omenContributingDamageByElementTimeSeries(battleData: GodsightBattleData) {
-  const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t)).filter(t => t != 0);
+function omenContributingDamageByElementTimeSeries(
+  battleData: GodsightBattleData,
+) {
+  const allTurns = Object.keys(battleData['turnData'])
+    .map((t) => Number(t))
+    .filter((t) => t != 0);
 
-  const allTurnStats = allTurns.map(t => {
+  const allTurnStats = allTurns.map((t) => {
     return {
       turn: t,
-      stats: battleData["turnData"][t]["beforeBossTurnStats"],
+      stats: battleData['turnData'][t]['beforeBossTurnStats'],
     };
   });
 
@@ -528,14 +722,21 @@ function omenContributingDamageByElementTimeSeries(battleData: GodsightBattleDat
   return damageByElementTimeSeries(data);
 }
 
-function omenContributingDamageByCharacterTimeSeries(battleData: GodsightBattleData) {
-  const allTurns = Object.keys(battleData["turnData"]).map(t => Number(t)).filter(t => t != 0);
-  const allCharacters = Array.from({ length: battleData["party"]["members"].length }, (_, idx) => idx);
+function omenContributingDamageByCharacterTimeSeries(
+  battleData: GodsightBattleData,
+) {
+  const allTurns = Object.keys(battleData['turnData'])
+    .map((t) => Number(t))
+    .filter((t) => t != 0);
+  const allCharacters = Array.from(
+    { length: battleData['party']['members'].length },
+    (_, idx) => idx,
+  );
 
-  const allTurnStats = allTurns.map(t => {
+  const allTurnStats = allTurns.map((t) => {
     return {
       turn: t,
-      stats: battleData["turnData"][t]["characterBeforeBossTurnStats"],
+      stats: battleData['turnData'][t]['characterBeforeBossTurnStats'],
     };
   });
 
@@ -549,9 +750,9 @@ export function TimeSeries({
   view,
   characterIndex,
 }: {
-  battleData: GodsightBattleData,
-  view: StatsView,
-  characterIndex: number,
+  battleData: GodsightBattleData;
+  view: StatsView;
+  characterIndex: number;
 }) {
   let viewResult = <></>;
 
@@ -560,9 +761,15 @@ export function TimeSeries({
   switch (view) {
     case StatsView.CHARACTER:
       if (selectedBreakdown == Breakdown.BY_TYPE) {
-        viewResult = totalCharacterDamageByTypeTimeSeries(battleData, characterIndex);
+        viewResult = totalCharacterDamageByTypeTimeSeries(
+          battleData,
+          characterIndex,
+        );
       } else if (selectedBreakdown == Breakdown.BY_ELEMENT) {
-        viewResult = totalCharacterDamageByElementTimeSeries(battleData, characterIndex);
+        viewResult = totalCharacterDamageByElementTimeSeries(
+          battleData,
+          characterIndex,
+        );
       }
       break;
     case StatsView.DPT:
@@ -587,9 +794,7 @@ export function TimeSeries({
     case StatsView.CURRENT_TURN:
     case StatsView.PREV_TURN:
     default:
-      viewResult = (
-        <>Unsupported time series view.</>
-      );
+      viewResult = <>Unsupported time series view.</>;
       break;
   }
 
@@ -597,24 +802,41 @@ export function TimeSeries({
     <>
       <div className="breakdown-selector-container sub-selector">
         <div
-          className={selectedBreakdown == Breakdown.BY_TYPE ? "breakdown-option selected" : "breakdown-option"}
+          className={
+            selectedBreakdown == Breakdown.BY_TYPE
+              ? 'breakdown-option selected'
+              : 'breakdown-option'
+          }
           onClick={() => setSelectedBreakdown(Breakdown.BY_TYPE)}
-        >Type</div>
+        >
+          Type
+        </div>
         <div
-          className={selectedBreakdown == Breakdown.BY_ELEMENT ? "breakdown-option selected" : "breakdown-option"}
+          className={
+            selectedBreakdown == Breakdown.BY_ELEMENT
+              ? 'breakdown-option selected'
+              : 'breakdown-option'
+          }
           onClick={() => setSelectedBreakdown(Breakdown.BY_ELEMENT)}
-        >Element</div>
-        {view != StatsView.CHARACTER ?
+        >
+          Element
+        </div>
+        {view != StatsView.CHARACTER ? (
           <div
-            className={selectedBreakdown == Breakdown.BY_CHARACTER ? "breakdown-option selected" : "breakdown-option"}
+            className={
+              selectedBreakdown == Breakdown.BY_CHARACTER
+                ? 'breakdown-option selected'
+                : 'breakdown-option'
+            }
             onClick={() => setSelectedBreakdown(Breakdown.BY_CHARACTER)}
-          >Character</div> :
+          >
+            Character
+          </div>
+        ) : (
           <></>
-        }
+        )}
       </div>
-      <div className="battle-stats-deepdive">
-        {viewResult}
-      </div>
+      <div className="battle-stats-deepdive">{viewResult}</div>
     </>
   );
 }

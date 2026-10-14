@@ -1,15 +1,15 @@
-import { InstanceManager } from "../instance/instancemanager";
-import { DefaultSettings, GodsightSettings } from "./godsightsettings";
+import { InstanceManager } from '../instance/instancemanager';
+import { DefaultSettings, GodsightSettings } from './godsightsettings';
 
 export class SettingsManager {
-  private static settingsKey = "godsightSettings";
+  private static settingsKey = 'godsightSettings';
   private static instance: SettingsManager;
 
   private settingsCache: GodsightSettings = DefaultSettings;
 
   private lastSetPromise = new Promise<void>((resolve) => resolve(undefined));
 
-  private changeListeners: { id: number, callback: () => void }[] = [];
+  private changeListeners: { id: number; callback: () => void }[] = [];
   private listenerId = 0;
 
   constructor() {
@@ -25,41 +25,57 @@ export class SettingsManager {
   }
 
   private async initialize() {
-    const existingData =
-      await chrome.storage.local.get(SettingsManager.settingsKey) as { [SettingsManager.settingsKey]?: string };
+    const existingData = (await chrome.storage.local.get(
+      SettingsManager.settingsKey,
+    )) as { [SettingsManager.settingsKey]?: string };
 
     if (existingData[SettingsManager.settingsKey]) {
-      const settings = JSON.parse(existingData[SettingsManager.settingsKey]!) as GodsightSettings;
+      const settings = JSON.parse(
+        existingData[SettingsManager.settingsKey]!,
+      ) as GodsightSettings;
 
-      const settingsKeys = Object.keys(DefaultSettings) as unknown as (keyof GodsightSettings)[];
+      const settingsKeys = Object.keys(
+        DefaultSettings,
+      ) as unknown as (keyof GodsightSettings)[];
 
       // Initialize any new config values with their defaults.
       settingsKeys.forEach((key: keyof GodsightSettings) => {
         if (!(key in settings)) {
-          (settings as unknown as Record<string, unknown>)[key] = DefaultSettings[key];
+          (settings as unknown as Record<string, unknown>)[key] =
+            DefaultSettings[key];
         }
       });
 
       this.settingsCache = settings;
     } else {
-      await chrome.storage.local.set({
-        [SettingsManager.settingsKey]: JSON.stringify(this.settingsCache),
-        [InstanceManager.godsightInstanceKey]: {
-          "id": InstanceManager.instanceId,
-          "timestamp": Date.now(),
-        },
-      }).catch(reason => {
-        console.error("Unable to initialize godsight settings", reason);
-      });
+      await chrome.storage.local
+        .set({
+          [SettingsManager.settingsKey]: JSON.stringify(this.settingsCache),
+          [InstanceManager.godsightInstanceKey]: {
+            'id': InstanceManager.instanceId,
+            'timestamp': Date.now(),
+          },
+        })
+        .catch((reason) => {
+          console.error('Unable to initialize godsight settings', reason);
+        });
     }
 
     chrome.storage.local.onChanged.addListener((changes) => {
       if (InstanceManager.godsightInstanceKey in changes) {
-        const sourceId = (changes[InstanceManager.godsightInstanceKey]["newValue"] as { "id": string })["id"];
+        const sourceId = (
+          changes[InstanceManager.godsightInstanceKey]['newValue'] as {
+            'id': string;
+          }
+        )['id'];
         const sourceIsCurrentPanel = sourceId == InstanceManager.instanceId;
         if (!sourceIsCurrentPanel && SettingsManager.settingsKey in changes) {
-          console.log(`Received settings change from other panel instance ${sourceId}`);
-          const newSettingsString = changes[SettingsManager.settingsKey]!["newValue"]! as string;
+          console.log(
+            `Received settings change from other panel instance ${sourceId}`,
+          );
+          const newSettingsString = changes[SettingsManager.settingsKey]![
+            'newValue'
+          ]! as string;
           const newSettings = JSON.parse(newSettingsString) as GodsightSettings;
 
           this.settingsCache = newSettings;
@@ -69,7 +85,7 @@ export class SettingsManager {
           // console.log(`Ignoring update to underlying storage because it was initiated by current window ${this.instanceId}`);
         }
       } else {
-        console.error(`No instance ID set for change!`)
+        console.error(`No instance ID set for change!`);
       }
     });
 
@@ -77,14 +93,14 @@ export class SettingsManager {
   }
 
   private fireChangeListeners() {
-    this.changeListeners.forEach(l => l.callback());
+    this.changeListeners.forEach((l) => l.callback());
   }
 
   /**
- * Subscribes to changes to the settings cache.
- * @param callback The callback to execute when there are changes
- * @returns An ID that can be used to unlisten to changes.
- */
+   * Subscribes to changes to the settings cache.
+   * @param callback The callback to execute when there are changes
+   * @returns An ID that can be used to unlisten to changes.
+   */
   public onChange(callback: () => void): number {
     const listener = { id: this.listenerId++, callback };
     this.changeListeners.push(listener);
@@ -92,11 +108,11 @@ export class SettingsManager {
   }
 
   /**
- * Unsubscribes from listening to changes to the settings cache.
- * @param id the ID returned by a call to `onChange`
- */
+   * Unsubscribes from listening to changes to the settings cache.
+   * @param id the ID returned by a call to `onChange`
+   */
   public unsubscribe(id: number) {
-    this.changeListeners = this.changeListeners.filter(l => l.id != id);
+    this.changeListeners = this.changeListeners.filter((l) => l.id != id);
   }
 
   public getSettings(): GodsightSettings {
@@ -104,27 +120,34 @@ export class SettingsManager {
   }
 
   /**
- * Updates the underlying chrome extension storage with the current cached settings.
- * Guarantees that updates are sequential,
- * such that a later update cannot override an earlier one.
- * Also notifies listeners that the settings cache was updated.
- */
+   * Updates the underlying chrome extension storage with the current cached settings.
+   * Guarantees that updates are sequential,
+   * such that a later update cannot override an earlier one.
+   * Also notifies listeners that the settings cache was updated.
+   */
   private updateUnderlyingSettingsAndNotify() {
-    this.lastSetPromise = this.lastSetPromise.then(() => {
-      return chrome.storage.local.set({
-        [SettingsManager.settingsKey]: JSON.stringify(this.settingsCache),
-        [InstanceManager.godsightInstanceKey]: {
-          "id": InstanceManager.instanceId,
-          "timestamp": Date.now(),
-        },
+    this.lastSetPromise = this.lastSetPromise
+      .then(() => {
+        return chrome.storage.local.set({
+          [SettingsManager.settingsKey]: JSON.stringify(this.settingsCache),
+          [InstanceManager.godsightInstanceKey]: {
+            'id': InstanceManager.instanceId,
+            'timestamp': Date.now(),
+          },
+        });
+      })
+      .catch((reason) => {
+        console.error(
+          `Failed to update godsight settings with reason ${reason}`,
+        );
       });
-    }).catch((reason) => {
-      console.error(`Failed to update godsight settings with reason ${reason}`);
-    });
     this.fireChangeListeners();
   }
 
-  public updateSingleSetting<T extends keyof GodsightSettings>(setting: T, newValue: GodsightSettings[T]) {
+  public updateSingleSetting<T extends keyof GodsightSettings>(
+    setting: T,
+    newValue: GodsightSettings[T],
+  ) {
     this.settingsCache = {
       ...this.settingsCache,
     };

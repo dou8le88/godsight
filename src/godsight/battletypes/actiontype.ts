@@ -9,31 +9,31 @@ export enum ActionType {
   /**
    * Used a skill, either manually or by automatically meeting conditions. It may buff, debuff, do damage, etc.
    */
-  ACTIVATED_ABILITY = "activated_ability",
+  ACTIVATED_ABILITY = 'activated_ability',
   /**
    * Buff and debuff list changed.
    */
-  CONDITION_CHANGED = "status_changed",
-  CA_METER_CHANGED = "ca_meter_changed",
-  CALLED_SUMMON = "summon",
-  BOSS_SPECIAL_ATTACK = "boss_special",
-  NORMAL_ATTACK = "normal_attack",
-  SINGULAR_NORMAL_ATTACK = "singular_normal_attack",
-  CHARGED_ATTACK = "charged_attack",
-  CHAIN_BURST = "chain_burst",
+  CONDITION_CHANGED = 'status_changed',
+  CA_METER_CHANGED = 'ca_meter_changed',
+  CALLED_SUMMON = 'summon',
+  BOSS_SPECIAL_ATTACK = 'boss_special',
+  NORMAL_ATTACK = 'normal_attack',
+  SINGULAR_NORMAL_ATTACK = 'singular_normal_attack',
+  CHARGED_ATTACK = 'charged_attack',
+  CHAIN_BURST = 'chain_burst',
   /**
    * The player or the boss died.
    */
-  DEATH = "death",
-  DAMAGE_DEALT = "damage_dealt",
-  DAMAGE_DEALT_MULTIHIT = "damage_dealt_multihit",
-  HEAL = "heal",
-  REPLACED_CHARACTER = "replaced_character",
-  RESURRECTED = "resurrected",
-  RETREAT = "retreat",
-  STANDBY = "standby",
-  TURN_CHANGE = "turn_change",
-  USED_FULL_ELIXIR = "used_full_elixir",
-  WINDOW_EFFECT = "window_effect",
-  OMEN_CANCELLED = "omen_cancelled",
+  DEATH = 'death',
+  DAMAGE_DEALT = 'damage_dealt',
+  DAMAGE_DEALT_MULTIHIT = 'damage_dealt_multihit',
+  HEAL = 'heal',
+  REPLACED_CHARACTER = 'replaced_character',
+  RESURRECTED = 'resurrected',
+  RETREAT = 'retreat',
+  STANDBY = 'standby',
+  TURN_CHANGE = 'turn_change',
+  USED_FULL_ELIXIR = 'used_full_elixir',
+  WINDOW_EFFECT = 'window_effect',
+  OMEN_CANCELLED = 'omen_cancelled',
 }

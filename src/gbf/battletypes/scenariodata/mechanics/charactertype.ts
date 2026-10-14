@@ -1,4 +1,4 @@
 export enum CharacterType {
-  PLAYER = "player",
-  NPC = "npc",
+  PLAYER = 'player',
+  NPC = 'npc',
 }

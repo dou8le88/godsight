@@ -1,12 +1,12 @@
-import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
-import { BattleAction } from "./battleaction";
-import { StatsUpdate, StatsUpdateHelper } from "./stats";
-import { GodsightCondition } from "./condition";
-import { ActionType } from "./actiontype";
-import { JSX } from "react/jsx-runtime";
-import { BattleActionHelper } from "./battleactionhelper";
-import { assertNotNullOrUndefined } from "../../util/assert";
-import { GodsightSettings } from "../settings/godsightsettings";
+import { Actor } from '../../gbf/battletypes/scenariodata/mechanics/actor';
+import { BattleAction } from './battleaction';
+import { StatsUpdate, StatsUpdateHelper } from './stats';
+import { GodsightCondition } from './condition';
+import { ActionType } from './actiontype';
+import { JSX } from 'react/jsx-runtime';
+import { BattleActionHelper } from './battleactionhelper';
+import { assertNotNullOrUndefined } from '../../util/assert';
+import { GodsightSettings } from '../settings/godsightsettings';
 
 export class ConditionChangeAction extends BattleAction {
   public actionType: ActionType = ActionType.CONDITION_CHANGED;
@@ -25,34 +25,66 @@ export class ConditionChangeAction extends BattleAction {
   }
 
   getDescription(key: number, settings: GodsightSettings): JSX.Element {
-    const allStatuses = [
-      ...this.buffs,
-      ...this.debuffs,
-      ...this.unclassified
-    ];
+    const allStatuses = [...this.buffs, ...this.debuffs, ...this.unclassified];
 
-    const gainedStatuses = allStatuses.filter(s => !s.dispelled);
-    const dispelledStatuses = allStatuses.filter(s => s.dispelled);
+    const gainedStatuses = allStatuses.filter((s) => !s.dispelled);
+    const dispelledStatuses = allStatuses.filter((s) => s.dispelled);
 
-    const gainedStatusesJsx: React.ReactNode[] | null = gainedStatuses.map((status, idx) => (
-      <span className="status-wrapper" key={idx}>
-        <span className="status-text">{status.name}</span> {settings["enableImageLoading"] && status.icon && !BattleActionHelper.IconlessStatusEffects.includes(status.icon) ? <img className="status-icon" src={BattleActionHelper.getStatusUrl(status.icon)} /> :
-          <>
-            {status.icon && status.icon.includes("_") ?
-              <span className="status-text">
-                ({status.icon.split("_").at(-1)})
-              </span> : <></>
-            }
-          </>
-        }
-      </span>
-    )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, ", ", cur], null);
+    const gainedStatusesJsx: React.ReactNode[] | null = gainedStatuses
+      .map((status, idx) => (
+        <span
+          className="status-wrapper"
+          key={idx}
+        >
+          <span className="status-text">{status.name}</span>{' '}
+          {settings['enableImageLoading'] &&
+          status.icon &&
+          !BattleActionHelper.IconlessStatusEffects.includes(status.icon) ? (
+            <img
+              className="status-icon"
+              src={BattleActionHelper.getStatusUrl(status.icon)}
+            />
+          ) : (
+            <>
+              {status.icon && status.icon.includes('_') ? (
+                <span className="status-text">
+                  ({status.icon.split('_').at(-1)})
+                </span>
+              ) : (
+                <></>
+              )}
+            </>
+          )}
+        </span>
+      ))
+      .reduce(
+        (prev: React.ReactNode[] | null, cur) =>
+          prev === null ? [cur] : [...prev, ', ', cur],
+        null,
+      );
 
-    const dispelledStatusesJsx: React.ReactNode[] | null = dispelledStatuses.map((status, idx) => (
-      <span className="status-wrapper" key={idx}>
-        <span className="status-text">{status.name}</span> {settings["enableImageLoading"] ? <img className="status-icon" src={BattleActionHelper.getStatusUrl(status.icon)} /> : <></>}
-      </span>
-    )).reduce((prev: React.ReactNode[] | null, cur) => prev === null ? [cur] : [...prev, ", ", cur], null);
+    const dispelledStatusesJsx: React.ReactNode[] | null = dispelledStatuses
+      .map((status, idx) => (
+        <span
+          className="status-wrapper"
+          key={idx}
+        >
+          <span className="status-text">{status.name}</span>{' '}
+          {settings['enableImageLoading'] ? (
+            <img
+              className="status-icon"
+              src={BattleActionHelper.getStatusUrl(status.icon)}
+            />
+          ) : (
+            <></>
+          )}
+        </span>
+      ))
+      .reduce(
+        (prev: React.ReactNode[] | null, cur) =>
+          prev === null ? [cur] : [...prev, ', ', cur],
+        null,
+      );
 
     let finalGainedStatusJsx = <></>;
     if (gainedStatusesJsx) {
@@ -65,22 +97,23 @@ export class ConditionChangeAction extends BattleAction {
 
     let finalDispelledStatusesJsx = <></>;
     if (dispelledStatusesJsx) {
-      let connectorWord = "was";
+      let connectorWord = 'was';
       if (dispelledStatuses.length > 1) {
-        connectorWord = "were";
+        connectorWord = 'were';
       }
       finalDispelledStatusesJsx = (
         <>
-          {this.targetName}&apos;s {dispelledStatusesJsx} {connectorWord} dispelled!
+          {this.targetName}&apos;s {dispelledStatusesJsx} {connectorWord}{' '}
+          dispelled!
         </>
       );
     }
 
     let finalMissedStatusesJsx = <></>;
     if (this.missCount > 0) {
-      let effectWord = "effects";
+      let effectWord = 'effects';
       if (this.missCount == 1) {
-        effectWord = "effect"
+        effectWord = 'effect';
       }
       finalMissedStatusesJsx = (
         <>
@@ -90,7 +123,12 @@ export class ConditionChangeAction extends BattleAction {
     }
 
     return (
-      <div key={key} className="action-description">{finalDispelledStatusesJsx} {finalGainedStatusJsx} {finalMissedStatusesJsx}
+      <div
+        key={key}
+        className="action-description"
+      >
+        {finalDispelledStatusesJsx} {finalGainedStatusJsx}{' '}
+        {finalMissedStatusesJsx}
       </div>
     );
   }
@@ -98,9 +136,10 @@ export class ConditionChangeAction extends BattleAction {
   getStats(): StatsUpdate {
     const update = StatsUpdateHelper.getEmptyStatsUpdate();
     if (this.target == Actor.BOSS) {
-      update["generalStats"]["debuffsInflictedCount"] += this.debuffs.length;
+      update['generalStats']['debuffsInflictedCount'] += this.debuffs.length;
       if (this.beforeBossTurn) {
-        update["beforeBossTurnStats"]["debuffsInflictedCount"] += this.debuffs.length;
+        update['beforeBossTurnStats']['debuffsInflictedCount'] +=
+          this.debuffs.length;
       }
       return update;
     } else {
@@ -108,17 +147,19 @@ export class ConditionChangeAction extends BattleAction {
     }
   }
 
-  static override fromJSON(json: Record<string, unknown>): ConditionChangeAction | undefined {
-    const actionType = json["actionType"];
+  static override fromJSON(
+    json: Record<string, unknown>,
+  ): ConditionChangeAction | undefined {
+    const actionType = json['actionType'];
     if (actionType == ActionType.CONDITION_CHANGED) {
       return new ConditionChangeAction(
-        assertNotNullOrUndefined(json["target"] as Actor),
-        assertNotNullOrUndefined(json["targetName"] as string),
-        assertNotNullOrUndefined(json["missCount"] as number),
-        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
-        assertNotNullOrUndefined(json["buffs"] as GodsightCondition[]),
-        assertNotNullOrUndefined(json["debuffs"] as GodsightCondition[]),
-        assertNotNullOrUndefined(json["unclassified"] as GodsightCondition[]),
+        assertNotNullOrUndefined(json['target'] as Actor),
+        assertNotNullOrUndefined(json['targetName'] as string),
+        assertNotNullOrUndefined(json['missCount'] as number),
+        assertNotNullOrUndefined(json['beforeBossTurn'] as boolean),
+        assertNotNullOrUndefined(json['buffs'] as GodsightCondition[]),
+        assertNotNullOrUndefined(json['debuffs'] as GodsightCondition[]),
+        assertNotNullOrUndefined(json['unclassified'] as GodsightCondition[]),
       );
     } else {
       console.error(`ConditionChangeAction.fromJSON called on ${json}`);

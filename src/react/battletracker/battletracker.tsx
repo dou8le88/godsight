@@ -1,22 +1,27 @@
-import { GodsightBattleData } from "../../godsight/battletypes/battledata";
-import { useState } from "react";
-import { TurnTracker } from "./turntracker";
-import { BattleStats } from "./battlestats";
-import { useGodsightSettings } from "../../godsight/settings/usegodsightsettings";
-import { BattleViewTab, DefaultBattleView } from "../../godsight/settings/godsightsettings";
-import { SettingsManager } from "../../godsight/settings/settingsmanager";
+import { GodsightBattleData } from '../../godsight/battletypes/battledata';
+import { useState } from 'react';
+import { TurnTracker } from './turntracker';
+import { BattleStats } from './battlestats';
+import { useGodsightSettings } from '../../godsight/settings/usegodsightsettings';
+import {
+  BattleViewTab,
+  DefaultBattleView,
+} from '../../godsight/settings/godsightsettings';
+import { SettingsManager } from '../../godsight/settings/settingsmanager';
 
-
-
-export default function BattleTracker({ battleData }: { battleData: GodsightBattleData | undefined }) {
+export default function BattleTracker({
+  battleData,
+}: {
+  battleData: GodsightBattleData | undefined;
+}) {
   const settings = useGodsightSettings();
   const settingsManager = SettingsManager.getInstance();
 
   let initialTab = BattleViewTab.STATS;
-  switch (settings["defaultBattleView"]) {
+  switch (settings['defaultBattleView']) {
     case DefaultBattleView.LAST_SELECTION:
-      if (settings["lastSelectedBattleView"] !== undefined) {
-        initialTab = settings["lastSelectedBattleView"];
+      if (settings['lastSelectedBattleView'] !== undefined) {
+        initialTab = settings['lastSelectedBattleView'];
       }
       break;
     case DefaultBattleView.STATS:
@@ -29,50 +34,94 @@ export default function BattleTracker({ battleData }: { battleData: GodsightBatt
 
   const [selectedTab, setSelectedTab] = useState(initialTab);
 
+  const isMissingAbilities: boolean =
+    battleData !== undefined
+      ? battleData['abilityTurns'].length <
+        (battleData['abilityTurns'].at(-1) || 0) + 1
+      : false;
+  const isMissingFinishedTurns: boolean =
+    battleData !== undefined
+      ? battleData['turnsWithSkippedOrRecordedAttackActions'].length <
+        battleData['currentTurn'] - 1
+      : false;
 
-  const isMissingAbilities: boolean = battleData !== undefined ?
-    battleData["abilityTurns"].length < ((battleData["abilityTurns"].at(-1) || 0) + 1) : false;
-  const isMissingFinishedTurns: boolean = battleData !== undefined ?
-    battleData["turnsWithSkippedOrRecordedAttackActions"].length <
-    (battleData["currentTurn"] - 1) : false;
-
-  const bossName = battleData !== undefined ? battleData["boss"][0]["name"] : "Unknown";
+  const bossName =
+    battleData !== undefined ? battleData['boss'][0]['name'] : 'Unknown';
   const crossTabHeader = (
     <div className="battle-metadata">
-      Vs. {bossName}&nbsp;
-      {(isMissingAbilities || isMissingFinishedTurns) ?
-        <span className="missing-info-warning" title="Missing battle data detected. The stats and actions shown may not match the ingame battle log.">
+      Vs. {bossName}{' '}
+      {isMissingAbilities || isMissingFinishedTurns ? (
+        <span
+          className="missing-info-warning"
+          title="Missing battle data detected. The stats and actions shown may not match the ingame battle log."
+        >
           ⚠
-        </span> :
+        </span>
+      ) : (
         <></>
-      }
+      )}
     </div>
-  )
+  );
 
   return (
     <div className="battle-info">
       <div className="tab-header">
         <div className="end-spacer"></div>
-        <div className={selectedTab == BattleViewTab.STATS ? "tab selected" : "tab"} onClick={() => {
-          setSelectedTab(BattleViewTab.STATS);
-          if (settings["defaultBattleView"] == DefaultBattleView.LAST_SELECTION) {
-            settingsManager.updateSingleSetting("lastSelectedBattleView", BattleViewTab.STATS);
+        <div
+          className={
+            selectedTab == BattleViewTab.STATS ? 'tab selected' : 'tab'
           }
-        }}>Stats</div>
+          onClick={() => {
+            setSelectedTab(BattleViewTab.STATS);
+            if (
+              settings['defaultBattleView'] == DefaultBattleView.LAST_SELECTION
+            ) {
+              settingsManager.updateSingleSetting(
+                'lastSelectedBattleView',
+                BattleViewTab.STATS,
+              );
+            }
+          }}
+        >
+          Stats
+        </div>
         <div className="middle-spacer"></div>
-        <div className={selectedTab == BattleViewTab.TURN_ACTIONS ? "tab selected" : "tab"} onClick={() => {
-          setSelectedTab(BattleViewTab.TURN_ACTIONS);
-          if (settings["defaultBattleView"] == DefaultBattleView.LAST_SELECTION) {
-            settingsManager.updateSingleSetting("lastSelectedBattleView", BattleViewTab.TURN_ACTIONS);
+        <div
+          className={
+            selectedTab == BattleViewTab.TURN_ACTIONS ? 'tab selected' : 'tab'
           }
-        }}>Turn Actions</div>
+          onClick={() => {
+            setSelectedTab(BattleViewTab.TURN_ACTIONS);
+            if (
+              settings['defaultBattleView'] == DefaultBattleView.LAST_SELECTION
+            ) {
+              settingsManager.updateSingleSetting(
+                'lastSelectedBattleView',
+                BattleViewTab.TURN_ACTIONS,
+              );
+            }
+          }}
+        >
+          Turn Actions
+        </div>
         <div className="end-spacer"></div>
       </div>
-      <div className="tab-container" style={{ "display": selectedTab == BattleViewTab.STATS ? "flex" : "none" }}>
+      <div
+        className="tab-container"
+        style={{
+          'display': selectedTab == BattleViewTab.STATS ? 'flex' : 'none',
+        }}
+      >
         {crossTabHeader}
         <BattleStats battleData={battleData} />
       </div>
-      <div className="tab-container" style={{ "display": selectedTab == BattleViewTab.TURN_ACTIONS ? "flex" : "none" }}>
+      <div
+        className="tab-container"
+        style={{
+          'display':
+            selectedTab == BattleViewTab.TURN_ACTIONS ? 'flex' : 'none',
+        }}
+      >
         {crossTabHeader}
         <TurnTracker battleData={battleData} />
       </div>

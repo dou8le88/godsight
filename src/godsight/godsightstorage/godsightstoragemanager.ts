@@ -1,17 +1,19 @@
-import { BattleActionHelper } from "../battletypes/battleactionhelper";
-import { GodsightBattleData } from "../battletypes/battledata";
-import { InstanceManager } from "../instance/instancemanager";
-import { DefaultGodsightStorage, GodsightStorage } from "./battlestorage";
+import { BattleActionHelper } from '../battletypes/battleactionhelper';
+import { GodsightBattleData } from '../battletypes/battledata';
+import { InstanceManager } from '../instance/instancemanager';
+import { DefaultGodsightStorage, GodsightStorage } from './battlestorage';
 
 export class GodsightStorageManager {
-  private static godsightStorageKey = "godsightStorage";
+  private static godsightStorageKey = 'godsightStorage';
   private static instance: GodsightStorageManager;
 
-  private storageCache: GodsightStorage = structuredClone(DefaultGodsightStorage) as unknown as GodsightStorage;
+  private storageCache: GodsightStorage = structuredClone(
+    DefaultGodsightStorage,
+  ) as unknown as GodsightStorage;
 
   private lastSetPromise = new Promise<void>((resolve) => resolve(undefined));
 
-  private changeListeners: { id: number, callback: () => void }[] = [];
+  private changeListeners: { id: number; callback: () => void }[] = [];
   private listenerId = 0;
 
   constructor() {
@@ -27,48 +29,68 @@ export class GodsightStorageManager {
   }
 
   private rehydrateTurns(data: GodsightBattleData): void {
-    const turns = Object.keys(data["turnData"]);
+    const turns = Object.keys(data['turnData']);
 
-    turns.forEach(turn => {
-      data["turnData"][turn]["turnActions"] = BattleActionHelper.getRehydratedActions(
-        data["turnData"][turn]["turnActions"]
-      );
+    turns.forEach((turn) => {
+      data['turnData'][turn]['turnActions'] =
+        BattleActionHelper.getRehydratedActions(
+          data['turnData'][turn]['turnActions'],
+        );
     });
   }
 
   private async initialize() {
-    const existingData = await chrome.storage.local.get(GodsightStorageManager.godsightStorageKey) as { [GodsightStorageManager.godsightStorageKey]?: string };
+    const existingData = (await chrome.storage.local.get(
+      GodsightStorageManager.godsightStorageKey,
+    )) as { [GodsightStorageManager.godsightStorageKey]?: string };
 
     if (existingData[GodsightStorageManager.godsightStorageKey]) {
-      const storage = JSON.parse(existingData[GodsightStorageManager.godsightStorageKey]!) as GodsightStorage;
+      const storage = JSON.parse(
+        existingData[GodsightStorageManager.godsightStorageKey]!,
+      ) as GodsightStorage;
 
-      storage["battles"].forEach(battle => {
+      storage['battles'].forEach((battle) => {
         this.rehydrateTurns(battle);
       });
 
       this.storageCache = storage;
     } else {
-      await chrome.storage.local.set({
-        [GodsightStorageManager.godsightStorageKey]: JSON.stringify(this.storageCache),
-        [InstanceManager.godsightInstanceKey]: {
-          "id": InstanceManager.instanceId,
-          "timestamp": Date.now(),
-        },
-      }).catch(reason => {
-        console.error("Unable to initialize godsight storage", reason);
-      });
+      await chrome.storage.local
+        .set({
+          [GodsightStorageManager.godsightStorageKey]: JSON.stringify(
+            this.storageCache,
+          ),
+          [InstanceManager.godsightInstanceKey]: {
+            'id': InstanceManager.instanceId,
+            'timestamp': Date.now(),
+          },
+        })
+        .catch((reason) => {
+          console.error('Unable to initialize godsight storage', reason);
+        });
     }
 
     chrome.storage.local.onChanged.addListener((changes) => {
       if (InstanceManager.godsightInstanceKey in changes) {
-        const sourceId = (changes[InstanceManager.godsightInstanceKey]["newValue"] as { "id": string })["id"];
+        const sourceId = (
+          changes[InstanceManager.godsightInstanceKey]['newValue'] as {
+            'id': string;
+          }
+        )['id'];
         const sourceIsCurrentPanel = sourceId == InstanceManager.instanceId;
-        if (!sourceIsCurrentPanel && GodsightStorageManager.godsightStorageKey in changes) {
-          console.log(`Received storage change from other panel instance ${sourceId}`);
-          const newStorageString = changes[GodsightStorageManager.godsightStorageKey]!["newValue"]! as string;
+        if (
+          !sourceIsCurrentPanel &&
+          GodsightStorageManager.godsightStorageKey in changes
+        ) {
+          console.log(
+            `Received storage change from other panel instance ${sourceId}`,
+          );
+          const newStorageString = changes[
+            GodsightStorageManager.godsightStorageKey
+          ]!['newValue']! as string;
           const storage = JSON.parse(newStorageString) as GodsightStorage;
 
-          storage["battles"].forEach(battle => {
+          storage['battles'].forEach((battle) => {
             this.rehydrateTurns(battle);
           });
 
@@ -79,7 +101,7 @@ export class GodsightStorageManager {
           // console.log(`Ignoring update to underlying storage because it was initiated by current window ${this.instanceId}`);
         }
       } else {
-        console.error(`No instance ID set for change!`)
+        console.error(`No instance ID set for change!`);
       }
     });
 
@@ -93,22 +115,28 @@ export class GodsightStorageManager {
    * Also notifies listeners that the storage cache was updated.
    */
   private updateUnderlyingStorageAndNotify() {
-    this.lastSetPromise = this.lastSetPromise.then(() => {
-      return chrome.storage.local.set({
-        [GodsightStorageManager.godsightStorageKey]: JSON.stringify(this.storageCache),
-        [InstanceManager.godsightInstanceKey]: {
-          "id": InstanceManager.instanceId,
-          "timestamp": Date.now(),
-        },
+    this.lastSetPromise = this.lastSetPromise
+      .then(() => {
+        return chrome.storage.local.set({
+          [GodsightStorageManager.godsightStorageKey]: JSON.stringify(
+            this.storageCache,
+          ),
+          [InstanceManager.godsightInstanceKey]: {
+            'id': InstanceManager.instanceId,
+            'timestamp': Date.now(),
+          },
+        });
+      })
+      .catch((reason) => {
+        console.error(
+          `Failed to update godsight storage with reason ${reason}`,
+        );
       });
-    }).catch((reason) => {
-      console.error(`Failed to update godsight storage with reason ${reason}`);
-    });
     this.fireChangeListeners();
   }
 
   private fireChangeListeners() {
-    this.changeListeners.forEach(l => l.callback());
+    this.changeListeners.forEach((l) => l.callback());
   }
 
   /**
@@ -127,36 +155,49 @@ export class GodsightStorageManager {
    * @param id the ID returned by a call to `onChange`
    */
   public unsubscribe(id: number) {
-    this.changeListeners = this.changeListeners.filter(l => l.id != id);
+    this.changeListeners = this.changeListeners.filter((l) => l.id != id);
   }
 
   public getStorage(): GodsightStorage {
     return this.storageCache;
   }
 
-  public setBattleData(battleId: number, battleData: GodsightBattleData, maxRememberedBattles: number) {
+  public setBattleData(
+    battleId: number,
+    battleData: GodsightBattleData,
+    maxRememberedBattles: number,
+  ) {
     this.storageCache = {
-      "battles": [...this.storageCache["battles"]],
+      'battles': [...this.storageCache['battles']],
     };
-    this.storageCache["battles"] = this.storageCache["battles"].filter(b => b["raidId"] != battleId);
-    this.storageCache["battles"].unshift(battleData);
-    if (this.storageCache["battles"].length > maxRememberedBattles) {
-      this.storageCache["battles"] = this.storageCache["battles"].slice(0, maxRememberedBattles);
+    this.storageCache['battles'] = this.storageCache['battles'].filter(
+      (b) => b['raidId'] != battleId,
+    );
+    this.storageCache['battles'].unshift(battleData);
+    if (this.storageCache['battles'].length > maxRememberedBattles) {
+      this.storageCache['battles'] = this.storageCache['battles'].slice(
+        0,
+        maxRememberedBattles,
+      );
     }
     this.updateUnderlyingStorageAndNotify();
   }
 
   public deleteBattle(battleId: string | number) {
     this.storageCache = {
-      "battles": [...this.storageCache["battles"]],
+      'battles': [...this.storageCache['battles']],
     };
-    const battlesWithoutBattleId = this.storageCache["battles"].filter(b => b["raidId"] != battleId);
-    this.storageCache["battles"] = battlesWithoutBattleId;
+    const battlesWithoutBattleId = this.storageCache['battles'].filter(
+      (b) => b['raidId'] != battleId,
+    );
+    this.storageCache['battles'] = battlesWithoutBattleId;
     this.updateUnderlyingStorageAndNotify();
   }
 
   public deleteAllBattles() {
-    this.storageCache = structuredClone(DefaultGodsightStorage) as unknown as GodsightStorage;
+    this.storageCache = structuredClone(
+      DefaultGodsightStorage,
+    ) as unknown as GodsightStorage;
     this.updateUnderlyingStorageAndNotify();
   }
 }

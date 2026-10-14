@@ -4,6 +4,6 @@
  * panel is opened in separate devtools windows.
  */
 export class InstanceManager {
-  static godsightInstanceKey = "godsightInstanceId";
+  static godsightInstanceKey = 'godsightInstanceId';
   static instanceId = crypto.randomUUID();
 }

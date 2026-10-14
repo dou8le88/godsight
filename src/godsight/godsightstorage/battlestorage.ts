@@ -1,9 +1,9 @@
-import { GodsightBattleData } from "../battletypes/battledata";
+import { GodsightBattleData } from '../battletypes/battledata';
 
 export interface GodsightStorage {
-  "battles": GodsightBattleData[]
+  'battles': GodsightBattleData[];
 }
 
 export const DefaultGodsightStorage = {
-  "battles": [],
+  'battles': [],
 } as const;

@@ -1,4 +1,4 @@
 export interface GodsightSummonData {
-  "name": string,
-  "description": string,
+  'name': string;
+  'description': string;
 }

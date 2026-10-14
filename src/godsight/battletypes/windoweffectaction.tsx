@@ -1,9 +1,9 @@
-import { JSX } from "react/jsx-runtime";
-import { ActionType } from "./actiontype";
-import { BattleAction } from "./battleaction";
-import { StatsUpdate, StatsUpdateHelper } from "./stats";
-import { assertNotNullOrUndefined } from "../../util/assert";
-import { GodsightSettings } from "../settings/godsightsettings";
+import { JSX } from 'react/jsx-runtime';
+import { ActionType } from './actiontype';
+import { BattleAction } from './battleaction';
+import { StatsUpdate, StatsUpdateHelper } from './stats';
+import { assertNotNullOrUndefined } from '../../util/assert';
+import { GodsightSettings } from '../settings/godsightsettings';
 
 export class WindowEffectAction extends BattleAction {
   public actionType: ActionType = ActionType.WINDOW_EFFECT;
@@ -19,7 +19,11 @@ export class WindowEffectAction extends BattleAction {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getDescription(key: number, settings: GodsightSettings): JSX.Element {
     return (
-      <div key={key} className="action-description">The window effect {this.name} was activated!
+      <div
+        key={key}
+        className="action-description"
+      >
+        The window effect {this.name} was activated!
       </div>
     );
   }
@@ -28,12 +32,14 @@ export class WindowEffectAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
-  static fromJSON(json: Record<string, unknown>): WindowEffectAction | undefined {
-    const actionType = json["actionType"];
+  static fromJSON(
+    json: Record<string, unknown>,
+  ): WindowEffectAction | undefined {
+    const actionType = json['actionType'];
     if (actionType == ActionType.WINDOW_EFFECT) {
       return new WindowEffectAction(
-        assertNotNullOrUndefined(json["name"] as string),
-        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
+        assertNotNullOrUndefined(json['name'] as string),
+        assertNotNullOrUndefined(json['beforeBossTurn'] as boolean),
       );
     } else {
       console.error(`WindowEffectAction.fromJSON called on ${json}`);

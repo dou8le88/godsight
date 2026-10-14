@@ -1,12 +1,12 @@
 export enum PrettyElementName {
-  NULL_PLAIN = "Plain",
-  FIRE = "Fire",
-  WATER = "Water",
-  EARTH = "Earth",
-  WIND = "Wind",
-  LIGHT = "Light",
-  DARK = "Dark",
-  DESTRUCTION = "Destruction",
+  NULL_PLAIN = 'Plain',
+  FIRE = 'Fire',
+  WATER = 'Water',
+  EARTH = 'Earth',
+  WIND = 'Wind',
+  LIGHT = 'Light',
+  DARK = 'Dark',
+  DESTRUCTION = 'Destruction',
 }
 
 /**
@@ -25,17 +25,20 @@ export const GameElement = {
   DESTRUCTION: 98,
 } as const;
 
-export type NumericGameElement = typeof GameElement[keyof typeof GameElement];
+export type NumericGameElement = (typeof GameElement)[keyof typeof GameElement];
 
-export type StringGameElement = `${NumericGameElement}` | ""
+export type StringGameElement = `${NumericGameElement}` | '';
 
 const elementValues = Object.values(GameElement);
 const elementNames = Object.values(PrettyElementName);
 
-const numericElementToName: Record<number, string> = elementValues.reduce((obj, key, index) => {
-  obj[key] = elementNames[index];
-  return obj;
-}, {} as Record<number, string>);
+const numericElementToName: Record<number, string> = elementValues.reduce(
+  (obj, key, index) => {
+    obj[key] = elementNames[index];
+    return obj;
+  },
+  {} as Record<number, string>,
+);
 
 const elementColorMapping: Record<NumericGameElement, string> = {
   [GameElement.NULL_PLAIN]: '#FFFFFF',
@@ -54,7 +57,7 @@ export class GameElementHelper {
   }
 
   static getNumericGameElement(elt: GameElementValue): NumericGameElement {
-    if (elt === "" || elt === undefined || elt === null) {
+    if (elt === '' || elt === undefined || elt === null) {
       return GameElement.NULL_PLAIN;
     } else {
       return Number(elt) as NumericGameElement;

@@ -1,12 +1,12 @@
-import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
-import { ActionType } from "./actiontype";
-import { BattleAction } from "./battleaction";
-import { DamageInstance } from "./damageinstance";
-import { StatsUpdate, StatsUpdateHelper } from "./stats";
-import { JSX } from "react/jsx-runtime";
-import { BattleActionHelper } from "./battleactionhelper";
-import { assertNotNullOrUndefined } from "../../util/assert";
-import { GodsightSettings } from "../settings/godsightsettings";
+import { Actor } from '../../gbf/battletypes/scenariodata/mechanics/actor';
+import { ActionType } from './actiontype';
+import { BattleAction } from './battleaction';
+import { DamageInstance } from './damageinstance';
+import { StatsUpdate, StatsUpdateHelper } from './stats';
+import { JSX } from 'react/jsx-runtime';
+import { BattleActionHelper } from './battleactionhelper';
+import { assertNotNullOrUndefined } from '../../util/assert';
+import { GodsightSettings } from '../settings/godsightsettings';
 
 export class DamageAction extends BattleAction {
   public actionType: ActionType = ActionType.DAMAGE_DEALT;
@@ -25,14 +25,10 @@ export class DamageAction extends BattleAction {
   getDescription(key: number, settings: GodsightSettings): JSX.Element {
     const damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(
       this.instances,
-      settings["damageDisplay"],
+      settings['damageDisplay'],
     );
 
-    return (
-      <span key={key}>
-        {damageInstanceJsx}
-      </span>
-    );
+    return <span key={key}>{damageInstanceJsx}</span>;
   }
 
   getStats(): StatsUpdate {
@@ -42,18 +38,21 @@ export class DamageAction extends BattleAction {
         // DamageActions are MOSTLY skill damage but Fated Chains can muck with that a bit.
         // Currently we have no way to associate a source character with this damage and
         // have to do it in AbilityAction, along with differentiating Fated Chains.
-        this.instances.forEach(instance => {
+        this.instances.forEach((instance) => {
           if (this.endOfTurnDamage) {
-            update["generalStats"]["dotDamage"] += instance["value"];
+            update['generalStats']['dotDamage'] += instance['value'];
           } else {
-            update["generalStats"]["skillDamage"][instance["element"]] += instance["value"];
+            update['generalStats']['skillDamage'][instance['element']] +=
+              instance['value'];
             if (this.beforeBossTurn) {
-              update["beforeBossTurnStats"]["skillDamage"][instance["element"]] += instance["value"];
+              update['beforeBossTurnStats']['skillDamage'][
+                instance['element']
+              ] += instance['value'];
             }
-            if (instance["value"] > 0) {
-              update["generalStats"]["hitCount"] += 1;
+            if (instance['value'] > 0) {
+              update['generalStats']['hitCount'] += 1;
               if (this.beforeBossTurn) {
-                update["beforeBossTurnStats"]["hitCount"] += 1;
+                update['beforeBossTurnStats']['hitCount'] += 1;
               }
             }
           }
@@ -61,12 +60,18 @@ export class DamageAction extends BattleAction {
         break;
       case Actor.PLAYER:
         // Boss "skill damage" can occur in certain raids like Macutanmacar or Esoteric Mastery Trial.
-        this.instances.forEach(instance => {
-          update["generalStats"]["damageTaken"][instance["element"]] += instance["value"];
-          update["characterStats"][instance["receiverIndex"]]["damageTaken"][instance["element"]] += instance["value"];
+        this.instances.forEach((instance) => {
+          update['generalStats']['damageTaken'][instance['element']] +=
+            instance['value'];
+          update['characterStats'][instance['receiverIndex']]['damageTaken'][
+            instance['element']
+          ] += instance['value'];
           if (this.beforeBossTurn) {
-            update["beforeBossTurnStats"]["damageTaken"][instance["element"]] += instance["value"];
-            update["characterBeforeBossTurnStats"][instance["receiverIndex"]]["damageTaken"][instance["element"]] += instance["value"];
+            update['beforeBossTurnStats']['damageTaken'][instance['element']] +=
+              instance['value'];
+            update['characterBeforeBossTurnStats'][instance['receiverIndex']][
+              'damageTaken'
+            ][instance['element']] += instance['value'];
           }
         });
         break;
@@ -76,15 +81,17 @@ export class DamageAction extends BattleAction {
     return update;
   }
 
-  static override fromJSON(json: Record<string, unknown>): DamageAction | undefined {
-    const actionType = json["actionType"];
+  static override fromJSON(
+    json: Record<string, unknown>,
+  ): DamageAction | undefined {
+    const actionType = json['actionType'];
     if (actionType == ActionType.DAMAGE_DEALT) {
       return new DamageAction(
-        assertNotNullOrUndefined(json["target"] as Actor),
-        assertNotNullOrUndefined(json["partySize"] as number),
-        assertNotNullOrUndefined(json["endOfTurnDamage"] as boolean),
-        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
-        assertNotNullOrUndefined(json["instances"] as DamageInstance[]),
+        assertNotNullOrUndefined(json['target'] as Actor),
+        assertNotNullOrUndefined(json['partySize'] as number),
+        assertNotNullOrUndefined(json['endOfTurnDamage'] as boolean),
+        assertNotNullOrUndefined(json['beforeBossTurn'] as boolean),
+        assertNotNullOrUndefined(json['instances'] as DamageInstance[]),
       );
     } else {
       console.error(`DamageAction.fromJSON called on ${json}`);

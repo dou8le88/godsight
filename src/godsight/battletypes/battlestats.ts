@@ -1,6 +1,6 @@
-import { Stats } from "./stats"
+import { Stats } from './stats';
 
 export interface BattleStats {
-  "generalStats": Stats,
-  "characterStats": Record<string | number, Stats>,
+  'generalStats': Stats;
+  'characterStats': Record<string | number, Stats>;
 }

@@ -1,55 +1,85 @@
-import { useState } from "react";
-import { GodsightBattleData } from "../../godsight/battletypes/battledata";
-import { Stats, StatsUpdateHelper } from "../../godsight/battletypes/stats";
-import { StatsShower } from "./statsshower";
-import { StatsView } from "./statsview";
-import { DeepDivePieGraph } from "./deepdivepiegraph";
-import { Breakdown } from "./breakdown";
-import { TimeSeries } from "./timeseries";
-import { ByCharacterPieGraph } from "./bycharacterpiegraph";
+import { useState } from 'react';
+import { GodsightBattleData } from '../../godsight/battletypes/battledata';
+import { Stats, StatsUpdateHelper } from '../../godsight/battletypes/stats';
+import { StatsShower } from './statsshower';
+import { StatsView } from './statsview';
+import { DeepDivePieGraph } from './deepdivepiegraph';
+import { Breakdown } from './breakdown';
+import { TimeSeries } from './timeseries';
+import { ByCharacterPieGraph } from './bycharacterpiegraph';
 
-export function BattleStats({ battleData }: { battleData: GodsightBattleData | undefined }) {
+export function BattleStats({
+  battleData,
+}: {
+  battleData: GodsightBattleData | undefined;
+}) {
   if (!battleData) {
     return <div>No battle data available yet, or battle data was deleted.</div>;
   } else {
-    const frontliners = battleData["party"]["frontline"];
+    const frontliners = battleData['party']['frontline'];
 
-    const backliners = battleData["party"]["backline"];
+    const backliners = battleData['party']['backline'];
 
-    const turnSet = new Set(Object.keys(battleData["turnData"]).map(t => Number(t)));
-    turnSet.add(battleData["currentTurn"]);
+    const turnSet = new Set(
+      Object.keys(battleData['turnData']).map((t) => Number(t)),
+    );
+    turnSet.add(battleData['currentTurn']);
     const turns = [...turnSet.values()].sort((a, b) => a - b);
 
-    const currentTurnIndex = turns.findIndex(t => t == battleData["currentTurn"]);
+    const currentTurnIndex = turns.findIndex(
+      (t) => t == battleData['currentTurn'],
+    );
     const lastTurnIndex = currentTurnIndex != -1 ? currentTurnIndex - 1 : -1;
 
-    const totalStats = battleData["battleStats"]["generalStats"];
+    const totalStats = battleData['battleStats']['generalStats'];
 
-    const currentTurn = battleData["turnData"][battleData["currentTurn"]];
-    const previousTurn = battleData["turnData"][turns[lastTurnIndex]];
+    const currentTurn = battleData['turnData'][battleData['currentTurn']];
+    const previousTurn = battleData['turnData'][turns[lastTurnIndex]];
 
-    const currentTurnStats = currentTurn ? currentTurn["turnStats"] : StatsUpdateHelper.getEmptyStats();
-    const previousTurnStats = previousTurn ? previousTurn["turnStats"] : StatsUpdateHelper.getEmptyStats();
-    const previousTurnBeforeBossActionStats = previousTurn ? previousTurn["beforeBossTurnStats"] : StatsUpdateHelper.getEmptyStats();
+    const currentTurnStats = currentTurn
+      ? currentTurn['turnStats']
+      : StatsUpdateHelper.getEmptyStats();
+    const previousTurnStats = previousTurn
+      ? previousTurn['turnStats']
+      : StatsUpdateHelper.getEmptyStats();
+    const previousTurnBeforeBossActionStats = previousTurn
+      ? previousTurn['beforeBossTurnStats']
+      : StatsUpdateHelper.getEmptyStats();
 
-    const allCharacterStats = battleData["battleStats"]["characterStats"];
-    const currentTurnCharacterStats = currentTurn ? currentTurn["characterCurrentTurnStats"] : {};
-    const previousTurnCharacterStats = previousTurn ? previousTurn["characterCurrentTurnStats"] : {};
-    const previousTurnCharacterBeforeBossStats = previousTurn ? previousTurn["characterBeforeBossTurnStats"] : {};
+    const allCharacterStats = battleData['battleStats']['characterStats'];
+    const currentTurnCharacterStats = currentTurn
+      ? currentTurn['characterCurrentTurnStats']
+      : {};
+    const previousTurnCharacterStats = previousTurn
+      ? previousTurn['characterCurrentTurnStats']
+      : {};
+    const previousTurnCharacterBeforeBossStats = previousTurn
+      ? previousTurn['characterBeforeBossTurnStats']
+      : {};
 
-    const previousTurnNumber = lastTurnIndex != -1 ? `${turns[lastTurnIndex]}` : "?";
+    const previousTurnNumber =
+      lastTurnIndex != -1 ? `${turns[lastTurnIndex]}` : '?';
 
-    const turnsWithData = turns.filter(t => t != 0).length;
+    const turnsWithData = turns.filter((t) => t != 0).length;
     const damagePerTurnStats = structuredClone(totalStats);
 
-    StatsUpdateHelper.divideStatsBy(damagePerTurnStats, turnsWithData || 1, ["normalAttacks", "tripleAttacks"]);
+    StatsUpdateHelper.divideStatsBy(damagePerTurnStats, turnsWithData || 1, [
+      'normalAttacks',
+      'tripleAttacks',
+    ]);
 
     const characterDamagePerTurnStats = structuredClone(allCharacterStats);
     Object.keys(characterDamagePerTurnStats).forEach((charIdx) => {
-      StatsUpdateHelper.divideStatsBy(characterDamagePerTurnStats[charIdx], turnsWithData || 1, ["normalAttacks", "tripleAttacks"]);
+      StatsUpdateHelper.divideStatsBy(
+        characterDamagePerTurnStats[charIdx],
+        turnsWithData || 1,
+        ['normalAttacks', 'tripleAttacks'],
+      );
     });
 
-    const [selectedStatsView, setSelectedStatsView] = useState<StatsView | undefined>(undefined);
+    const [selectedStatsView, setSelectedStatsView] = useState<
+      StatsView | undefined
+    >(undefined);
     const [selectedCharacter, setSelectedCharacter] = useState<number>(0);
 
     const views = {
@@ -57,92 +87,144 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
       [StatsView.DPT]: damagePerTurnStats,
       [StatsView.CURRENT_TURN]: currentTurnStats,
       [StatsView.PREV_TURN]: previousTurnStats,
-      [StatsView.PREV_TURN_BEFORE_BOSS_ACTION]: previousTurnBeforeBossActionStats,
-      [StatsView.CHARACTER]: battleData["battleStats"]["characterStats"],
+      [StatsView.PREV_TURN_BEFORE_BOSS_ACTION]:
+        previousTurnBeforeBossActionStats,
+      [StatsView.CHARACTER]: battleData['battleStats']['characterStats'],
     };
-    const byCharacterViews: Record<StatsView, Record<string | number, Stats>> = {
+    const byCharacterViews: Record<
+      StatsView,
+      Record<string | number, Stats>
+    > = {
       [StatsView.TOTAL]: allCharacterStats,
       [StatsView.DPT]: characterDamagePerTurnStats,
       [StatsView.CURRENT_TURN]: currentTurnCharacterStats,
       [StatsView.PREV_TURN]: previousTurnCharacterStats,
-      [StatsView.PREV_TURN_BEFORE_BOSS_ACTION]: previousTurnCharacterBeforeBossStats,
+      [StatsView.PREV_TURN_BEFORE_BOSS_ACTION]:
+        previousTurnCharacterBeforeBossStats,
       [StatsView.CHARACTER]: {},
-    }
+    };
     const viewNames = {
-      [StatsView.TOTAL]: "Party Damage Breakdown",
-      [StatsView.DPT]: "Average DPT Breakdown",
-      [StatsView.CURRENT_TURN]: "Current Turn Breakdown",
-      [StatsView.PREV_TURN]: "Previous Turn Breakdown",
-      [StatsView.PREV_TURN_BEFORE_BOSS_ACTION]: "Previous Turn Omen-Contributing Breakdown",
-      [StatsView.CHARACTER]: `${battleData["party"]["members"][selectedCharacter]["name"]}'s Damage Breakdown`,
+      [StatsView.TOTAL]: 'Party Damage Breakdown',
+      [StatsView.DPT]: 'Average DPT Breakdown',
+      [StatsView.CURRENT_TURN]: 'Current Turn Breakdown',
+      [StatsView.PREV_TURN]: 'Previous Turn Breakdown',
+      [StatsView.PREV_TURN_BEFORE_BOSS_ACTION]:
+        'Previous Turn Omen-Contributing Breakdown',
+      [StatsView.CHARACTER]: `${battleData['party']['members'][selectedCharacter]['name']}'s Damage Breakdown`,
     };
 
-    const [selectedBreakdown, setSelectedBreakdown] = useState(Breakdown.BY_TYPE);
+    const [selectedBreakdown, setSelectedBreakdown] = useState(
+      Breakdown.BY_TYPE,
+    );
 
     return (
       <>
-        {selectedStatsView !== undefined ?
+        {selectedStatsView !== undefined ? (
           <>
             <div className="breakdown-name">{viewNames[selectedStatsView]}</div>
             <div className="breakdown-header">
-              <div className="exit-breakdown-button" onClick={() => setSelectedStatsView(undefined)}>X</div>
+              <div
+                className="exit-breakdown-button"
+                onClick={() => setSelectedStatsView(undefined)}
+              >
+                X
+              </div>
             </div>
             <div className="breakdown-selector-container">
               <div
-                className={selectedBreakdown == Breakdown.BY_TYPE ? "breakdown-option selected" : "breakdown-option"}
+                className={
+                  selectedBreakdown == Breakdown.BY_TYPE
+                    ? 'breakdown-option selected'
+                    : 'breakdown-option'
+                }
                 onClick={() => setSelectedBreakdown(Breakdown.BY_TYPE)}
-              >Type</div>
+              >
+                Type
+              </div>
               <div
-                className={selectedBreakdown == Breakdown.BY_ELEMENT ? "breakdown-option selected" : "breakdown-option"}
+                className={
+                  selectedBreakdown == Breakdown.BY_ELEMENT
+                    ? 'breakdown-option selected'
+                    : 'breakdown-option'
+                }
                 onClick={() => setSelectedBreakdown(Breakdown.BY_ELEMENT)}
-              >Element</div>
-              {selectedStatsView != StatsView.CHARACTER ?
+              >
+                Element
+              </div>
+              {selectedStatsView != StatsView.CHARACTER ? (
                 <div
-                  className={selectedBreakdown == Breakdown.BY_CHARACTER ? "breakdown-option selected" : "breakdown-option"}
+                  className={
+                    selectedBreakdown == Breakdown.BY_CHARACTER
+                      ? 'breakdown-option selected'
+                      : 'breakdown-option'
+                  }
                   onClick={() => setSelectedBreakdown(Breakdown.BY_CHARACTER)}
-                >Character</div> :
+                >
+                  Character
+                </div>
+              ) : (
                 <></>
-              }
-              {selectedStatsView != StatsView.CURRENT_TURN && selectedStatsView != StatsView.PREV_TURN && selectedStatsView != StatsView.DPT ?
+              )}
+              {selectedStatsView != StatsView.CURRENT_TURN &&
+              selectedStatsView != StatsView.PREV_TURN &&
+              selectedStatsView != StatsView.DPT ? (
                 <div
-                  className={selectedBreakdown == Breakdown.BY_TURN ? "breakdown-option selected" : "breakdown-option"}
+                  className={
+                    selectedBreakdown == Breakdown.BY_TURN
+                      ? 'breakdown-option selected'
+                      : 'breakdown-option'
+                  }
                   onClick={() => setSelectedBreakdown(Breakdown.BY_TURN)}
-                >Turn</div> : <></>
-              }
+                >
+                  Turn
+                </div>
+              ) : (
+                <></>
+              )}
             </div>
-            {selectedBreakdown == Breakdown.BY_TYPE || selectedBreakdown == Breakdown.BY_ELEMENT ?
+            {selectedBreakdown == Breakdown.BY_TYPE ||
+            selectedBreakdown == Breakdown.BY_ELEMENT ? (
               <DeepDivePieGraph
-                stats={selectedStatsView == StatsView.CHARACTER ?
-                  views[selectedStatsView][selectedCharacter] : views[selectedStatsView]}
+                stats={
+                  selectedStatsView == StatsView.CHARACTER
+                    ? views[selectedStatsView][selectedCharacter]
+                    : views[selectedStatsView]
+                }
                 breakdown={selectedBreakdown}
-              /> : selectedBreakdown == Breakdown.BY_TURN ?
-                <TimeSeries
-                  battleData={battleData}
-                  view={selectedStatsView}
-                  characterIndex={selectedCharacter}
-                /> : selectedBreakdown == Breakdown.BY_CHARACTER ?
-                  <ByCharacterPieGraph
-                    battleData={battleData}
-                    characterStats={byCharacterViews[selectedStatsView]}
-                  /> :
-                  <></>
-            }
-          </> :
+              />
+            ) : selectedBreakdown == Breakdown.BY_TURN ? (
+              <TimeSeries
+                battleData={battleData}
+                view={selectedStatsView}
+                characterIndex={selectedCharacter}
+              />
+            ) : selectedBreakdown == Breakdown.BY_CHARACTER ? (
+              <ByCharacterPieGraph
+                battleData={battleData}
+                characterStats={byCharacterViews[selectedStatsView]}
+              />
+            ) : (
+              <></>
+            )}
+          </>
+        ) : (
           <>
-            <div className="battle-stats-instructions">Click any tile for visualizations.</div>
+            <div className="battle-stats-instructions">
+              Click any tile for visualizations.
+            </div>
             <div className="battle-stats-summary-container">
               <StatsShower
                 stats={totalStats}
-                header={"Totals"}
+                header={'Totals'}
                 searchable
                 onClick={() => setSelectedStatsView(StatsView.TOTAL)}
               />
               <StatsShower
                 stats={damagePerTurnStats}
-                header={"Average DPT"}
+                header={'Average DPT'}
                 searchable
                 onClick={() => {
-                  setSelectedStatsView(StatsView.DPT)
+                  setSelectedStatsView(StatsView.DPT);
                   if (selectedBreakdown == Breakdown.BY_TURN) {
                     setSelectedBreakdown(Breakdown.BY_TYPE);
                   }
@@ -169,7 +251,7 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
               />
               <StatsShower
                 stats={currentTurnStats}
-                header={`Current Turn (${battleData["currentTurn"]})`}
+                header={`Current Turn (${battleData['currentTurn']})`}
                 searchable
                 onClick={() => {
                   setSelectedStatsView(StatsView.CURRENT_TURN);
@@ -184,10 +266,10 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
               {frontliners.map((charIdx) => (
                 <StatsShower
                   key={charIdx}
-                  stats={battleData["battleStats"]["characterStats"][charIdx]}
-                  header={battleData["party"]["members"][charIdx]["name"]}
+                  stats={battleData['battleStats']['characterStats'][charIdx]}
+                  header={battleData['party']['members'][charIdx]['name']}
                   searchable
-                  character={battleData["party"]["members"][charIdx]}
+                  character={battleData['party']['members'][charIdx]}
                   onClick={() => {
                     setSelectedStatsView(StatsView.CHARACTER);
                     setSelectedCharacter(charIdx);
@@ -202,10 +284,10 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
               {backliners.map((charIdx) => (
                 <StatsShower
                   key={charIdx}
-                  stats={battleData["battleStats"]["characterStats"][charIdx]}
-                  header={battleData["party"]["members"][charIdx]["name"]}
+                  stats={battleData['battleStats']['characterStats'][charIdx]}
+                  header={battleData['party']['members'][charIdx]['name']}
                   searchable
-                  character={battleData["party"]["members"][charIdx]}
+                  character={battleData['party']['members'][charIdx]}
                   backline={true}
                   onClick={() => {
                     setSelectedStatsView(StatsView.CHARACTER);
@@ -218,7 +300,7 @@ export function BattleStats({ battleData }: { battleData: GodsightBattleData | u
               ))}
             </div>
           </>
-        }
+        )}
       </>
     );
   }

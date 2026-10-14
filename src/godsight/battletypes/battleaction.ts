@@ -1,7 +1,7 @@
-import { JSX } from "react/jsx-runtime";
-import { ActionType } from "./actiontype";
-import { StatsUpdate } from "./stats";
-import { GodsightSettings } from "../settings/godsightsettings";
+import { JSX } from 'react/jsx-runtime';
+import { ActionType } from './actiontype';
+import { StatsUpdate } from './stats';
+import { GodsightSettings } from '../settings/godsightsettings';
 
 export abstract class BattleAction {
   abstract actionType: ActionType;
@@ -14,6 +14,8 @@ export abstract class BattleAction {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   static fromJSON(json: Record<string, unknown>): BattleAction | undefined {
-    throw new Error("BattleAction subclasses must implement a `static fromJSON` method!");
+    throw new Error(
+      'BattleAction subclasses must implement a `static fromJSON` method!',
+    );
   }
 }

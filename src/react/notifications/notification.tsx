@@ -1,24 +1,27 @@
-import { ViewTransition } from "react";
+import { ViewTransition } from 'react';
 
 export interface GodsightNotification {
-  key: string,
-  type: NotificationType,
-  message: string,
-  expiration: number,
+  key: string;
+  type: NotificationType;
+  message: string;
+  expiration: number;
   action?: {
-    buttonText: string,
-    onClick: () => void,
-  }
+    buttonText: string;
+    onClick: () => void;
+  };
 }
 
 export enum NotificationType {
-  INFO = "info",
-  ERROR = "error",
+  INFO = 'info',
+  ERROR = 'error',
 }
 
-export function Notification({ notification, onExit }: {
-  notification: GodsightNotification,
-  onExit: () => void,
+export function Notification({
+  notification,
+  onExit,
+}: {
+  notification: GodsightNotification;
+  onExit: () => void;
 }) {
   return (
     <ViewTransition>
@@ -27,13 +30,20 @@ export function Notification({ notification, onExit }: {
           {notification.message}
         </div>
         <div className="notification-buttons">
-          {notification.action ?
-            <div className="notification-action" onClick={() => notification.action?.onClick()}>
+          {notification.action ? (
+            <div
+              className="notification-action"
+              onClick={() => notification.action?.onClick()}
+            >
               {notification.action.buttonText}
-            </div> :
+            </div>
+          ) : (
             <></>
-          }
-          <div className="notification-close" onClick={() => onExit()}>
+          )}
+          <div
+            className="notification-close"
+            onClick={() => onExit()}
+          >
             X
           </div>
         </div>

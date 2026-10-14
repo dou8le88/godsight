@@ -1,10 +1,13 @@
-import { JSX } from "react/jsx-runtime";
-import { Actor } from "../../gbf/battletypes/scenariodata/mechanics/actor";
-import { ActionType } from "./actiontype";
-import { BattleAction } from "./battleaction";
-import { StatsUpdate, StatsUpdateHelper } from "./stats";
-import { assertNotNullOrUndefined, assertNotUndefined } from "../../util/assert";
-import { GodsightSettings } from "../settings/godsightsettings";
+import { JSX } from 'react/jsx-runtime';
+import { Actor } from '../../gbf/battletypes/scenariodata/mechanics/actor';
+import { ActionType } from './actiontype';
+import { BattleAction } from './battleaction';
+import { StatsUpdate, StatsUpdateHelper } from './stats';
+import {
+  assertNotNullOrUndefined,
+  assertNotUndefined,
+} from '../../util/assert';
+import { GodsightSettings } from '../settings/godsightsettings';
 
 export class DeathAction extends BattleAction {
   public actionType: ActionType = ActionType.DEATH;
@@ -22,7 +25,11 @@ export class DeathAction extends BattleAction {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getDescription(key: number, settings: GodsightSettings): JSX.Element {
     return (
-      <div key={key} className="action-description">{this.targetName} was knocked out!
+      <div
+        key={key}
+        className="action-description"
+      >
+        {this.targetName} was knocked out!
       </div>
     );
   }
@@ -31,14 +38,16 @@ export class DeathAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
-  static override fromJSON(json: Record<string, unknown>): DeathAction | undefined {
-    const actionType = json["actionType"];
+  static override fromJSON(
+    json: Record<string, unknown>,
+  ): DeathAction | undefined {
+    const actionType = json['actionType'];
     if (actionType == ActionType.DEATH) {
       return new DeathAction(
-        assertNotNullOrUndefined(json["target"] as Actor),
-        assertNotNullOrUndefined(json["targetName"] as string),
-        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
-        assertNotUndefined(json["index"] as number | null),
+        assertNotNullOrUndefined(json['target'] as Actor),
+        assertNotNullOrUndefined(json['targetName'] as string),
+        assertNotNullOrUndefined(json['beforeBossTurn'] as boolean),
+        assertNotUndefined(json['index'] as number | null),
       );
     } else {
       console.error(`DeathAction.fromJSON called on ${json}`);

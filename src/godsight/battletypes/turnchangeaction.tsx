@@ -1,9 +1,9 @@
-import { JSX } from "react/jsx-runtime";
-import { ActionType } from "./actiontype";
-import { BattleAction } from "./battleaction";
-import { StatsUpdate, StatsUpdateHelper } from "./stats";
-import { assertNotNullOrUndefined } from "../../util/assert";
-import { GodsightSettings } from "../settings/godsightsettings";
+import { JSX } from 'react/jsx-runtime';
+import { ActionType } from './actiontype';
+import { BattleAction } from './battleaction';
+import { StatsUpdate, StatsUpdateHelper } from './stats';
+import { assertNotNullOrUndefined } from '../../util/assert';
+import { GodsightSettings } from '../settings/godsightsettings';
 
 export class TurnChangeAction extends BattleAction {
   public actionType: ActionType = ActionType.TURN_CHANGE;
@@ -24,18 +24,24 @@ export class TurnChangeAction extends BattleAction {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getDescription(key: number, settings: GodsightSettings): JSX.Element {
     return (
-      <div key={key} className="action-description">The turn counter advanced by {this.newTurn - this.currentTurn}!
+      <div
+        key={key}
+        className="action-description"
+      >
+        The turn counter advanced by {this.newTurn - this.currentTurn}!
       </div>
     );
   }
 
-  static override fromJSON(json: Record<string, unknown>): TurnChangeAction | undefined {
-    const actionType = json["actionType"];
+  static override fromJSON(
+    json: Record<string, unknown>,
+  ): TurnChangeAction | undefined {
+    const actionType = json['actionType'];
     if (actionType == ActionType.TURN_CHANGE) {
       return new TurnChangeAction(
-        assertNotNullOrUndefined(json["currentTurn"] as number),
-        assertNotNullOrUndefined(json["newTurn"] as number),
-        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
+        assertNotNullOrUndefined(json['currentTurn'] as number),
+        assertNotNullOrUndefined(json['newTurn'] as number),
+        assertNotNullOrUndefined(json['beforeBossTurn'] as boolean),
       );
     } else {
       console.error(`TurnChangeAction.fromJSON called on ${json}`);

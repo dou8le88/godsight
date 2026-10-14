@@ -1,4 +1,4 @@
-import { GodsightStatusType } from "./statustype";
+import { GodsightStatusType } from './statustype';
 
 export class GodsightCondition {
   constructor(
@@ -6,6 +6,5 @@ export class GodsightCondition {
     public type: GodsightStatusType,
     public icon: string,
     public dispelled: boolean,
-  ) {
-  }
+  ) {}
 }

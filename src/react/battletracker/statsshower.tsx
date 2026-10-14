@@ -1,96 +1,145 @@
-import { GodsightPartyMemberData } from "../../godsight/battletypes/partyformationdata";
-import { Stats } from "../../godsight/battletypes/stats";
-import { useGodsightSettings } from "../../godsight/settings/usegodsightsettings";
-import Avatar from "./avatar";
+import { GodsightPartyMemberData } from '../../godsight/battletypes/partyformationdata';
+import { Stats } from '../../godsight/battletypes/stats';
+import { useGodsightSettings } from '../../godsight/settings/usegodsightsettings';
+import Avatar from './avatar';
 
-export function StatsShower({ stats, header, character, backline, searchable, onClick }: {
-  stats: Stats,
-  header?: string,
-  character?: GodsightPartyMemberData,
-  backline?: boolean,
-  searchable?: boolean,
-  onClick?: () => void,
+export function StatsShower({
+  stats,
+  header,
+  character,
+  backline,
+  searchable,
+  onClick,
+}: {
+  stats: Stats;
+  header?: string;
+  character?: GodsightPartyMemberData;
+  backline?: boolean;
+  searchable?: boolean;
+  onClick?: () => void;
 }) {
-  const totalNormalAttackDamage = Math.round(Object.keys(stats["normalAttackDamage"]).map(element => {
-    return stats["normalAttackDamage"][element];
-  }).reduce((prev, cur) => prev + cur, 0));
+  const totalNormalAttackDamage = Math.round(
+    Object.keys(stats['normalAttackDamage'])
+      .map((element) => {
+        return stats['normalAttackDamage'][element];
+      })
+      .reduce((prev, cur) => prev + cur, 0),
+  );
 
-  const totalChargedAttackDamage = Math.round(Object.keys(stats["chargedAttackDamage"]).map(element => {
-    return stats["chargedAttackDamage"][element];
-  }).reduce((prev, cur) => prev + cur, 0));
+  const totalChargedAttackDamage = Math.round(
+    Object.keys(stats['chargedAttackDamage'])
+      .map((element) => {
+        return stats['chargedAttackDamage'][element];
+      })
+      .reduce((prev, cur) => prev + cur, 0),
+  );
 
-  const totalSkillDamage = Math.round(Object.keys(stats["skillDamage"]).map(element => {
-    return stats["skillDamage"][element];
-  }).reduce((prev, cur) => prev + cur, 0));
+  const totalSkillDamage = Math.round(
+    Object.keys(stats['skillDamage'])
+      .map((element) => {
+        return stats['skillDamage'][element];
+      })
+      .reduce((prev, cur) => prev + cur, 0),
+  );
 
-  const totalOtherDamage = Math.round(Object.keys(stats["otherDamage"]).map(element => {
-    return stats["otherDamage"][element];
-  }).reduce((prev, cur) => prev + cur, 0));
+  const totalOtherDamage = Math.round(
+    Object.keys(stats['otherDamage'])
+      .map((element) => {
+        return stats['otherDamage'][element];
+      })
+      .reduce((prev, cur) => prev + cur, 0),
+  );
 
-  const hitCount = Math.round(stats["hitCount"]);
-  const debuffs = Math.round(stats["debuffsInflictedCount"]);
+  const hitCount = Math.round(stats['hitCount']);
+  const debuffs = Math.round(stats['debuffsInflictedCount']);
 
-  const dotDamage = Math.round(stats["dotDamage"]);
+  const dotDamage = Math.round(stats['dotDamage']);
 
-  const totalDamage = totalNormalAttackDamage +
+  const totalDamage =
+    totalNormalAttackDamage +
     totalChargedAttackDamage +
     totalSkillDamage +
     totalOtherDamage +
     dotDamage;
 
-  let className = "stats-list";
+  let className = 'stats-list';
   if (character) {
-    className += " for-character";
+    className += ' for-character';
   }
   if (onClick) {
-    className += " clickable";
+    className += ' clickable';
   }
   if (searchable) {
-    className += " searchable";
+    className += ' searchable';
   }
 
   const tripleAttackRate =
-    stats["normalAttacks"] > 0 ? `${((stats["tripleAttacks"] / stats["normalAttacks"]) * 100).toFixed(0)}` : "--";
+    stats['normalAttacks'] > 0
+      ? `${((stats['tripleAttacks'] / stats['normalAttacks']) * 100).toFixed(0)}`
+      : '--';
 
   const settings = useGodsightSettings();
 
   return (
-    <div className={className} {...(onClick && { "onClick": () => onClick() })}>
-      {character && settings["enableImageLoading"] ?
+    <div
+      className={className}
+      {...(onClick && { 'onClick': () => onClick() })}
+    >
+      {character && settings['enableImageLoading'] ? (
         <>
-          <Avatar key={character["characterId"]} characterData={character} backline={backline} />
-        </> :
+          <Avatar
+            key={character['characterId']}
+            characterData={character}
+            backline={backline}
+          />
+        </>
+      ) : (
         <></>
-      }
+      )}
       <div className="stats-container">
-        {header ?
-          <div className="stats-header">
-            {header}
-          </div> :
-          <></>
-        }
+        {header ? <div className="stats-header">{header}</div> : <></>}
         <div className="stat-line">
-          <span className="stat-label">Total damage:</span> <span className="stat-value">{totalDamage.toLocaleString()}</span></div>
-        <div className="stat-line">
-          <span className="stat-label">NA damage:</span> <span className="stat-value">{totalNormalAttackDamage.toLocaleString()}</span>
+          <span className="stat-label">Total damage:</span>{' '}
+          <span className="stat-value">{totalDamage.toLocaleString()}</span>
         </div>
         <div className="stat-line">
-          <span className="stat-label">Skill damage:</span> <span className="stat-value">{totalSkillDamage.toLocaleString()}</span>
+          <span className="stat-label">NA damage:</span>{' '}
+          <span className="stat-value">
+            {totalNormalAttackDamage.toLocaleString()}
+          </span>
         </div>
         <div className="stat-line">
-          <span className="stat-label">CA damage:</span> <span className="stat-value">{totalChargedAttackDamage.toLocaleString()}</span>
+          <span className="stat-label">Skill damage:</span>{' '}
+          <span className="stat-value">
+            {totalSkillDamage.toLocaleString()}
+          </span>
         </div>
         <div className="stat-line">
-          <span className="stat-label">Other damage:</span> <span className="stat-value">{totalOtherDamage.toLocaleString()}</span>
+          <span className="stat-label">CA damage:</span>{' '}
+          <span className="stat-value">
+            {totalChargedAttackDamage.toLocaleString()}
+          </span>
         </div>
         <div className="stat-line">
-          <span className="stat-label">Hit count:</span> <span className="stat-value">{hitCount}</span>
+          <span className="stat-label">Other damage:</span>{' '}
+          <span className="stat-value">
+            {totalOtherDamage.toLocaleString()}
+          </span>
         </div>
         <div className="stat-line">
-          <span className="stat-label">Debuffs:</span> <span className="stat-value">{debuffs}</span>
+          <span className="stat-label">Hit count:</span>{' '}
+          <span className="stat-value">{hitCount}</span>
         </div>
         <div className="stat-line">
-          <span className="stat-label">TAs:</span> <span className="stat-value">{stats["tripleAttacks"]}/{stats["normalAttacks"]} ({tripleAttackRate}%)</span>
+          <span className="stat-label">Debuffs:</span>{' '}
+          <span className="stat-value">{debuffs}</span>
+        </div>
+        <div className="stat-line">
+          <span className="stat-label">TAs:</span>{' '}
+          <span className="stat-value">
+            {stats['tripleAttacks']}/{stats['normalAttacks']} (
+            {tripleAttackRate}%)
+          </span>
         </div>
       </div>
     </div>

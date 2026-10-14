@@ -1,9 +1,9 @@
-import { JSX } from "react/jsx-runtime";
-import { ActionType } from "./actiontype";
-import { BattleAction } from "./battleaction";
-import { StatsUpdate, StatsUpdateHelper } from "./stats";
-import { assertNotNullOrUndefined } from "../../util/assert";
-import { GodsightSettings } from "../settings/godsightsettings";
+import { JSX } from 'react/jsx-runtime';
+import { ActionType } from './actiontype';
+import { BattleAction } from './battleaction';
+import { StatsUpdate, StatsUpdateHelper } from './stats';
+import { assertNotNullOrUndefined } from '../../util/assert';
+import { GodsightSettings } from '../settings/godsightsettings';
 
 export class ResurrectedAction extends BattleAction {
   public actionType: ActionType = ActionType.RESURRECTED;
@@ -24,18 +24,24 @@ export class ResurrectedAction extends BattleAction {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getDescription(key: number, settings: GodsightSettings): JSX.Element {
     return (
-      <div key={key} className="action-description">{this.resurrectedCharacterName} was revived by {this.resurrectionCause}!
+      <div
+        key={key}
+        className="action-description"
+      >
+        {this.resurrectedCharacterName} was revived by {this.resurrectionCause}!
       </div>
     );
   }
 
-  static override fromJSON(json: Record<string, unknown>): ResurrectedAction | undefined {
-    const actionType = json["actionType"];
+  static override fromJSON(
+    json: Record<string, unknown>,
+  ): ResurrectedAction | undefined {
+    const actionType = json['actionType'];
     if (actionType == ActionType.RESURRECTED) {
       return new ResurrectedAction(
-        assertNotNullOrUndefined(json["resurrectedCharacterName"] as string),
-        assertNotNullOrUndefined(json["resurrectionCause"] as string),
-        assertNotNullOrUndefined(json["beforeBossTurn"] as boolean),
+        assertNotNullOrUndefined(json['resurrectedCharacterName'] as string),
+        assertNotNullOrUndefined(json['resurrectionCause'] as string),
+        assertNotNullOrUndefined(json['beforeBossTurn'] as boolean),
       );
     } else {
       console.error(`ResurrectedAction.fromJSON called on ${json}`);
