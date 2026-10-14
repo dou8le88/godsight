@@ -624,8 +624,8 @@ body,
 }
 
 /*
-* Cloning a lot of Granblue's CSS here to imitate the UI.
-* Particularly the element icons.
+* Cloning some of Granblue's CSS here to imitate the avatar UI.
+* Particularly the element icons since they come from a spritesheet.
 */
 .avatar-container {
   width: 49px;
