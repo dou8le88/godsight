@@ -31,34 +31,9 @@ export class ConditionChangeAction extends BattleAction {
     const dispelledStatuses = allStatuses.filter((s) => s.dispelled);
 
     const gainedStatusesJsx: React.ReactNode[] | null = gainedStatuses
-      .map((status, idx) => (
-        <span
-          className="status-wrapper"
-          key={idx}
-        >
-          {settings['enableImageLoading'] &&
-          status.icon &&
-          !BattleActionHelper.IconlessStatusEffects.includes(status.icon) ? (
-            <img
-              className="status-icon"
-              src={BattleActionHelper.getStatusUrl(status.icon)}
-            />
-          ) : (
-            <>
-              {status.icon && status.icon.includes('_') ? (
-                <>
-                  <span className="status-text">
-                    ({status.icon.split('_').at(-1)})
-                  </span>{' '}
-                </>
-              ) : (
-                <></>
-              )}
-            </>
-          )}
-          <span className="status-text">{status.name}</span>
-        </span>
-      ))
+      .map((status, idx) =>
+        BattleActionHelper.getStatusTextJsx(status, settings, idx),
+      )
       .reduce(
         (prev: React.ReactNode[] | null, cur) =>
           prev === null ? [cur] : [...prev, ', ', cur],
@@ -66,22 +41,9 @@ export class ConditionChangeAction extends BattleAction {
       );
 
     const dispelledStatusesJsx: React.ReactNode[] | null = dispelledStatuses
-      .map((status, idx) => (
-        <span
-          className="status-wrapper"
-          key={idx}
-        >
-          {settings['enableImageLoading'] && status.icon ? (
-            <img
-              className="status-icon"
-              src={BattleActionHelper.getStatusUrl(status.icon)}
-            />
-          ) : (
-            <></>
-          )}
-          <span className="status-text">{status.name}</span>
-        </span>
-      ))
+      .map((status, idx) =>
+        BattleActionHelper.getStatusTextJsx(status, settings, idx),
+      )
       .reduce(
         (prev: React.ReactNode[] | null, cur) =>
           prev === null ? [cur] : [...prev, ', ', cur],

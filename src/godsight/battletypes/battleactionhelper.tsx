@@ -16,8 +16,9 @@ import { GodsightBossData } from './bossdata';
 import { BattleAction } from './battleaction';
 import { identity } from '../../util/functional';
 import { BattleActionParser } from './battleactionparser';
-import { DamageDisplay } from '../settings/godsightsettings';
+import { DamageDisplay, GodsightSettings } from '../settings/godsightsettings';
 import { DamageByElement, StatsUpdateHelper } from './stats';
+import { GodsightCondition } from './condition';
 
 export class BattleActionHelper {
   static IconlessStatusEffects = ['1047'];
@@ -294,8 +295,8 @@ export class BattleActionHelper {
                       </>
                     ) : (
                       <></>
-                    )}
-                    {' '}(Hits:{' '}
+                    )}{' '}
+                    (Hits:{' '}
                     {maybeHitCountOverride
                       ? maybeHitCountOverride
                       : onlyRealDamageInstancesByRecipient[recipient].filter(
@@ -374,8 +375,8 @@ export class BattleActionHelper {
                           </span>
                           )
                         </>
-                      )}
-                      {' '}(Hits:{' '}
+                      )}{' '}
+                      (Hits:{' '}
                       {maybeHitCountOverride
                         ? maybeHitCountOverride
                         : onlyRealDamageInstancesByRecipient[recipient].filter(
@@ -466,6 +467,77 @@ export class BattleActionHelper {
     });
 
     return healingInstancesByRecipient;
+  }
+
+  static getStatusTextJsx(
+    status: GodsightCondition,
+    settings: GodsightSettings,
+    key: number,
+    statusUrlOverride?: string,
+  ): JSX.Element {
+    return (
+      <span
+        className={
+          !settings['enableImageLoading'] && settings['clickStatusToLoadImage']
+            ? 'status-wrapper clickable'
+            : 'status-wrapper'
+        }
+        key={key}
+        {...(!settings['enableImageLoading'] &&
+          settings['clickStatusToLoadImage'] &&
+          status.icon &&
+          !BattleActionHelper.IconlessStatusEffects.includes(status.icon) && {
+            onClick: (e) => {
+              const target = e.target as HTMLElement;
+              let wrapper: HTMLElement | null = target;
+              while (wrapper && !wrapper.className.includes('status-wrapper')) {
+                wrapper = target.parentElement;
+              }
+              const children = wrapper
+                ? wrapper.querySelectorAll('.removable')
+                : null;
+              if (
+                children &&
+                !children.values().some((elt) => elt.nodeName == 'IMG')
+              ) {
+                children?.forEach((child) => {
+                  wrapper?.removeChild(child);
+                });
+                const icon = document.createElement('img');
+                icon.className = 'status-icon removable';
+                icon.src =
+                  statusUrlOverride ||
+                  BattleActionHelper.getStatusUrl(status.icon!);
+                wrapper?.prepend(icon);
+              }
+            },
+          })}
+      >
+        {settings['enableImageLoading'] &&
+        status.icon &&
+        !BattleActionHelper.IconlessStatusEffects.includes(status.icon) ? (
+          <img
+            className="status-icon"
+            src={
+              statusUrlOverride || BattleActionHelper.getStatusUrl(status.icon)
+            }
+          />
+        ) : (
+          <>
+            {status.icon && status.icon.includes('_') ? (
+              <>
+                <span className="status-text removable">
+                  ({status.icon.split('_').at(-1)}){' '}
+                </span>
+              </>
+            ) : (
+              <></>
+            )}
+          </>
+        )}
+        <span className="status-text">{status.name}</span>
+      </span>
+    );
   }
 
   static getMainCharacterName(formation: GodsightPartyFormationData): string {

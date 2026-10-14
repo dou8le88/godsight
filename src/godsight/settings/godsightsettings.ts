@@ -6,6 +6,7 @@ export interface GodsightSettings {
   'damageDisplay': DamageDisplay;
   'onRaidLoadBehavior': OnRaidLoadBehavior;
   'enableImageLoading': boolean;
+  'clickStatusToLoadImage': boolean;
 }
 
 export enum DefaultBattleView {
@@ -38,4 +39,5 @@ export const DefaultSettings: GodsightSettings = {
   'damageDisplay': DamageDisplay.ONE_PER_ELEMENT,
   'onRaidLoadBehavior': OnRaidLoadBehavior.SWITCH,
   'enableImageLoading': false,
+  'clickStatusToLoadImage': false,
 };

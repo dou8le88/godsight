@@ -216,6 +216,12 @@ body,
       padding: 10px;
       border-bottom: 1px solid #5e5e5e;
 
+      &.disabled {
+        pointer-events: none;
+        cursor: not-allowed;
+        color: #7c919b;
+      }
+
       &:last-child {
         border-bottom: none;
       }
@@ -874,25 +880,29 @@ body,
               color: #a0bbc7;
               margin-left: 10px;
             }
-
-            /* line-wrap the text and status icon together. */
-            .status-wrapper {
-              display: inline-block;
-            }
-
-            .status-text {
-              color: #ffff40;
-              text-shadow: 1px 1px 2px #000000;
-            }
-
-            .status-icon {
-              display: inline-block;
-              max-height: 20px;
-              vertical-align: middle;
-            }
           }
         }
       }
     }
   }
+}
+
+/* line-wrap the text and status icon together. */
+.status-wrapper {
+  display: inline-block;
+
+  &.clickable {
+    cursor: pointer;
+  }
+}
+
+.status-text {
+  color: #ffff40;
+  text-shadow: 1px 1px 2px #000000;
+}
+
+.status-icon {
+  display: inline-block;
+  max-height: 20px;
+  vertical-align: middle;
 }

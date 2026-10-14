@@ -9,6 +9,7 @@ import {
 import { DamageInstance } from '../../godsight/battletypes/damageinstance';
 import { GameElement } from '../../gbf/battletypes/scenariodata/mechanics/element';
 import { BattleActionHelper } from '../../godsight/battletypes/battleactionhelper';
+import { GodsightStatusType } from '../../godsight/battletypes/statustype';
 
 export function Config({ onExit }: { onExit: () => void }) {
   const settingsManager = SettingsManager.getInstance();
@@ -190,10 +191,15 @@ export function Config({ onExit }: { onExit: () => void }) {
     };
   }, []);
 
+  const configWindowRef = useRef<HTMLDivElement>(null);
+
   return (
     <>
       <div className="config-overlay-mask"></div>
-      <div className="config-window">
+      <div
+        className="config-window"
+        ref={configWindowRef}
+      >
         <div className="config-header">
           <div>Configuration</div>
           <div
@@ -396,6 +402,64 @@ export function Config({ onExit }: { onExit: () => void }) {
                 As your browser must load this data anyway to display the images
                 ingame, these requests are cached and should have minimal impact
                 on the game servers.
+              </td>
+            </tr>
+            <tr
+              className={
+                settings['enableImageLoading']
+                  ? 'config-option disabled'
+                  : 'config-option'
+              }
+            >
+              <td className="config-description">
+                Click status text to load icon:
+              </td>
+              <td className="config-input-container">
+                <input
+                  type="checkbox"
+                  className="config-checkbox"
+                  checked={settings['clickStatusToLoadImage']}
+                  onChange={(e) => {
+                    settingsManager.updateSingleSetting(
+                      'clickStatusToLoadImage',
+                      e.target.checked,
+                    );
+                    configWindowRef.current
+                      ?.querySelectorAll('.status-wrapper img.removable')
+                      .forEach((elt) => elt.remove());
+                  }}
+                  {...(settings['enableImageLoading'] && { disabled: true })}
+                />
+              </td>
+              <td className="config-explanation">
+                Only works when &quot;Enable loading images from the GBF
+                CDN&quot; is off.
+                <br />
+                Allows clicking on status text to load the status effect&apos;s
+                icon from the GBF CDN.
+                <br />
+                This allows you to see the icon without having to load every
+                single other image.
+                <br />
+                Example (this one loads the extension icon, not an image from
+                the GBF CDN):
+                <br />
+                Old Lignoid gained{' '}
+                {BattleActionHelper.getStatusTextJsx(
+                  {
+                    'name': 'Godsight',
+                    'type': GodsightStatusType.BUFF,
+                    'icon': 'Godsight',
+                    'dispelled': false,
+                  },
+                  {
+                    ...settings,
+                    'enableImageLoading': false,
+                  },
+                  1,
+                  '/icons/godsight-48x48.png',
+                )}
+                !
               </td>
             </tr>
           </tbody>
