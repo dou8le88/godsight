@@ -36,7 +36,6 @@ export class ConditionChangeAction extends BattleAction {
           className="status-wrapper"
           key={idx}
         >
-          <span className="status-text">{status.name}</span>{' '}
           {settings['enableImageLoading'] &&
           status.icon &&
           !BattleActionHelper.IconlessStatusEffects.includes(status.icon) ? (
@@ -47,14 +46,17 @@ export class ConditionChangeAction extends BattleAction {
           ) : (
             <>
               {status.icon && status.icon.includes('_') ? (
-                <span className="status-text">
-                  ({status.icon.split('_').at(-1)})
-                </span>
+                <>
+                  <span className="status-text">
+                    ({status.icon.split('_').at(-1)})
+                  </span>{' '}
+                </>
               ) : (
                 <></>
               )}
             </>
           )}
+          <span className="status-text">{status.name}</span>
         </span>
       ))
       .reduce(
@@ -69,8 +71,7 @@ export class ConditionChangeAction extends BattleAction {
           className="status-wrapper"
           key={idx}
         >
-          <span className="status-text">{status.name}</span>{' '}
-          {settings['enableImageLoading'] ? (
+          {settings['enableImageLoading'] && status.icon ? (
             <img
               className="status-icon"
               src={BattleActionHelper.getStatusUrl(status.icon)}
@@ -78,6 +79,7 @@ export class ConditionChangeAction extends BattleAction {
           ) : (
             <></>
           )}
+          <span className="status-text">{status.name}</span>
         </span>
       ))
       .reduce(

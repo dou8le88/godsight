@@ -1,10 +1,8 @@
 import { GodsightStatusType } from './statustype';
 
-export class GodsightCondition {
-  constructor(
-    public name: string,
-    public type: GodsightStatusType,
-    public icon: string,
-    public dispelled: boolean,
-  ) {}
+export interface GodsightCondition {
+  'name': string;
+  'type': GodsightStatusType;
+  'icon': string | null;
+  'dispelled': boolean;
 }

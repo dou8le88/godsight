@@ -1411,7 +1411,7 @@ export class BattleScenarioParser {
         destination.push({
           'name': change['text'],
           'type': type,
-          'icon': change['status'],
+          'icon': change['status'] ? `${change['status']}` : null,
           'dispelled': 'dispel' in change && change['dispel'] == 1,
         });
       });
@@ -1488,7 +1488,7 @@ export class BattleScenarioParser {
             destination.push({
               'name': change['text'],
               'type': type,
-              'icon': `${change['status']}`,
+              'icon': change['status'] ? `${change['status']}` : null,
               'dispelled': 'dispel' in change && change['dispel'] == 1,
             });
           }
