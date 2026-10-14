@@ -19,6 +19,7 @@ import {
   GameElement,
   GameElementHelper,
   GameElementValue,
+  NumericGameElement,
 } from './gbf/battletypes/scenariodata/mechanics/element';
 import { StatusType } from './gbf/battletypes/scenariodata/mechanics/statustype';
 import { Actor } from './gbf/battletypes/scenariodata/mechanics/actor';
@@ -88,6 +89,8 @@ import { AttackPhaseTurnScenarioData } from './gbf/battletypes/scenariodata/atta
 import { AttackAccuracyResult } from './gbf/battletypes/scenariodata/mechanics/attackaccuracyresult';
 import { SkillOrDebuffDamageInstance } from './gbf/battletypes/scenariodata/individualdamageinstance';
 import { StopScenarioData } from './gbf/battletypes/scenariodata/stopscenariodata';
+import { HealingInstance } from './godsight/battletypes/healinginstance';
+import { HPChangedScenarioData } from './gbf/battletypes/scenariodata/hpchangedscenariodata';
 
 export class BattleScenarioParser {
   constructor() {
@@ -217,6 +220,12 @@ export class BattleScenarioParser {
                   'miss': instance['miss'],
                   'guarded': instance['guard'],
                 };
+                BattleActionHelper.updateReceiverHp(
+                  godsightBattleData,
+                  bossSpecialAttackScenario['target'],
+                  receiverIndex,
+                  instance['hp'],
+                );
                 return damageInstance;
               }),
             // Peek ahead at further scenarios to find out the consequences of this one, so we can associate them.
@@ -272,14 +281,17 @@ export class BattleScenarioParser {
               isBossAttackPhase,
             ),
           );
+          const deadActorIdx = BattleActionHelper.getActorIndex(
+            godsightBattleData['party'],
+            deathScenario['to'],
+            deathScenario['pos'],
+          );
           if (deathScenario['to'] == Actor.PLAYER) {
-            const deadCharacterIdx = BattleActionHelper.getActorIndex(
-              godsightBattleData['party'],
-              deathScenario['to'],
-              deathScenario['pos'],
-            );
-            godsightBattleData['party']['members'][deadCharacterIdx]['alive'] =
+            godsightBattleData['party']['members'][deadActorIdx]['alive'] =
               false;
+            godsightBattleData['party']['members'][deadActorIdx]['hp'] = 0;
+          } else if (deathScenario['to'] == Actor.BOSS) {
+            godsightBattleData['boss'][deadActorIdx]['hpCurrent'] = 0;
           }
           break;
         }
@@ -532,10 +544,9 @@ export class BattleScenarioParser {
                 damageDealtScenario['to'],
                 l['pos'],
               );
-              return {
+              const damageInstance: DamageInstance = {
                 'receiverIndex': receiverIndex,
                 'receiverName': receiverName,
-                'currentHit': l['attack_num'],
                 'element':
                   'color' in l && l['color'] !== ''
                     ? GameElementHelper.getNumericGameElement(l['color'])
@@ -546,6 +557,13 @@ export class BattleScenarioParser {
                 'guarded': l['guard'],
                 'miss': l['miss'],
               };
+              BattleActionHelper.updateReceiverHp(
+                godsightBattleData,
+                damageDealtScenario['to'],
+                receiverIndex,
+                l['hp'],
+              );
+              return damageInstance;
             }),
           );
           actions.push(damageAction);
@@ -576,7 +594,7 @@ export class BattleScenarioParser {
               multihitDamageScenario['to'],
               hit['pos'],
             );
-            return {
+            const damageInstance: DamageInstance = {
               'element':
                 'color' in hit && hit['color'] !== ''
                   ? GameElementHelper.getNumericGameElement(hit['color'])
@@ -589,6 +607,13 @@ export class BattleScenarioParser {
               'guarded': hit['guard'],
               'miss': hit['miss'],
             };
+            BattleActionHelper.updateReceiverHp(
+              godsightBattleData,
+              multihitDamageScenario['to'],
+              receiverIndex,
+              hit['hp'],
+            );
+            return damageInstance;
           });
           const multihitDamageAction = new MultihitDamageAction(
             multihitDamageScenario['to'],
@@ -683,12 +708,14 @@ export class BattleScenarioParser {
                       damage['pos'],
                     )
                   : damage['pos'];
+              const receivingActor =
+                singularNormalAttackScenario['from'] == Actor.PLAYER
+                  ? Actor.BOSS
+                  : Actor.PLAYER;
               const receiverName = BattleActionHelper.getActorName(
                 godsightBattleData['boss'],
                 godsightBattleData['party'],
-                singularNormalAttackScenario['from'] == Actor.PLAYER
-                  ? Actor.BOSS
-                  : Actor.PLAYER,
+                receivingActor,
                 damage['pos'],
               );
               let damageElement: GameElementValue;
@@ -709,7 +736,7 @@ export class BattleScenarioParser {
               } else {
                 damageElement = GameElement.NULL_PLAIN;
               }
-              return {
+              const damageInstance: DamageInstance = {
                 'element':
                   GameElementHelper.getNumericGameElement(damageElement),
                 'receiverIndex': receiverIndex,
@@ -720,6 +747,13 @@ export class BattleScenarioParser {
                 'guarded': damage['guard'],
                 'miss': damage['miss'],
               };
+              BattleActionHelper.updateReceiverHp(
+                godsightBattleData,
+                receivingActor,
+                receiverIndex,
+                damage['hp'],
+              );
+              return damageInstance;
             }),
           );
           actions.push(singularNormalAttackAction);
@@ -780,10 +814,10 @@ export class BattleScenarioParser {
                 chargedAttackScenario['target'],
                 damage['pos'],
               );
-              return {
+              const damageInstance: DamageInstance = {
                 'element':
                   'attr' in damage && damage['attr'] !== ''
-                    ? damage['attr']
+                    ? (Number(damage['attr']) as NumericGameElement)
                     : GameElement.NULL_PLAIN,
                 'value': damageTotal,
                 'critical': wasCriticalHit.get(damage['attr'])!,
@@ -795,7 +829,16 @@ export class BattleScenarioParser {
                     ? AttackAccuracyResult.HIT
                     : AttackAccuracyResult.DODGE,
                 'guarded': false,
-              } as DamageInstance;
+              };
+              if (hpAfterDamage !== undefined) {
+                BattleActionHelper.updateReceiverHp(
+                  godsightBattleData,
+                  chargedAttackScenario['target'],
+                  receiverIndex,
+                  hpAfterDamage,
+                );
+              }
+              return damageInstance;
             }),
             subactions.actions,
           );
@@ -863,12 +906,19 @@ export class BattleScenarioParser {
                 healingScenario['to'],
                 h['pos'],
               );
-              return {
+              const healingInstance: HealingInstance = {
                 'receiverIndex': receiverIndex,
                 'receiverName': receiverName,
                 'value': h['value'],
                 'hpAfterHealing': h['hp'],
               };
+              BattleActionHelper.updateReceiverHp(
+                godsightBattleData,
+                healingScenario['to'],
+                receiverIndex,
+                h['hp'],
+              );
+              return healingInstance;
             }),
           );
           actions.push(healingAction);
@@ -909,12 +959,12 @@ export class BattleScenarioParser {
               Actor.BOSS,
               damage['pos'],
             );
-            return {
+            const damageInstance: DamageInstance = {
               'receiverIndex': receiverIndex,
               'receiverName': receiverName,
               'element':
                 'color' in damage && damage['color'] !== ''
-                  ? damage['color']
+                  ? (Number(damage['color']) as NumericGameElement)
                   : GameElement.NULL_PLAIN,
               'value': damage['value'],
               'receiverHpAfterDamage': damage['hp'],
@@ -922,7 +972,14 @@ export class BattleScenarioParser {
               'guarded': damage['guard'],
               // Summon "misses" just show up as damage value 0, so they technically can't miss.
               'miss': AttackAccuracyResult.HIT,
-            } as DamageInstance;
+            };
+            BattleActionHelper.updateReceiverHp(
+              godsightBattleData,
+              Actor.BOSS,
+              receiverIndex,
+              damage['hp'],
+            );
+            return damageInstance;
           });
           const summonAction = new SummonAction(
             summonScenario['name'],
@@ -1017,7 +1074,7 @@ export class BattleScenarioParser {
                   Actor.BOSS,
                   d['pos'],
                 );
-                return {
+                const damageInstance: DamageInstance = {
                   'element':
                     'color' in d && d['color'] !== ''
                       ? GameElementHelper.getNumericGameElement(d['color'])
@@ -1030,6 +1087,13 @@ export class BattleScenarioParser {
                   'miss': d['miss'],
                   'guarded': d['guard'],
                 };
+                BattleActionHelper.updateReceiverHp(
+                  godsightBattleData,
+                  Actor.BOSS,
+                  receiverIndex,
+                  d['hp'],
+                );
+                return damageInstance;
               },
             );
             // Make sure to skip the command since we already processed it.
@@ -1058,7 +1122,7 @@ export class BattleScenarioParser {
                 Actor.BOSS,
                 d['pos'],
               );
-              return {
+              const damageInstance: DamageInstance = {
                 'element':
                   'color' in d && d['color'] !== ''
                     ? GameElementHelper.getNumericGameElement(d['color'])
@@ -1071,6 +1135,13 @@ export class BattleScenarioParser {
                 'miss': d['miss'],
                 'guarded': d['guard'],
               };
+              BattleActionHelper.updateReceiverHp(
+                godsightBattleData,
+                Actor.BOSS,
+                receiverIndex,
+                d['hp'],
+              );
+              return damageInstance;
             });
             // Make sure to skip the command since we already processed it.
             i += 1;
@@ -1193,6 +1264,14 @@ export class BattleScenarioParser {
           );
           actions.push(resurrectedAction);
 
+          BattleActionHelper.updateReceiverHp(
+            godsightBattleData,
+            Actor.PLAYER,
+            resurrectionScenario['index'],
+            resurrectionScenario['hp'],
+            resurrectionScenario['hpmax'],
+          );
+
           // TODO: handle party formation changes due to resurrection.
           const characterIndex = BattleActionHelper.getActorIndex(
             godsightBattleData['party'],
@@ -1248,6 +1327,23 @@ export class BattleScenarioParser {
           break;
         }
 
+        case ScenarioCommand.HP_CHANGED: {
+          const hpChangedScenario = scenario as HPChangedScenarioData;
+          const receiverIndex = BattleActionHelper.getActorIndex(
+            godsightBattleData['party'],
+            hpChangedScenario['to'],
+            hpChangedScenario['pos'],
+          );
+          BattleActionHelper.updateReceiverHp(
+            godsightBattleData,
+            hpChangedScenario['to'],
+            receiverIndex,
+            hpChangedScenario['value'],
+            hpChangedScenario['max'],
+          );
+          break;
+        }
+
         case ScenarioCommand.BACKLINE_STATUS:
           break;
 
@@ -1257,7 +1353,6 @@ export class BattleScenarioParser {
         case ScenarioCommand._CONDITION:
         case ScenarioCommand._DROP:
         case ScenarioCommand._GROUP_GAUGE:
-        case ScenarioCommand._HP_CHANGED:
         case ScenarioCommand._IMAGE_CHANGE:
         case ScenarioCommand._INFORMATION:
         case ScenarioCommand._LOSE:

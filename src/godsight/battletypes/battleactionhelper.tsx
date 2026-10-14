@@ -19,6 +19,7 @@ import { BattleActionParser } from './battleactionparser';
 import { DamageDisplay, GodsightSettings } from '../settings/godsightsettings';
 import { DamageByElement, StatsUpdateHelper } from './stats';
 import { GodsightCondition } from './condition';
+import { GodsightBattleData } from './battledata';
 
 export class BattleActionHelper {
   static IconlessStatusEffects = ['1047'];
@@ -556,5 +557,31 @@ export class BattleActionHelper {
       statusIcon = '1486';
     }
     return `${this.statusBaseUrl}${statusIcon}.png`;
+  }
+
+  static updateReceiverHp(
+    battleData: GodsightBattleData,
+    actor: Actor,
+    receiverIndex: number,
+    newHp: number,
+    newMaxHp?: number,
+  ) {
+    switch (actor) {
+      case Actor.BOSS:
+        battleData['boss'][receiverIndex]['hpCurrent'] = newHp;
+        if (newMaxHp !== undefined) {
+          battleData['boss'][receiverIndex]['hpMax'] = newMaxHp;
+        }
+        break;
+      case Actor.PLAYER:
+        battleData['party']['members'][receiverIndex]['hp'] = newHp;
+        if (newMaxHp !== undefined) {
+          battleData['party']['members'][receiverIndex]['hpMax'] = newMaxHp;
+        }
+        break;
+      default:
+        console.error(`Unknown actor ${actor} when trying to update actor HP.`);
+        break;
+    }
   }
 }

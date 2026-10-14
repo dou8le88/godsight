@@ -7,5 +7,6 @@ export interface ResurrectionScenarioData extends GenericScenarioData {
   'index': number;
   'performer': number;
   'name': string;
+  'hp': number;
   'hpmax': number;
 }

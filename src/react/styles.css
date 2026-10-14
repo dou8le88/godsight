@@ -725,10 +725,19 @@ body,
   .battle-metadata {
     margin: 10px;
     align-self: flex-start;
-    font-size: 20px;
-    vertical-align: middle;
+    display: flex;
+    align-items: center;
+    column-gap: 10px;
+
+    .boss-name {
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+    }
 
     .missing-info-warning {
+      font-size: 20px;
+      vertical-align: middle;
       display: inline-block;
       color: #f5bd32;
       margin-left: 5px;
@@ -905,4 +914,73 @@ body,
   display: inline-block;
   max-height: 20px;
   vertical-align: middle;
+}
+
+.hp-bar {
+  display: inline-block;
+  width: 100px;
+  height: 11px;
+  background-color: #190f0e;
+  border: 1px solid #170f11;
+  z-index: 10;
+  margin-top: 5px;
+
+  &.boss {
+    .current-hp {
+      background: linear-gradient(to bottom, #aba395, #db6159, #690f0e);
+    }
+
+    .hp-percent {
+      color: #aba395;
+    }
+  }
+
+  &.player {
+    .current-hp {
+      background: linear-gradient(to bottom, #76c786, #2ba23d, #690f0e);
+    }
+
+    .hp-percent {
+      color: #76c786;
+    }
+  }
+
+  .current-hp {
+    position: relative;
+    top: -7px;
+    left: 1px;
+    height: 8px;
+    z-index: 14;
+  }
+
+  .damage-diff {
+    position: relative;
+    left: 1px;
+    top: 1px;
+    height: 8px;
+    background-color: #c2c2c2;
+    z-index: 11;
+  }
+
+  .hp-percent {
+    position: relative;
+    font-size: 10px;
+    top: -30px;
+    left: 1px;
+    z-index: 15;
+  }
+}
+
+::view-transition-group(.hp-decrease) {
+  animation-duration: 0.5s;
+}
+
+::view-transition-old(.hp-decrease),
+::view-transition-new(.hp-decrease) {
+  /* Prevent the browser from forcing aspect-ratio scaling */
+  height: 100% !important;
+  width: 100% !important;
+
+  /* Force the content to fill the transitioning container box */
+  object-fit: fill !important;
 }

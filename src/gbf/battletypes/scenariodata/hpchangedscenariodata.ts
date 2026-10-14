@@ -3,7 +3,7 @@ import { Actor } from './mechanics/actor';
 import { ScenarioCommand } from './scenariocommand';
 
 export interface HPChangedScenarioData extends GenericScenarioData {
-  'cmd': ScenarioCommand._HP_CHANGED;
+  'cmd': ScenarioCommand.HP_CHANGED;
   'to': Actor;
   'pos': number;
   /**

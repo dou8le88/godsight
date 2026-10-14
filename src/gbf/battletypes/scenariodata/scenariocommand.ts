@@ -134,6 +134,11 @@ export enum ScenarioCommand {
   RESURRECTION = 'resurrection',
 
   /**
+   * A character's HP/max HP changed.
+   */
+  HP_CHANGED = 'hp',
+
+  /**
    * Signals the shift from actions by one Actor (e.g., the player) to that of another (e.g., the boss).
    * Currently only seen this between the end of the player's attack phase and the start of the boss's.
    */
@@ -168,10 +173,6 @@ export enum ScenarioCommand {
    * Ignored command, do not use, exists for completeness in the parser.
    */
   _SPECIAL_CHANGE = 'special_change',
-  /**
-   * Ignored command, do not use, exists for completeness in the parser.
-   */
-  _HP_CHANGED = 'hp',
   /**
    * Ignored command, do not use, exists for completeness in the parser.
    */

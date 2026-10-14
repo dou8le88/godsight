@@ -8,6 +8,8 @@ import {
   DefaultBattleView,
 } from '../../godsight/settings/godsightsettings';
 import { SettingsManager } from '../../godsight/settings/settingsmanager';
+import { HpBar } from './hpbar';
+import { Actor } from '../../gbf/battletypes/scenariodata/mechanics/actor';
 
 export default function BattleTracker({
   battleData,
@@ -49,14 +51,28 @@ export default function BattleTracker({
     battleData !== undefined ? battleData['boss'][0]['name'] : 'Unknown';
   const crossTabHeader = (
     <div className="battle-metadata">
-      Vs. {bossName}{' '}
-      {isMissingAbilities || isMissingFinishedTurns ? (
-        <span
-          className="missing-info-warning"
-          title="Missing battle data detected. The stats and actions shown may not match the ingame battle log."
-        >
-          ⚠
-        </span>
+      <div className="boss-name">
+        Vs. {bossName}{' '}
+        {isMissingAbilities || isMissingFinishedTurns ? (
+          <span
+            className="missing-info-warning"
+            title="Missing battle data detected. The stats and actions shown may not match the ingame battle log."
+          >
+            ⚠
+          </span>
+        ) : (
+          <></>
+        )}
+      </div>
+      {battleData !== undefined ? (
+        battleData['boss'].map((boss, idx) => (
+          <HpBar
+            key={idx}
+            currentHp={boss['hpCurrent']}
+            maxHp={boss['hpMax']}
+            actor={Actor.BOSS}
+          />
+        ))
       ) : (
         <></>
       )}
