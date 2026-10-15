@@ -947,25 +947,31 @@ body,
 
   .current-hp {
     position: relative;
-    top: -7px;
-    left: 1px;
-    height: 8px;
+    top: -9px;
+    height: 10px;
     z-index: 14;
+    max-width: 97px;
+    border-top: 1px solid #170f11;
+    border-bottom: 1px solid #170f11;
+    border-left: 1px solid #170f11;
   }
 
   .damage-diff {
     position: relative;
-    left: 1px;
-    top: 1px;
-    height: 8px;
+    top: 0px;
+    height: 9px;
     background-color: #c2c2c2;
     z-index: 11;
+    max-width: 97px;
+    border-top: 1px solid #170f11;
+    border-bottom: 1px solid #170f11;
+    border-left: 1px solid #170f11;
   }
 
   .hp-percent {
     position: relative;
     font-size: 10px;
-    top: -30px;
+    top: -33px;
     left: 1px;
     z-index: 15;
   }

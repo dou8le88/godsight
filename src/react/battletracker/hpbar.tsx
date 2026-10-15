@@ -19,13 +19,13 @@ export function HpBar({
         <div
           className="damage-diff"
           style={{
-            width: `calc(${deferredHpPercent}% - 2px)`,
+            width: `${deferredHpPercent}%`,
           }}
         ></div>
         <div
           className="current-hp"
           style={{
-            width: `calc(${currentHpPercent}% - 2px)`,
+            width: `${currentHpPercent}%`,
           }}
         ></div>
       </ViewTransition>

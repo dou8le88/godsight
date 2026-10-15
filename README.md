@@ -4,13 +4,13 @@ Godsight is a free browser extension intended to be used with the browser game [
 
 ## Granblue Fantasy ToS Compatibility
 
-This extension does not modify any code in the game itself. It does not inject any scripts, and it uses a separate UI in your developer tools (F12/CTRL+SHIFT+I) to display all of its information. An explicit aim for this extension was to be ToS-compatible by any *reasonable* definition. That said, the ToS is pretty broad about external tools, and while that's likely intended for things that give you an actual gameplay advantage, like a bot or UI modifications, it's probably best to avoid associating your account with this tool in videos or screenshots. Some game developers are *very* strict with these things. :/
+This extension does not modify any code in the game itself. It does not inject any scripts, and it uses a separate UI in your developer tools (F12/CTRL+SHIFT+I) to display all of its information. An explicit aim for this extension was to be ToS-compatible by any _reasonable_ definition. That said, the ToS is pretty broad about external tools, and while that's likely intended for things that give you an actual gameplay advantage, like a bot or UI modifications, it's probably best to avoid associating your account with this tool in videos or screenshots. Some game developers are _very_ strict with these things. :/
 
 ## Warnings
 
 To be able to read response bodies from the server, an extension must either patch the main window's XHR functions or use devtools APIs. As the former would definitely break Granblue Fantasy's TOS, this extension opts for the latter.
 
-Devtools APIs are very powerful and thus very dangerous for users installing such extensions. *You should be exceedingly cautious when thinking of using them, as a malicious extension could steal your cookies or act on your behalf.*
+Devtools APIs are very powerful and thus very dangerous for users installing such extensions. _You should be exceedingly cautious when thinking of using them, as a malicious extension could steal your cookies or act on your behalf._
 
 Review the code of such extensions carefully, or ask a trusted individual familiar with such things to do so on your behalf.
 
@@ -42,6 +42,7 @@ The only code that interfaces with the devtools APIs is in [/src/devtools.ts](/s
 ## Limitations
 
 - **This extension does not currently support the ingame Japanese language option. For now, please only use the extension with the ingame language set to English.**
+- This extension cannot intercept battle updates from other players. Thus, you will not see HP update inside the extension until you perform an action (similar to the ingame "Live Battle Feed" setting being off).
 - Multiwave battles are treated as separate battles per wave. This is low priority to fix, as there is esentially no multiwave content that is nontrivial.
 - Multihit summons may have incorrect hitcounts when called with a cross-summon. This is because when a summon is "reskinned" (either through setting an actual skin for your main summon, or cross-summoning), it will only display a single hit in the damage data for mono-elemental summon damage, even if it's actually several hits mechanically. We can get around this for reskinned main summons, as we can look up the summon by its call name and parse its description for the real hitcount, but cross-summons don't give us any way to find the original summon data to correct the hitcount.
 
@@ -51,7 +52,7 @@ The only code that interfaces with the devtools APIs is in [/src/devtools.ts](/s
   - "Wrong-looking" action grouping under Turn Actions.
     - This is because the grouping is a best effort transformation of data that isn't at all designed to map to a player's intuition of what an "action" should be. The game client can order things strangely relative to the stated order of operations in skill and passive descriptions.
 - The following ARE considered bugs:
-  - Incorrect damage values. The "total damage" should always match the ingame end-of-battle Battle Log *as long as no actions were missed via refreshing too quickly*.
+  - Incorrect damage values. The "total damage" should always match the ingame end-of-battle Battle Log _as long as no actions were missed via refreshing too quickly_.
   - Incorrect damage attribution. I suspect there are unavoidable cases, for instance due to ordering weirdness with Rigor damage and on-dispel passives, but I haven't found any yet.
 - You may make pull requests to this project.
   - AI-assisted code is allowed, **however:**
