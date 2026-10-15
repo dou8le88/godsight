@@ -918,7 +918,7 @@ body,
 
 .hp-bar {
   display: inline-block;
-  width: 100px;
+  width: 103px;
   height: 11px;
   background-color: #190f0e;
   border: 1px solid #170f11;
@@ -950,7 +950,7 @@ body,
     top: -9px;
     height: 10px;
     z-index: 14;
-    max-width: 97px;
+    max-width: 100px;
     border-top: 1px solid #170f11;
     border-bottom: 1px solid #170f11;
     border-left: 1px solid #170f11;
@@ -962,7 +962,7 @@ body,
     height: 9px;
     background-color: #c2c2c2;
     z-index: 11;
-    max-width: 97px;
+    max-width: 100px;
     border-top: 1px solid #170f11;
     border-bottom: 1px solid #170f11;
     border-left: 1px solid #170f11;
