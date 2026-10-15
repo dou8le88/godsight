@@ -97,11 +97,8 @@ export enum ScenarioCommand {
   FULL_ELIXIR = 'rematch',
   RETREAT = 'retire',
   _POTIONS_CHANGED = 'temporary',
-
   FORM_CHANGE = 'formchange',
-
   CHAIN_BURST = 'chain_cutin',
-
   /**
    * Beginning of a sequence of `NORMAL_ATTACK` commands by one character.
    * A triple attack would consist of three `NORMAL_ATTACK` commands afterwards,
@@ -120,35 +117,32 @@ export enum ScenarioCommand {
    * Set the turn counter.
    */
   TURN_CHANGE = 'turn_change',
-
   OMEN_CANCEL = 'special_skill_interrupt',
-
   /**
    * An effect disabled the player's attack phase (e.g., charm).
    * Boss probably uses something else cuz there's no target field.
    */
   STANDBY = 'standby',
-
   RESURRECTION_AVAILABLE = 'resurrection_available',
-
   RESURRECTION = 'resurrection',
-
   /**
    * A character's HP/max HP changed.
    */
   HP_CHANGED = 'hp',
-
   /**
    * Signals the shift from actions by one Actor (e.g., the player) to that of another (e.g., the boss).
    * Currently only seen this between the end of the player's attack phase and the start of the boss's.
    */
   TURN = 'turn',
-
   /**
    * Updates the status of the backline, e.g. when a boss special
    * hits backline allies like Seofon's Carro Magnifico.
    */
   BACKLINE_STATUS = 'status_back',
+  /**
+   * Party member portrait changed.
+   */
+  IMAGE_CHANGE = 'image_change',
 
   /**
    * Sometimes contains useful information about certain actions, such as attacking under the effects of Confusion.
@@ -189,10 +183,6 @@ export enum ScenarioCommand {
    * Ignored command, do not use, exists for completeness in the parser.
    */
   _WAIT = 'wait',
-  /**
-   * Ignored command, do not use, exists for completeness in the parser.
-   */
-  _IMAGE_CHANGE = 'image_change',
   /**
    * Ignored command, do not use, exists for completeness in the parser.
    */

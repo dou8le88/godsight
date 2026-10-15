@@ -26,9 +26,6 @@ export type StartData = GranblueBattleData & {
    * Increments every time a character skill is used via pressing its button.
    */
   'ability_turn': number;
-  /**
-   * TODO: Numerical boolean (0/1) for whether or not it's multiplayer?
-   */
   'multi': number;
   'battle': WaveData;
   /**
@@ -47,9 +44,6 @@ export type StartData = GranblueBattleData & {
    */
   'player': PartyFormationData;
   'boss': BossFormationData;
-  /**
-   * TODO: redundant in practice since all non-story battles have MC?
-   */
   'nickname': string;
   /**
    * Only populated if the boss has an opening action, and only on the initial start.json.
@@ -81,7 +75,7 @@ export interface PartyMemberData {
    */
   'setting_id': number | string;
   /**
-   * TODO: Some kind of portrait ID. Changes with MC's class/skin, might change with character skins?
+   * Some kind of portrait ID. Changes with MC's class/skin, might change with character skins?
    */
   'pid': string;
   /**
@@ -127,18 +121,9 @@ export interface PartyMemberData {
 }
 
 export interface BossFormationData {
-  /**
-   * TODO: Numeric string?
-   */
   'type': string;
-  /**
-   * TODO: is this boss target count?
-   */
   'number': number;
-  /**
-   * TODO: numeric string boolean?
-   */
-  'modechange': '1';
+  'modechange': string | number;
   'modegauge': number;
   /**
    * Difficulty in number of stars in the raid host UI.
@@ -148,18 +133,12 @@ export interface BossFormationData {
 }
 
 export interface BossData {
-  /**
-   * TODO: Numeric string?
-   */
   'type': string;
-  /**
-   * TODO: Sprite or portrait data?
-   */
   'cjs': string;
   'number': number;
   'hpmax': number;
   /**
-   * Numeric string...
+   * HP as a numeric string...
    */
   'hp': string;
   /**
@@ -191,7 +170,8 @@ export interface BossData {
   'Lv': string;
   'attribute': PrettyElementName;
   /**
-   * TODO: what?
+   * Enemy type (e.g., "Ooze").
+   * Think this is used for trophies that want you to kill a gorillion slimes/crabs/etc.
    */
   'tribe': string;
   'condition': ConditionSummary;

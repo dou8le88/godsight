@@ -347,7 +347,6 @@ export default function GodsightPanel() {
 
     function retryBattleHandler() {
       // This actually starts a new battle so we don't really need to do anything.
-      // TODO: maybe update the battle status of the previous battle.
     }
 
     async function onRequestFinishedListener(

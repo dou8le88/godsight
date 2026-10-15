@@ -27,6 +27,7 @@ export enum ActionType {
   DEATH = 'death',
   DAMAGE_DEALT = 'damage_dealt',
   DAMAGE_DEALT_MULTIHIT = 'damage_dealt_multihit',
+  FORM_CHANGE = 'form_change',
   HEAL = 'heal',
   REPLACED_CHARACTER = 'replaced_character',
   RESURRECTED = 'resurrected',

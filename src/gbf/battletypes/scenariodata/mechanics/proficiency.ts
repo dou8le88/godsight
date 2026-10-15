@@ -1,6 +1,3 @@
-/**
- * TODO: Validate values.
- */
 export enum Proficiency {
   SABRE = '1',
   DAGGER = '2',

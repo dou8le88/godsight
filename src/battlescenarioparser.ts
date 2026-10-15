@@ -91,6 +91,8 @@ import { SkillOrDebuffDamageInstance } from './gbf/battletypes/scenariodata/indi
 import { StopScenarioData } from './gbf/battletypes/scenariodata/stopscenariodata';
 import { HealingInstance } from './godsight/battletypes/healinginstance';
 import { HPChangedScenarioData } from './gbf/battletypes/scenariodata/hpchangedscenariodata';
+import { ImageChangeScenarioData } from './gbf/battletypes/scenariodata/imagechangescenariodata';
+import { FormChangeAction } from './godsight/battletypes/formchangeaction';
 
 export class BattleScenarioParser {
   constructor() {
@@ -159,13 +161,17 @@ export class BattleScenarioParser {
           );
           break;
 
-        case ScenarioCommand.FORM_CHANGE:
-          // Updates battle data rather than recording an action.
-          this.handleFormChangeScenario(
+        case ScenarioCommand.FORM_CHANGE: {
+          const action = this.handleFormChangeScenario(
             scenario as FormChangeScenarioData,
             godsightBattleData,
+            isBossAttackPhase,
           );
+          if (action) {
+            actions.push(action);
+          }
           break;
+        }
 
         case ScenarioCommand.BOSS_SPECIAL_ATTACK: {
           if (stopOnMainAction) {
@@ -701,17 +707,15 @@ export class BattleScenarioParser {
             godsightBattleData['party']['partyMemberCount'],
             !isBossAttackPhase,
             damageArray.map((damage) => {
-              const receiverIndex =
-                singularNormalAttackScenario['from'] == Actor.PLAYER
-                  ? BattleActionHelper.getCharacterIndexAtPosition(
-                      godsightBattleData['party'],
-                      damage['pos'],
-                    )
-                  : damage['pos'];
               const receivingActor =
                 singularNormalAttackScenario['from'] == Actor.PLAYER
                   ? Actor.BOSS
                   : Actor.PLAYER;
+              const receiverIndex = BattleActionHelper.getActorIndex(
+                godsightBattleData['party'],
+                receivingActor,
+                damage['pos'],
+              );
               const receiverName = BattleActionHelper.getActorName(
                 godsightBattleData['boss'],
                 godsightBattleData['party'],
@@ -1272,7 +1276,6 @@ export class BattleScenarioParser {
             resurrectionScenario['hpmax'],
           );
 
-          // TODO: handle party formation changes due to resurrection.
           const characterIndex = BattleActionHelper.getActorIndex(
             godsightBattleData['party'],
             Actor.PLAYER,
@@ -1347,13 +1350,25 @@ export class BattleScenarioParser {
         case ScenarioCommand.BACKLINE_STATUS:
           break;
 
+        case ScenarioCommand.IMAGE_CHANGE: {
+          const imageChangeScenario = scenario as ImageChangeScenarioData;
+          const characterIdx = BattleActionHelper.getActorIndex(
+            godsightBattleData['party'],
+            Actor.PLAYER,
+            imageChangeScenario['pos'],
+          );
+          godsightBattleData['party']['members'][characterIdx][
+            'portraitImageId'
+          ] = imageChangeScenario['image_id'];
+          break;
+        }
+
         // All of these commands are recognized but ignored.
         case ScenarioCommand._BACKGROUND_CHANGE:
         case ScenarioCommand._BGM:
         case ScenarioCommand._CONDITION:
         case ScenarioCommand._DROP:
         case ScenarioCommand._GROUP_GAUGE:
-        case ScenarioCommand._IMAGE_CHANGE:
         case ScenarioCommand._INFORMATION:
         case ScenarioCommand._LOSE:
         case ScenarioCommand._MODE_CHANGE:
@@ -1405,13 +1420,33 @@ export class BattleScenarioParser {
   private handleFormChangeScenario(
     formChangeScenario: FormChangeScenarioData,
     battleData: GodsightBattleData,
-  ): void {
-    if (formChangeScenario['to'] == Actor.BOSS) {
-      battleData.boss[formChangeScenario['pos']] =
-        this.getBossDataFromFormChangeScenario(
-          formChangeScenario,
-          battleData['boss'][formChangeScenario['pos']],
+    isBossAttackPhase: boolean,
+  ): FormChangeAction | undefined {
+    switch (formChangeScenario['to']) {
+      case Actor.BOSS:
+        battleData.boss[formChangeScenario['pos']] =
+          this.getBossDataFromFormChangeScenario(
+            formChangeScenario,
+            battleData['boss'][formChangeScenario['pos']],
+          );
+        // Bosses get a ton of meaningless form changes for some reason.
+        // We don't return an action for them.
+        return undefined;
+      case Actor.PLAYER: {
+        const actorName = BattleActionHelper.getActorName(
+          battleData['boss'],
+          battleData['party'],
+          formChangeScenario['to'],
+          formChangeScenario['pos'],
         );
+        // Player form changes, on the other hand, always seem to be meaningful.
+        return new FormChangeAction(actorName, !isBossAttackPhase);
+      }
+      default:
+        console.error(
+          `Unknown actor ${formChangeScenario['to']} in form change scenario`,
+        );
+        return undefined;
     }
   }
 
@@ -1768,7 +1803,7 @@ export class BattleScenarioParser {
       'name': b['name']['en'],
       'element': b['attr'],
       'hpCurrent': currentHp,
-      'hpMax': b['hpmax'],
+      'hpMax': Number(b['hpmax']),
       'maxDiamonds': isNaN(maxDiamonds) ? 0 : maxDiamonds - 1,
       // For some reason empty diamonds is set to max in data, and it counts down to 1 as diamonds fill.
       'currentDiamonds': isNaN(maxDiamonds) ? 0 : maxDiamonds - currentDiamonds,
@@ -1793,8 +1828,6 @@ export class BattleScenarioParser {
       // For some reason empty diamonds is set to max in data, and it counts down to 1 as diamonds fill.
       'currentDiamonds': isNaN(maxDiamonds) ? 0 : maxDiamonds - currentDiamonds,
     };
-
-    // TODO: maybe return a CAMeterChangedAction if diamonds changed?
 
     return godsightBossData;
   }

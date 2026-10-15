@@ -1,6 +1,6 @@
 /**
  * Category of status effect.
- * TODO: Tentative values/meanings, cross-reference
+ * The names are approximate meanings deduced from usage.
  */
 export enum StatusType {
   BUFF = '1',

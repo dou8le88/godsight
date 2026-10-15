@@ -11,7 +11,7 @@ export interface ConditionSummary {
   'buff'?: Condition[];
   'debuff'?: Condition[];
   /**
-   * TODO: Weird value, hard to correlate to any actual logic.
+   * Weird value, hard to correlate to any actual logic.
    */
   'num'?: number;
   /**

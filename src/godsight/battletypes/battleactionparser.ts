@@ -8,6 +8,7 @@ import { ChargedAttackAction } from './chargedattackaction';
 import { ConditionChangeAction } from './conditionchangeaction';
 import { DamageAction } from './damageaction';
 import { DeathAction } from './deathaction';
+import { FormChangeAction } from './formchangeaction';
 import { FullElixirAction } from './fullelixiraction';
 import { HealingAction } from './healingaction';
 import { MultihitDamageAction } from './multihitdamageaction';
@@ -89,6 +90,9 @@ export class BattleActionParser {
 
         case ActionType.RESURRECTED:
           return ResurrectedAction.fromJSON(json);
+
+        case ActionType.FORM_CHANGE:
+          return FormChangeAction.fromJSON(json);
 
         default:
           console.error(`Unknown action type ${actionType}!`);
