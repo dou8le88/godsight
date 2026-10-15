@@ -918,7 +918,7 @@ body,
 
 .hp-bar {
   display: inline-block;
-  width: 103px;
+  width: 203px;
   height: 11px;
   background-color: #190f0e;
   border: 1px solid #170f11;
@@ -946,7 +946,7 @@ body,
   }
 
   .dynamic-hp-bar-wrapper {
-    width: 100px;
+    width: 200px;
 
     .current-hp {
       position: relative;
