@@ -945,27 +945,29 @@ body,
     }
   }
 
-  .current-hp {
-    position: relative;
-    top: -9px;
-    height: 10px;
-    z-index: 14;
-    max-width: 100px;
-    border-top: 1px solid #170f11;
-    border-bottom: 1px solid #170f11;
-    border-left: 1px solid #170f11;
-  }
+  .dynamic-hp-bar-wrapper {
+    width: 100px;
 
-  .damage-diff {
-    position: relative;
-    top: 0px;
-    height: 9px;
-    background-color: #c2c2c2;
-    z-index: 11;
-    max-width: 100px;
-    border-top: 1px solid #170f11;
-    border-bottom: 1px solid #170f11;
-    border-left: 1px solid #170f11;
+    .current-hp {
+      position: relative;
+      top: -9px;
+      height: 10px;
+      z-index: 14;
+      border-top: 1px solid #170f11;
+      border-bottom: 1px solid #170f11;
+      border-left: 1px solid #170f11;
+    }
+
+    .damage-diff {
+      position: relative;
+      top: 0px;
+      height: 9px;
+      background-color: #c2c2c2;
+      z-index: 11;
+      border-top: 1px solid #170f11;
+      border-bottom: 1px solid #170f11;
+      border-left: 1px solid #170f11;
+    }
   }
 
   .hp-percent {

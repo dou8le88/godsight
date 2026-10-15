@@ -15,20 +15,22 @@ export function HpBar({
 
   return (
     <div className={`hp-bar ${actor}`}>
-      <ViewTransition update="hp-decrease">
-        <div
-          className="damage-diff"
-          style={{
-            width: `${deferredHpPercent}%`,
-          }}
-        ></div>
-        <div
-          className="current-hp"
-          style={{
-            width: `${currentHpPercent}%`,
-          }}
-        ></div>
-      </ViewTransition>
+      <div className="dynamic-hp-bar-wrapper">
+        <ViewTransition update="hp-decrease">
+          <div
+            className="damage-diff"
+            style={{
+              width: `${deferredHpPercent}%`,
+            }}
+          ></div>
+          <div
+            className="current-hp"
+            style={{
+              width: `${currentHpPercent}%`,
+            }}
+          ></div>
+        </ViewTransition>
+      </div>
       <div className="hp-percent">{currentHpPercent}%</div>
     </div>
   );
