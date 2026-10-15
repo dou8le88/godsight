@@ -1706,6 +1706,7 @@ export class BattleScenarioParser {
     // Bosses can start the battle with actions, reflected in the "scenario" field.
     // It's empty when loading into a raid in the middle of some arbitrary turn,
     // so if we have a non-empty scenario, our convention is that those entries belong to turn 0.
+    // In gameplay terms, they actually belong to turn 1, as can be seen via certain character passives.
     if (startData['scenario'].length) {
       battleData['currentTurn'] = 0;
       const actions = this.parseScenarioData(

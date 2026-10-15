@@ -977,6 +977,15 @@ body,
     left: 1px;
     z-index: 15;
   }
+
+  .exact-hp {
+    font-size: 10px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    top: -23px;
+    color: #aba395;
+  }
 }
 
 ::view-transition-group(.hp-decrease) {

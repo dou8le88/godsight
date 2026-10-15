@@ -32,6 +32,9 @@ export function HpBar({
         </ViewTransition>
       </div>
       <div className="hp-percent">{currentHpPercent}%</div>
+      <div className="exact-hp">
+        {currentHp.toLocaleString()} / {maxHp.toLocaleString()}
+      </div>
     </div>
   );
 }

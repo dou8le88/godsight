@@ -11,10 +11,13 @@ export interface ConditionSummary {
   'buff'?: Condition[];
   'debuff'?: Condition[];
   /**
-   * TODO: Weird value, perhaps the original party slot of the affected character at battle start if it's a player?
-   * Unsure about when the boss has this value.
+   * TODO: Weird value, hard to correlate to any actual logic.
    */
   'num'?: number;
+  /**
+   * Shield HP if a status effect described by this condition granted a shield.
+   */
+  'coating_value'?: number;
 }
 
 export interface ConditionChangedScenarioData extends GenericScenarioData {

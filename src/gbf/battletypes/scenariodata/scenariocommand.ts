@@ -174,7 +174,10 @@ export enum ScenarioCommand {
    */
   _SPECIAL_CHANGE = 'special_change',
   /**
-   * Ignored command, do not use, exists for completeness in the parser.
+   * A type of status effect command, related to what shows up
+   * on top of the character's portrait and its ordering.
+   * Notably, includes the value of applied shields.
+   * However, we do not currently track character HP and shields.
    */
   _CONDITION = 'condition',
   /**
