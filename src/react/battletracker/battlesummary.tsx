@@ -12,13 +12,20 @@ export default function BattleSummary({
   const updateTime = new Date(battleData['lastUpdated']);
 
   const prettyUpdateTime = `${updateTime.toLocaleDateString()} ${updateTime.toLocaleTimeString()}`;
+  const waveCount =
+    battleData['totalWaves'] > 1
+      ? ` (${battleData['currentWave']}/${battleData['totalWaves']})`
+      : '';
 
   return (
     <div
       className="battle-summary-container"
       onClick={onClick}
     >
-      <div className="versus">Vs. {battleData['boss'][0]['name']}</div>
+      <div className="versus">
+        Vs. {battleData['boss'][0]['name']}
+        {waveCount}
+      </div>
       <div className="last-updated">Last updated: {prettyUpdateTime}</div>
       <div
         className="delete-button"

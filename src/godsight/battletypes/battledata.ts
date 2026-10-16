@@ -6,11 +6,14 @@ import { TurnData } from './turndata';
 
 export interface GodsightBattleData {
   'raidId': number;
+  'updateRaidIdTo'?: number;
   'questId': string;
   'IsCoopRaid': boolean;
   'isHost': boolean;
   'currentTurn': number;
   'updateTurnTo'?: number;
+  'currentWave': number;
+  'totalWaves': number;
   'abilityTurns': number[];
   'turnsWithSkippedOrRecordedAttackActions': number[];
   'honors': number;

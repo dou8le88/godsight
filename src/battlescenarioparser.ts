@@ -329,7 +329,13 @@ export class BattleScenarioParser {
           if (subactions.actions.length == 0) {
             // Sometimes we have empty ability commands followed by real ones, dunno why, the client is weird.
             // The real ability command should happen next so just break and continue the loop.
-            break;
+            // But only if we didn't process every single command looking for subactions.
+            // If we did and found nothing, proceed with recording the AbilityAction since it
+            // should still have some meaning in battle.
+            // Examples include Rei's and Caim's turn fastforward skills.
+            if (subactions.lastIndex != scenarioData.length - 1) {
+              break;
+            }
           }
           const sourceName = BattleActionHelper.getActorName(
             godsightBattleData['boss'],
@@ -1172,6 +1178,9 @@ export class BattleScenarioParser {
             godsightBattleData['battleProgressStatus'] =
               BattleProgressStatus.WON;
           }
+          if (wonBattleScenario['raid_id']) {
+            godsightBattleData['updateRaidIdTo'] = wonBattleScenario['raid_id'];
+          }
           break;
         }
 
@@ -1731,6 +1740,10 @@ export class BattleScenarioParser {
        */
       'expirationTime': Date.now() + startData['timer'] * 1000,
       'lastUpdated': Date.now(),
+      'currentWave':
+        (startData['battle'] && Number(startData['battle']['count'])) || 1,
+      'totalWaves':
+        (startData['battle'] && Number(startData['battle']['total'])) || 1,
       'abilityTurns': [0],
       'turnsWithSkippedOrRecordedAttackActions': [],
       'party': party,

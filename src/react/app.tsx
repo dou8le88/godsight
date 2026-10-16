@@ -123,7 +123,7 @@ export default function GodsightPanel() {
         godsightBattleData['battleStats'] = existingRaid['battleStats'];
         const abilityTurns = [...existingRaid['abilityTurns']];
         godsightBattleData['abilityTurns'].forEach((t) => {
-          if (!abilityTurns.includes(t)) {
+          if (t !== null && t !== undefined && !abilityTurns.includes(t)) {
             abilityTurns.push(t);
           }
         });
@@ -277,6 +277,8 @@ export default function GodsightPanel() {
 
           if (
             data['status'] &&
+            data['status']['ability_turn'] !== null &&
+            data['status']['ability_turn'] !== undefined &&
             !draft['abilityTurns'].includes(data['status']['ability_turn'])
           ) {
             draft['abilityTurns'].push(data['status']['ability_turn']);
@@ -329,11 +331,40 @@ export default function GodsightPanel() {
 
           if ('updateTurnTo' in draft) {
             const updatedTurn = draft['updateTurnTo']!;
-            draft['turnsWithSkippedOrRecordedAttackActions'].push(
-              ...range(draft['currentTurn'], updatedTurn - 1),
-            );
+            const turns = range(draft['currentTurn'], updatedTurn - 1);
+            turns.forEach((t) => {
+              if (
+                !draft['turnsWithSkippedOrRecordedAttackActions'].includes(t)
+              ) {
+                draft['turnsWithSkippedOrRecordedAttackActions'].push(t);
+              }
+            });
+
             draft['currentTurn'] = updatedTurn;
             delete draft['updateTurnTo'];
+          }
+
+          // multiwave battles don't have a turn_change action
+          // so we account for that here.
+          if (endpoint == 'normal_attack_result.json') {
+            if (
+              !draft['turnsWithSkippedOrRecordedAttackActions'].includes(
+                draft['currentTurn'],
+              )
+            ) {
+              draft['turnsWithSkippedOrRecordedAttackActions'].push(
+                draft['currentTurn'],
+              );
+            }
+          }
+
+          if (draft['updateRaidIdTo'] !== undefined) {
+            draft['raidId'] = draft['updateRaidIdTo'];
+            if (selectedBattle == battleId) {
+              setSelectedBattle(draft['raidId']);
+            }
+            setLastUpdatedBattle(draft['raidId']);
+            delete draft['updateRaidIdTo'];
           }
         });
 

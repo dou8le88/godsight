@@ -49,10 +49,15 @@ export default function BattleTracker({
 
   const bossName =
     battleData !== undefined ? battleData['boss'][0]['name'] : 'Unknown';
+  const waveCount =
+    battleData !== undefined && battleData['totalWaves'] > 1
+      ? ` (${battleData['currentWave']}/${battleData['totalWaves']})`
+      : '';
   const crossTabHeader = (
     <div className="battle-metadata">
       <div className="boss-name">
-        Vs. {bossName}{' '}
+        Vs. {bossName}
+        {waveCount}{' '}
         {isMissingAbilities || isMissingFinishedTurns ? (
           <span
             className="missing-info-warning"
