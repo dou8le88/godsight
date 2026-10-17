@@ -28,8 +28,8 @@ export class PartyChangeAction extends BattleAction {
         key={key}
         className="action-description"
       >
-        Party {this.oldPartyId + 1} left the field! Party {this.newPartyId + 1}{' '}
-        took to the field!
+        Party {this.oldPartyId} left the field! Party {this.newPartyId} took to
+        the field!
       </div>
     );
   }

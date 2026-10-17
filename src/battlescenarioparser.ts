@@ -956,9 +956,17 @@ export class BattleScenarioParser {
             godsightBattleData,
             isBossAttackPhase,
           );
-          const maybeMeaninglessAbilityActionIdx = subactions.actions.findIndex(
-            (a) => a instanceof AbilityAction && a.name == 'Unnamed Ability',
-          );
+          // This is meant to guard against other characters stealing credit
+          // for effects caused by summoning when using party 2 or 3 in Babyl.
+          // Kinda hacky.
+          const maybeMeaninglessAbilityActionIdx = godsightBattleData[
+            'babylParties'
+          ]
+            ? subactions.actions.findIndex(
+                (a) =>
+                  a instanceof AbilityAction && a.name == 'Unnamed Ability',
+              )
+            : -1;
           if (maybeMeaninglessAbilityActionIdx != -1) {
             subactions.actions = [
               ...subactions.actions.slice(0, maybeMeaninglessAbilityActionIdx),
@@ -1404,7 +1412,7 @@ export class BattleScenarioParser {
           // Tower of Babyl party switch.
           const partyChangeScenario = scenario as PartyChangeScenarioData;
           const oldPartyId = godsightBattleData['currentBabylParty']!;
-          const newPartyId = partyChangeScenario['main_party_num'] - 1;
+          const newPartyId = partyChangeScenario['main_party_num'];
           const newParty = godsightBattleData['babylParties']![newPartyId];
 
           const characterIndexOffset = this.computeCharacterIndexOffset(
@@ -1770,6 +1778,15 @@ export class BattleScenarioParser {
     };
   }
 
+  /**
+   * For Tower of Babyl parties only.
+   * We fold the extra parties into one big party,
+   * but this means we have to offset character indexes
+   * whenever we deal with them. Which is basically
+   * only when constructing party formations, as afterwards
+   * the standard 'pos' field on commands will line
+   * up with our constructed `frontline` and `members` layouts.
+   */
   private computeCharacterIndexOffset(
     currentPartyId: number,
     extraPartyData: Record<string | number, GodsightPartyMemberData[]>,
@@ -1816,7 +1833,7 @@ export class BattleScenarioParser {
       'isBabyl': !!startData['tower_party'],
       'currentBabylParty':
         startData['tower_front_party_num'] !== undefined
-          ? startData['tower_front_party_num'] - 1
+          ? startData['tower_front_party_num']
           : undefined,
       /**
        * If we miss a battle finish action while Godsight is closed,
@@ -1836,74 +1853,72 @@ export class BattleScenarioParser {
     };
 
     if (startData['tower_party']) {
-      // Tower of Babyl extra parties. Fold into other parties,
+      // Tower of Babyl extra parties. Fold into one party,
       // correct any data that was off.
       const extraParties = startData['tower_party']['param'];
-      const currentBacklineExtraPartyIds = Object.keys(extraParties).map(
-        (i) => Number(i) - 1,
+      const currentBacklineExtraPartyIds = Object.keys(extraParties).map((i) =>
+        Number(i),
       );
       const currentPartyId = battleData['currentBabylParty']!;
 
-      const extraPartyData: Record<string | number, GodsightPartyMemberData[]> =
-        {};
-
-      const allExtraMembers: GodsightPartyMemberData[] = [];
+      const partyData: Record<string | number, GodsightPartyMemberData[]> = {};
+      const allPartyMembers: GodsightPartyMemberData[] = [];
 
       currentBacklineExtraPartyIds.forEach((id) => {
-        extraPartyData[id] = [];
-        Object.values(extraParties[id + 1]).map((gbfChar) => {
+        partyData[id] = [];
+        Object.values(extraParties[id]).map((gbfChar) => {
           if (typeof gbfChar == 'object') {
             const char = this.getGodsightPartyMemberData(
               gbfChar,
               mainCharacterNameOverride,
             );
-            extraPartyData[id].push(char);
-            allExtraMembers.push(char);
+            partyData[id].push(char);
+            allPartyMembers.push(char);
           }
         });
       });
 
-      // MC is included invisibly in parties 2 and 3 to enable summon calls.
-      // Remove them.
-      const currentExtraParty: GodsightPartyMemberData[] = [];
-      if (currentPartyId != 0) {
-        currentExtraParty.push(...battleData['party']['members'].slice(1));
-        party['partyMemberCount'] = currentExtraParty.length;
+      // MC is included invisibly in parties 2 and 3 (to enable summon calls?),
+      // but only if those parties are in the frontline. Remove them.
+      const currentParty: GodsightPartyMemberData[] = [];
+      if (currentPartyId != 1) {
+        currentParty.push(...battleData['party']['members'].slice(1));
+        party['partyMemberCount'] = currentParty.length;
         party['frontline'] = range(0, party['partyMemberCount'] - 1);
       } else {
-        currentExtraParty.push(...battleData['party']['members']);
+        currentParty.push(...battleData['party']['members']);
       }
+      allPartyMembers.push(...currentParty);
 
-      extraPartyData[currentPartyId] = currentExtraParty.filter(
-        identity,
-      ) as GodsightPartyMemberData[];
+      partyData[currentPartyId] = currentParty;
 
-      party['partyMemberCount'] += allExtraMembers.length;
+      party['partyMemberCount'] = allPartyMembers.length;
       party['members'] = [];
 
-      Object.keys(extraPartyData).map((pid) => {
-        const partyId = Number(pid);
-        const offset = 4 * partyId;
-        extraPartyData[partyId].forEach((char, idx) => {
-          party['members'][offset + idx] = char;
-        });
+      let index = 0;
+      [1, 2, 3].map((partyId) => {
+        const babylParty = partyData[partyId];
+        if (babylParty) {
+          babylParty.forEach((char) => {
+            party['members'][index] = char;
+            index++;
+          });
+        }
       });
 
-      party['members'] = party['members'].filter(identity);
-
-      const offset = this.computeCharacterIndexOffset(
+      const frontlineOffset = this.computeCharacterIndexOffset(
         currentPartyId,
-        extraPartyData,
+        partyData,
       );
 
       party['frontline'] = party['frontline'].map(
-        (charIdx) => charIdx + offset,
+        (charIdx) => charIdx + frontlineOffset,
       );
       party['backline'] = range(0, party['partyMemberCount'] - 1).filter(
         (id) => !party['frontline'].includes(id),
       );
 
-      battleData['babylParties'] = extraPartyData;
+      battleData['babylParties'] = partyData;
 
       battleData['battleStats'] = StatsUpdateHelper.getEmptyStatsUpdate(
         party['partyMemberCount'],

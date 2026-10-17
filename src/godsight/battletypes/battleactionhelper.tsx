@@ -542,7 +542,9 @@ export class BattleActionHelper {
   }
 
   static getMainCharacterName(formation: GodsightPartyFormationData): string {
-    return formation['members'][0]['name'];
+    const maybeMC = formation['members'].find((char) => char['isMC']);
+
+    return maybeMC ? maybeMC['name'] : 'Unknown';
   }
 
   private static statusBaseUrl =

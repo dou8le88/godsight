@@ -444,7 +444,7 @@ export function Config({ onExit }: { onExit: () => void }) {
                 Example (this one loads the extension icon, not an image from
                 the GBF CDN):
                 <br />
-                Old Lignoid gained{' '}
+                Old Lignoid received{' '}
                 {BattleActionHelper.getStatusTextJsx(
                   {
                     'name': 'Godsight',

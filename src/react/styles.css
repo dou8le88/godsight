@@ -168,7 +168,13 @@ body,
   animation: config-fadeIn 0.2s forwards;
 }
 
+/* Ensure the HP bar animation doesn't play on top of the config window. */
+::view-transition-group(config-overlay) {
+  z-index: 2000;
+}
+
 .config-window {
+  view-transition-name: config-overlay;
   position: absolute;
   width: 95%;
   height: 95%;
@@ -623,6 +629,16 @@ body,
   margin-bottom: 5px;
 }
 
+.frontline-backline-divider {
+  width: 1px;
+  display: block;
+  cursor: default;
+  flex-shrink: 0;
+  background-color: white;
+  height: 90px;
+  align-self: center;
+}
+
 /*
 * Cloning some of Granblue's CSS here to imitate the avatar UI.
 * Particularly the element icons since they come from a spritesheet.
@@ -632,23 +648,6 @@ body,
   height: 100px;
   position: relative;
 
-  &:nth-child(4) {
-    margin-right: 10px;
-
-    &::after {
-      width: 1px;
-      height: 90px;
-      background-color: white;
-      content: '';
-      display: block;
-      position: absolute;
-      right: -8px;
-      bottom: 5px;
-      cursor: default;
-    }
-  }
-
-  &:nth-child(n + 5),
   &.backline-or-dead {
     .mask {
       display: block;

@@ -39,12 +39,14 @@ export function TurnTracker({
                 return <></>;
               }
             })}
+            <div className="frontline-backline-divider"></div>
             {backliners.map((char) => {
               if (char) {
                 return (
                   <Avatar
                     key={char['characterId']}
                     characterData={char}
+                    backline
                   />
                 );
               } else {
