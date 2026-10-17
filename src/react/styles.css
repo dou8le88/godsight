@@ -709,6 +709,44 @@ body,
       background-position: 0 -529px;
     }
   }
+
+  .death-icon {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 25;
+    font-size: 11px;
+  }
+
+  .portrait-noimage {
+    width: 49px;
+    height: 100px;
+    border: 1px solid #3bd4fe;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-shadow: black;
+
+    .character-name {
+      font-weight: bold;
+      font-size: 16px;
+      transform: rotate(-45deg);
+      text-shadow: 1px 1px black;
+    }
+  }
+
+  .element-icon-noimage {
+    display: block;
+    position: absolute;
+    top: 1px;
+    right: 2px;
+    z-index: 15;
+    font-weight: bold;
+    font-size: 12px;
+    width: 20px;
+    text-align: end;
+  }
 }
 
 .battle-info {

@@ -1,5 +1,4 @@
 import { GodsightBattleData } from '../../godsight/battletypes/battledata';
-import { useGodsightSettings } from '../../godsight/settings/usegodsightsettings';
 import Avatar from './avatar';
 import Turn from './turn';
 
@@ -21,42 +20,38 @@ export function TurnTracker({
 
     const turns = Object.keys(battleData['turnData']);
 
-    const settings = useGodsightSettings();
-
     return (
       <>
-        {settings['enableImageLoading'] ? (
-          <div className="party-container">
-            {frontliners.map((char) => {
-              if (char) {
-                return (
-                  <Avatar
-                    key={char['characterId']}
-                    characterData={char}
-                  />
-                );
-              } else {
-                return <></>;
-              }
-            })}
-            <div className="frontline-backline-divider"></div>
-            {backliners.map((char) => {
-              if (char) {
-                return (
-                  <Avatar
-                    key={char['characterId']}
-                    characterData={char}
-                    backline
-                  />
-                );
-              } else {
-                return <></>;
-              }
-            })}
-          </div>
-        ) : (
-          <></>
-        )}
+        <div className="party-container">
+          {frontliners.map((char) => {
+            if (char) {
+              return (
+                <Avatar
+                  key={char['characterId']}
+                  characterData={char}
+                  showName
+                />
+              );
+            } else {
+              return <></>;
+            }
+          })}
+          <div className="frontline-backline-divider"></div>
+          {backliners.map((char) => {
+            if (char) {
+              return (
+                <Avatar
+                  key={char['characterId']}
+                  characterData={char}
+                  backline
+                  showName
+                />
+              );
+            } else {
+              return <></>;
+            }
+          })}
+        </div>
         <div className="turn-container">
           {turns.length > 0 ? (
             <>

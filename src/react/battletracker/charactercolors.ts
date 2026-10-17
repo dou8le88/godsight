@@ -2,16 +2,16 @@
  * Twelve colors for twelve max party members (in Babyl).
  */
 export const CharacterColors = [
-  '#49917D',
-  '#65AC73',
-  '#9EBF61',
-  '#DACC6A',
-  '#8570C8',
-  '#7D95DD',
-  '#7CB7E9',
-  '#88D7F1',
-  '#B16F45',
-  '#D97A6F',
-  '#EB93A9',
-  '#EFB5D9',
+  '#1f78b4',
+  '#a6cee3',
+  '#33a02c',
+  '#b2df8a',
+  '#f93b3d',
+  '#fb9a99',
+  '#ff7f00',
+  '#fdbf6f',
+  '#6a3d9a',
+  '#cab2d6',
+  '#fb582a',
+  '#f48f73',
 ];
