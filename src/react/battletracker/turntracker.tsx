@@ -28,20 +28,28 @@ export function TurnTracker({
         {settings['enableImageLoading'] ? (
           <div className="party-container">
             {frontliners.map((char) => {
-              return (
-                <Avatar
-                  key={char['characterId']}
-                  characterData={char}
-                />
-              );
+              if (char) {
+                return (
+                  <Avatar
+                    key={char['characterId']}
+                    characterData={char}
+                  />
+                );
+              } else {
+                return <></>;
+              }
             })}
             {backliners.map((char) => {
-              return (
-                <Avatar
-                  key={char['characterId']}
-                  characterData={char}
-                />
-              );
+              if (char) {
+                return (
+                  <Avatar
+                    key={char['characterId']}
+                    characterData={char}
+                  />
+                );
+              } else {
+                return <></>;
+              }
             })}
           </div>
         ) : (

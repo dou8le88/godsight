@@ -52,6 +52,12 @@ export type StartData = GranblueBattleData & {
   'scenario': GenericScenarioData[];
   'status'?: BattleStatus;
   'chain_burst_gauge'?: string;
+
+  /** Tower of Babyl extra parties */
+  'tower_party'?: {
+    'param': Record<string | number, Record<string | number, PartyMemberData>>;
+  };
+  'tower_front_party_num'?: number;
 };
 
 export interface WaveData {

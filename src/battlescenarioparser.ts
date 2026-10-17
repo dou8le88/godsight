@@ -36,7 +36,11 @@ import { ReplaceCharacterScenarioData } from './gbf/battletypes/scenariodata/rep
 import { ScenarioCommand } from './gbf/battletypes/scenariodata/scenariocommand';
 import { HealingScenarioData } from './gbf/battletypes/scenariodata/healingscenariodata';
 import { WindowEffectScenarioData } from './gbf/battletypes/scenariodata/windoweffectscenariodata';
-import { BossData, StartData } from './gbf/battletypes/startdata';
+import {
+  BossData,
+  PartyMemberData,
+  StartData,
+} from './gbf/battletypes/startdata';
 import { AbilityAction } from './godsight/battletypes/abilityaction';
 import { BattleAction } from './godsight/battletypes/battleaction';
 import { GodsightBattleData } from './godsight/battletypes/battledata';
@@ -79,6 +83,7 @@ import { BattleLogScenarioData } from './gbf/battletypes/scenariodata/battlelogs
 import { RetreatAction } from './godsight/battletypes/retreataction';
 import {
   GodsightPartyFormationData,
+  GodsightPartyMemberData,
   PartyFormationHelper,
 } from './godsight/battletypes/partyformationdata';
 import { GranblueBattleData } from './gbf/battletypes/battledata';
@@ -93,6 +98,10 @@ import { HealingInstance } from './godsight/battletypes/healinginstance';
 import { HPChangedScenarioData } from './gbf/battletypes/scenariodata/hpchangedscenariodata';
 import { ImageChangeScenarioData } from './gbf/battletypes/scenariodata/imagechangescenariodata';
 import { FormChangeAction } from './godsight/battletypes/formchangeaction';
+import { PartyChangeScenarioData } from './gbf/battletypes/scenariodata/partychangescenariodata';
+import { identity } from './util/functional';
+import { range } from './util/range';
+import { PartyChangeAction } from './godsight/battletypes/partychangeaction';
 
 export class BattleScenarioParser {
   constructor() {
@@ -657,15 +666,19 @@ export class BattleScenarioParser {
           const firstNormalAttack = subactions.actions.find(
             (a) => a instanceof SingularNormalAttackAction,
           );
-          const attackerName = firstNormalAttack
-            ? firstNormalAttack.source == Actor.PLAYER
-              ? godsightBattleData['party']['members'][
-                  firstNormalAttack.attackerIndex
-                ]['name']
-              : godsightBattleData['boss'][firstNormalAttack.attackerIndex][
+          let attackerName = 'Unknown';
+          if (firstNormalAttack) {
+            if (firstNormalAttack.source == Actor.PLAYER) {
+              const attackerIdx = firstNormalAttack.attackerIndex;
+              attackerName =
+                godsightBattleData['party']['members'][attackerIdx]['name'];
+            } else {
+              attackerName =
+                godsightBattleData['boss'][firstNormalAttack.attackerIndex][
                   'name'
-                ]
-            : 'Unknown';
+                ];
+            }
+          }
           const normalAttackAction = new NormalAttackAction(
             attackerName,
             firstNormalAttack ? firstNormalAttack.isCounter : false,
@@ -943,6 +956,17 @@ export class BattleScenarioParser {
             godsightBattleData,
             isBossAttackPhase,
           );
+          const maybeMeaninglessAbilityActionIdx = subactions.actions.findIndex(
+            (a) => a instanceof AbilityAction && a.name == 'Unnamed Ability',
+          );
+          if (maybeMeaninglessAbilityActionIdx != -1) {
+            subactions.actions = [
+              ...subactions.actions.slice(0, maybeMeaninglessAbilityActionIdx),
+              ...subactions.actions[maybeMeaninglessAbilityActionIdx]
+                .subactions,
+              ...subactions.actions.slice(maybeMeaninglessAbilityActionIdx + 1),
+            ].filter(identity);
+          }
           let summonDamage: SummonDamageInstance[] = [];
           const unfixedSummonDamage = summonScenario['list'].map(
             (l) => l['damage'],
@@ -1291,8 +1315,10 @@ export class BattleScenarioParser {
             resurrectionScenario['pos'],
           );
 
-          godsightBattleData['party']['members'][characterIndex]['alive'] =
-            true;
+          if (godsightBattleData['party']['members'][characterIndex]) {
+            godsightBattleData['party']['members'][characterIndex]['alive'] =
+              true;
+          }
           break;
         }
 
@@ -1366,9 +1392,40 @@ export class BattleScenarioParser {
             Actor.PLAYER,
             imageChangeScenario['pos'],
           );
-          godsightBattleData['party']['members'][characterIdx][
-            'portraitImageId'
-          ] = imageChangeScenario['image_id'];
+          if (godsightBattleData['party']['members'][characterIdx]) {
+            godsightBattleData['party']['members'][characterIdx][
+              'portraitImageId'
+            ] = imageChangeScenario['image_id'];
+          }
+          break;
+        }
+
+        case ScenarioCommand.PARTY_CHANGE: {
+          // Tower of Babyl party switch.
+          const partyChangeScenario = scenario as PartyChangeScenarioData;
+          const oldPartyId = godsightBattleData['currentBabylParty']!;
+          const newPartyId = partyChangeScenario['main_party_num'] - 1;
+          const newParty = godsightBattleData['babylParties']![newPartyId];
+
+          const characterIndexOffset = this.computeCharacterIndexOffset(
+            newPartyId,
+            godsightBattleData['babylParties']!,
+          );
+
+          godsightBattleData['party']['frontline'] = newParty.map(
+            (_, idx) => idx + characterIndexOffset,
+          );
+          godsightBattleData['party']['backline'] = range(
+            0,
+            godsightBattleData['party']['partyMemberCount'] - 1,
+          ).filter(
+            (id) => !godsightBattleData['party']['frontline'].includes(id),
+          );
+
+          godsightBattleData['currentBabylParty'] = newPartyId;
+          actions.push(
+            new PartyChangeAction(oldPartyId, newPartyId, !isBossAttackPhase),
+          );
           break;
         }
 
@@ -1379,6 +1436,7 @@ export class BattleScenarioParser {
         case ScenarioCommand._DROP:
         case ScenarioCommand._GROUP_GAUGE:
         case ScenarioCommand._INFORMATION:
+        case ScenarioCommand._LINE_MESSAGE:
         case ScenarioCommand._LOSE:
         case ScenarioCommand._MODE_CHANGE:
         case ScenarioCommand._MOTION:
@@ -1485,7 +1543,6 @@ export class BattleScenarioParser {
       const allyIndex = battleData['party']['frontline'][position];
       const targetAlly = battleData['party']['members'][allyIndex];
       initialValue = targetAlly.meter;
-
       targetAlly['meter'] = newValue;
       change = newValue - initialValue;
     } else {
@@ -1679,6 +1736,55 @@ export class BattleScenarioParser {
     return actions;
   }
 
+  private getGodsightPartyMemberData(
+    character: PartyMemberData,
+    mainCharacterNameOverride: string,
+  ): GodsightPartyMemberData {
+    const isMC = Boolean(character['leader']);
+    let name = character['name'];
+    if (isMC && mainCharacterNameOverride) {
+      name = mainCharacterNameOverride;
+    }
+
+    return {
+      'name': name,
+      'characterId': String(character['setting_id']),
+      'isMC': Boolean(character['leader']),
+      /**
+       * Portrait filename to be used in the URL.
+       */
+      'portraitImageId': character['pid_image'],
+      'hpMax': character['hpmax'],
+      'hp': character['hp'],
+      'meter': character['recast'],
+      'meterMax': Number(character['recastmax']),
+      'element': character['attr'],
+      'weaponProficiency': character['weapon'],
+      'alive': Boolean(character['alive']),
+      'buffCount': (character['condition']['buff'] || []).length,
+      'debuffCount': (character['condition']['debuff'] || []).length,
+      'canBeResurrected': character['resurrection_availble_flag'], // sic
+      'isGuarding': Boolean(Number(character['is_guard_status'])),
+      'canGuard': !Number(character['is_guard_unavailable']),
+      'isVanished': Boolean(character['is_vanished']),
+    };
+  }
+
+  private computeCharacterIndexOffset(
+    currentPartyId: number,
+    extraPartyData: Record<string | number, GodsightPartyMemberData[]>,
+  ): number {
+    let pid = currentPartyId - 1;
+    let lowerNumberParty = extraPartyData[pid];
+    let offset = 0;
+    while (pid >= 0) {
+      offset += lowerNumberParty ? lowerNumberParty.length : 0;
+      lowerNumberParty = extraPartyData[--pid];
+    }
+
+    return offset;
+  }
+
   public parseStartData(
     startData: StartData,
     mainCharacterNameOverride: string,
@@ -1687,36 +1793,9 @@ export class BattleScenarioParser {
       'partyMemberCount': startData['player']['number'],
       'frontline': startData['formation'].map((idx) => Number(idx)),
       'backline': startData['back_formation'].map((idx) => Number(idx)),
-      'members': startData['player']['param'].map((character) => {
-        const isMC = Boolean(character['leader']);
-        let name = character['name'];
-        if (isMC && mainCharacterNameOverride) {
-          name = mainCharacterNameOverride;
-        }
-
-        return {
-          'name': name,
-          'characterId': String(character['setting_id']),
-          'isMC': Boolean(character['leader']),
-          /**
-           * Portrait filename to be used in the URL.
-           */
-          'portraitImageId': character['pid_image'],
-          'hpMax': character['hpmax'],
-          'hp': character['hp'],
-          'meter': character['recast'],
-          'meterMax': Number(character['recastmax']),
-          'element': character['attr'],
-          'weaponProficiency': character['weapon'],
-          'alive': Boolean(character['alive']),
-          'buffCount': (character['condition']['buff'] || []).length,
-          'debuffCount': (character['condition']['debuff'] || []).length,
-          'canBeResurrected': character['resurrection_availble_flag'], // sic
-          'isGuarding': Boolean(Number(character['is_guard_status'])),
-          'canGuard': !Number(character['is_guard_unavailable']),
-          'isVanished': Boolean(character['is_vanished']),
-        };
-      }),
+      'members': startData['player']['param'].map((character) =>
+        this.getGodsightPartyMemberData(character, mainCharacterNameOverride),
+      ),
     };
 
     const battleData: GodsightBattleData = {
@@ -1734,6 +1813,11 @@ export class BattleScenarioParser {
       ),
       'fatedChainGauge': Number(startData['chain_burst_gauge'] || 0),
       'battleProgressStatus': BattleProgressStatus.ACTIVE,
+      'isBabyl': !!startData['tower_party'],
+      'currentBabylParty':
+        startData['tower_front_party_num'] !== undefined
+          ? startData['tower_front_party_num'] - 1
+          : undefined,
       /**
        * If we miss a battle finish action while Godsight is closed,
        * we can use this time reference to determine if it has already expired.
@@ -1750,6 +1834,81 @@ export class BattleScenarioParser {
       'boss': startData['boss']['param'].map((b) => this.getBossData(b)),
       'turnData': {},
     };
+
+    if (startData['tower_party']) {
+      // Tower of Babyl extra parties. Fold into other parties,
+      // correct any data that was off.
+      const extraParties = startData['tower_party']['param'];
+      const currentBacklineExtraPartyIds = Object.keys(extraParties).map(
+        (i) => Number(i) - 1,
+      );
+      const currentPartyId = battleData['currentBabylParty']!;
+
+      const extraPartyData: Record<string | number, GodsightPartyMemberData[]> =
+        {};
+
+      const allExtraMembers: GodsightPartyMemberData[] = [];
+
+      currentBacklineExtraPartyIds.forEach((id) => {
+        extraPartyData[id] = [];
+        Object.values(extraParties[id + 1]).map((gbfChar) => {
+          if (typeof gbfChar == 'object') {
+            const char = this.getGodsightPartyMemberData(
+              gbfChar,
+              mainCharacterNameOverride,
+            );
+            extraPartyData[id].push(char);
+            allExtraMembers.push(char);
+          }
+        });
+      });
+
+      // MC is included invisibly in parties 2 and 3 to enable summon calls.
+      // Remove them.
+      const currentExtraParty: GodsightPartyMemberData[] = [];
+      if (currentPartyId != 0) {
+        currentExtraParty.push(...battleData['party']['members'].slice(1));
+        party['partyMemberCount'] = currentExtraParty.length;
+        party['frontline'] = range(0, party['partyMemberCount'] - 1);
+      } else {
+        currentExtraParty.push(...battleData['party']['members']);
+      }
+
+      extraPartyData[currentPartyId] = currentExtraParty.filter(
+        identity,
+      ) as GodsightPartyMemberData[];
+
+      party['partyMemberCount'] += allExtraMembers.length;
+      party['members'] = [];
+
+      Object.keys(extraPartyData).map((pid) => {
+        const partyId = Number(pid);
+        const offset = 4 * partyId;
+        extraPartyData[partyId].forEach((char, idx) => {
+          party['members'][offset + idx] = char;
+        });
+      });
+
+      party['members'] = party['members'].filter(identity);
+
+      const offset = this.computeCharacterIndexOffset(
+        currentPartyId,
+        extraPartyData,
+      );
+
+      party['frontline'] = party['frontline'].map(
+        (charIdx) => charIdx + offset,
+      );
+      party['backline'] = range(0, party['partyMemberCount'] - 1).filter(
+        (id) => !party['frontline'].includes(id),
+      );
+
+      battleData['babylParties'] = extraPartyData;
+
+      battleData['battleStats'] = StatsUpdateHelper.getEmptyStatsUpdate(
+        party['partyMemberCount'],
+      );
+    }
 
     // Bosses can start the battle with actions, reflected in the "scenario" field.
     // It's empty when loading into a raid in the middle of some arbitrary turn,

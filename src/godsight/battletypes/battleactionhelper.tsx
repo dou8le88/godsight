@@ -574,9 +574,9 @@ export class BattleActionHelper {
         }
         break;
       case Actor.PLAYER:
-        battleData['party']['members'][receiverIndex]['hp'] = newHp;
+        battleData['party']['members'][receiverIndex]!['hp'] = newHp;
         if (newMaxHp !== undefined) {
-          battleData['party']['members'][receiverIndex]['hpMax'] = newMaxHp;
+          battleData['party']['members'][receiverIndex]!['hpMax'] = newMaxHp;
         }
         break;
       default:

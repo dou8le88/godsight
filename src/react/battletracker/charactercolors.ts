@@ -1,14 +1,17 @@
 /**
- * Nine colors for nine max party members (in Unlimited raids).
+ * Twelve colors for twelve max party members (in Babyl).
  */
 export const CharacterColors = [
-  '#ef476f',
-  '#f78c6b',
-  '#ffd166',
-  '#83d483',
-  '#06d6a0',
-  '#0cb0a9',
-  '#118ab2',
-  '#0c637f',
-  '#073b4c',
+  '#49917D',
+  '#65AC73',
+  '#9EBF61',
+  '#DACC6A',
+  '#8570C8',
+  '#7D95DD',
+  '#7CB7E9',
+  '#88D7F1',
+  '#B16F45',
+  '#D97A6F',
+  '#EB93A9',
+  '#EFB5D9',
 ];

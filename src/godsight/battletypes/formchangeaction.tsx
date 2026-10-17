@@ -34,7 +34,7 @@ export class FormChangeAction extends BattleAction {
 
   static override fromJSON(
     json: Record<string, unknown>,
-  ): BattleAction | undefined {
+  ): FormChangeAction | undefined {
     const actionType = json['actionType'];
     if (actionType == ActionType.FORM_CHANGE) {
       const action = new FormChangeAction(

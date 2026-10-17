@@ -14,6 +14,7 @@ import { HealingAction } from './healingaction';
 import { MultihitDamageAction } from './multihitdamageaction';
 import { NormalAttackAction } from './normalattackaction';
 import { OmenCancelAction } from './omencancelaction';
+import { PartyChangeAction } from './partychangeaction';
 import { ReplaceCharacterAction } from './replacecharacteraction';
 import { ResurrectedAction } from './resurrectedaction';
 import { RetreatAction } from './retreataction';
@@ -93,6 +94,9 @@ export class BattleActionParser {
 
         case ActionType.FORM_CHANGE:
           return FormChangeAction.fromJSON(json);
+
+        case ActionType.SWITCHED_PARTIES:
+          return PartyChangeAction.fromJSON(json);
 
         default:
           console.error(`Unknown action type ${actionType}!`);

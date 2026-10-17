@@ -104,13 +104,13 @@ export function BattleStats({
       [StatsView.CHARACTER]: {},
     };
     const viewNames = {
-      [StatsView.TOTAL]: 'Party Damage Breakdown',
+      [StatsView.TOTAL]: 'Party Stat Breakdown',
       [StatsView.DPT]: 'Average DPT Breakdown',
       [StatsView.CURRENT_TURN]: 'Current Turn Breakdown',
       [StatsView.PREV_TURN]: 'Previous Turn Breakdown',
       [StatsView.PREV_TURN_BEFORE_BOSS_ACTION]:
         'Previous Turn Omen-Contributing Breakdown',
-      [StatsView.CHARACTER]: `${battleData['party']['members'][selectedCharacter]['name']}'s Damage Breakdown`,
+      [StatsView.CHARACTER]: `${battleData['party']['members'][selectedCharacter]['name']}'s Stat Breakdown`,
     };
 
     const [selectedBreakdown, setSelectedBreakdown] = useState(

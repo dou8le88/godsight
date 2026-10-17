@@ -976,6 +976,7 @@ body,
     top: -33px;
     left: 1px;
     z-index: 15;
+    font-weight: bold;
   }
 
   .exact-hp {
@@ -985,6 +986,7 @@ body,
     position: relative;
     top: -23px;
     color: #aba395;
+    font-weight: bold;
   }
 }
 

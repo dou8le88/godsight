@@ -405,6 +405,7 @@ export default function GodsightPanel() {
               case 'temporary_item_result.json':
               case 'user_recovery.json':
               case 'retire.json':
+              case 'tower_party_change.json':
                 try {
                   const body = JSON.parse(content) as GranblueBattleData;
                   battleDataHandler(body, endpoint);
@@ -445,6 +446,8 @@ export default function GodsightPanel() {
               case 'multi_battle_log':
               case 'setting':
               case 'showed_vote_result.json':
+              case 'skip_special_motion_setting.json':
+              case 'skip_special_motion_setting_all.json':
               case 'special_skill_setting':
               case 'stamp_list':
               case 'user_battle_log':

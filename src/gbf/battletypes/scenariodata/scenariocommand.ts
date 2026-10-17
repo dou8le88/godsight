@@ -143,6 +143,10 @@ export enum ScenarioCommand {
    * Party member portrait changed.
    */
   IMAGE_CHANGE = 'image_change',
+  /**
+   * In Babyl, swapping which party you're using.
+   */
+  PARTY_CHANGE = 'party_change',
 
   /**
    * Sometimes contains useful information about certain actions, such as attacking under the effects of Confusion.
@@ -224,4 +228,9 @@ export enum ScenarioCommand {
    * Ignored command, do not use, exists for completeness in the parser.
    */
   _MOTION_LINK = 'motion_link',
+  /**
+   * In Babyl, the party switch message.
+   * Ignored command, do not use, exists for completeness in the parser.
+   */
+  _LINE_MESSAGE = 'line_message',
 }

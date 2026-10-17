@@ -1,7 +1,10 @@
 import { BattleStats } from './battlestats';
 import { BattleProgressStatus } from './battleprogressstatus';
 import { GodsightBossData } from './bossdata';
-import { GodsightPartyFormationData } from './partyformationdata';
+import {
+  GodsightPartyFormationData,
+  GodsightPartyMemberData,
+} from './partyformationdata';
 import { TurnData } from './turndata';
 
 export interface GodsightBattleData {
@@ -19,6 +22,9 @@ export interface GodsightBattleData {
   'honors': number;
   'fatedChainGauge': number;
   'battleProgressStatus': BattleProgressStatus;
+  'isBabyl': boolean;
+  'currentBabylParty'?: number;
+  'babylParties'?: Record<string | number, GodsightPartyMemberData[]>;
   'expirationTime': number;
   'lastUpdated': number;
   'party': GodsightPartyFormationData;
