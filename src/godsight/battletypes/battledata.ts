@@ -25,6 +25,7 @@ export interface GodsightBattleData {
   'isBabyl': boolean;
   'currentBabylParty'?: number;
   'babylParties'?: Record<string | number, GodsightPartyMemberData[]>;
+  'babylFormations'?: Record<string | number, number[]>;
   'expirationTime': number;
   'lastUpdated': number;
   'party': GodsightPartyFormationData;

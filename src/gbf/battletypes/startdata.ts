@@ -58,6 +58,7 @@ export type StartData = GranblueBattleData & {
     'param': Record<string | number, Record<string | number, PartyMemberData>>;
   };
   'tower_front_party_num'?: number;
+  'tower_formation'?: Record<string | number, (string | number)[]>;
 };
 
 export interface WaveData {

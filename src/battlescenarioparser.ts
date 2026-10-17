@@ -1415,14 +1415,30 @@ export class BattleScenarioParser {
           const newPartyId = partyChangeScenario['main_party_num'];
           const newParty = godsightBattleData['babylParties']![newPartyId];
 
+          const newFrontline = godsightBattleData['babylFormations']![
+            newPartyId
+          ] as number[] | undefined;
+
+          const oldCharacterIndexOffset = this.computeCharacterIndexOffset(
+            oldPartyId,
+            godsightBattleData['babylParties']!,
+          );
+
+          // Put the current frontline into formations in the same format
+          // as we get from start data.
+          godsightBattleData['babylFormations']![oldPartyId] =
+            godsightBattleData['party']['frontline'].map(
+              (idx) => idx - oldCharacterIndexOffset,
+            );
+
           const characterIndexOffset = this.computeCharacterIndexOffset(
             newPartyId,
             godsightBattleData['babylParties']!,
           );
 
-          godsightBattleData['party']['frontline'] = newParty.map(
-            (_, idx) => idx + characterIndexOffset,
-          );
+          godsightBattleData['party']['frontline'] = (
+            newFrontline || newParty.map((_, idx) => idx)
+          ).map((idx) => idx + characterIndexOffset);
           godsightBattleData['party']['backline'] = range(
             0,
             godsightBattleData['party']['partyMemberCount'] - 1,
@@ -1815,6 +1831,24 @@ export class BattleScenarioParser {
       ),
     };
 
+    const babylFormations = startData['tower_formation']
+      ? (Object.assign(
+          {},
+          ...Object.keys(startData['tower_formation']).map((stringPartyId) => {
+            const partyId = Number(stringPartyId);
+            return {
+              [partyId]: startData['tower_formation']![partyId].map((idx) => {
+                if (partyId != 1) {
+                  return Number(idx) - 1;
+                } else {
+                  return Number(idx);
+                }
+              }),
+            };
+          }),
+        ) as Record<string | number, number[]>)
+      : undefined;
+
     const battleData: GodsightBattleData = {
       'raidId': startData['raid_id'],
       'questId': startData['quest_id'],
@@ -1835,6 +1869,7 @@ export class BattleScenarioParser {
         startData['tower_front_party_num'] !== undefined
           ? startData['tower_front_party_num']
           : undefined,
+      'babylFormations': babylFormations,
       /**
        * If we miss a battle finish action while Godsight is closed,
        * we can use this time reference to determine if it has already expired.
