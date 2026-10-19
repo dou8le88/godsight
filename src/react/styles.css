@@ -739,12 +739,11 @@ body,
   .element-icon-noimage {
     display: block;
     position: absolute;
-    top: 1px;
-    right: 2px;
+    top: -1px;
+    right: 3px;
     z-index: 15;
     font-weight: bold;
     font-size: 12px;
-    width: 20px;
     text-align: end;
   }
 }

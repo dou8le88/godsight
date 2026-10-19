@@ -65,7 +65,7 @@ export default function Avatar({
             className={`element-icon-noimage element ${elementName}`}
             title={elementName}
           >
-            {elementName.slice(0, 2)}
+            ⬤
           </div>
           <div className="mask" />
           {!characterData['alive'] ? (
