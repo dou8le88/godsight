@@ -8,6 +8,7 @@ import { BattleActionHelper } from './battleactionhelper';
 import { assertNotNullOrUndefined } from '../../util/assert';
 import { GodsightSettings } from '../settings/godsightsettings';
 import { GameElementHelper } from '../../gbf/battletypes/scenariodata/mechanics/element';
+import { AbilityAction } from './abilityaction';
 
 export class SummonAction extends BattleAction {
   public actionType: ActionType = ActionType.CALLED_SUMMON;
@@ -86,40 +87,59 @@ export class SummonAction extends BattleAction {
       }
     }
 
-    const subactionUpdates = this.subactions.map((action) => action.getStats());
+    // Summon skill damage is weird. Some summons like Bubs do skill damage
+    // as a direct subaction of the summon call, while some like M3 summons
+    // do it with an Ability subaction that itself contains a damage action.
+    // In the former case, we want to correct the damage dealt to attribute it to MC.
+    // In the latter case, the Ability subaction does that for us.
+    const abilitySubactionUpdates = this.subactions
+      .filter((a) => a instanceof AbilityAction)
+      .map((a) => a.getStats());
 
-    const mergedSubactionUpdates = subactionUpdates.reduce(
+    const mergedAbilitySubactionUpdates = abilitySubactionUpdates.reduce(
       (prev, cur) => StatsUpdateHelper.concatUpdates(prev, cur),
       StatsUpdateHelper.getEmptyStatsUpdate(this.partySize),
     );
 
-    const subactionHitCount =
-      mergedSubactionUpdates['generalStats']['hitCount'];
-    const subactionSkillDamage =
-      mergedSubactionUpdates['generalStats']['skillDamage'];
-    const subactionDebuffCount =
-      mergedSubactionUpdates['generalStats']['debuffsInflictedCount'];
+    const nonAbilitySubactionUpdates = this.subactions
+      .filter((a) => !(a instanceof AbilityAction))
+      .map((a) => a.getStats());
 
-    update['characterStats'][0]['hitCount'] += subactionHitCount;
+    const mergedNonAbilitySubactionUpdates = nonAbilitySubactionUpdates.reduce(
+      (prev, cur) => StatsUpdateHelper.concatUpdates(prev, cur),
+      StatsUpdateHelper.getEmptyStatsUpdate(this.partySize),
+    );
+
+    const nonAbilitySubactionHitCount =
+      mergedNonAbilitySubactionUpdates['generalStats']['hitCount'];
+    const nonAbilitySubactionSkillDamage =
+      mergedNonAbilitySubactionUpdates['generalStats']['skillDamage'];
+    const nonAbilitySubactionDebuffCount =
+      mergedNonAbilitySubactionUpdates['generalStats']['debuffsInflictedCount'];
+
+    update['characterStats'][0]['hitCount'] += nonAbilitySubactionHitCount;
     update['characterStats'][0]['debuffsInflictedCount'] +=
-      subactionDebuffCount;
+      nonAbilitySubactionDebuffCount;
     GameElementHelper.getAllElements().forEach((element) => {
       update['characterStats'][0]['skillDamage'][element] +=
-        subactionSkillDamage[element];
+        nonAbilitySubactionSkillDamage[element];
     });
 
     if (this.beforeBossTurn) {
       update['characterBeforeBossTurnStats'][0]['hitCount'] +=
-        subactionHitCount;
+        nonAbilitySubactionHitCount;
       update['characterBeforeBossTurnStats'][0]['debuffsInflictedCount'] +=
-        subactionDebuffCount;
+        nonAbilitySubactionDebuffCount;
       GameElementHelper.getAllElements().forEach((element) => {
         update['characterBeforeBossTurnStats'][0]['skillDamage'][element] +=
-          subactionSkillDamage[element];
+          nonAbilitySubactionSkillDamage[element];
       });
     }
 
-    return StatsUpdateHelper.concatUpdates(update, mergedSubactionUpdates);
+    return StatsUpdateHelper.concatUpdates(
+      StatsUpdateHelper.concatUpdates(update, mergedAbilitySubactionUpdates),
+      mergedNonAbilitySubactionUpdates,
+    );
   }
 
   static override fromJSON(
