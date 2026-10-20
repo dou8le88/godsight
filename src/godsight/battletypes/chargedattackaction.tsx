@@ -85,6 +85,8 @@ export class ChargedAttackAction extends BattleAction {
       // These subactions have no way to associate certain general stats with
       // a specific character, so we must do it here.
       const subactionHitCount = subactionUpdates['generalStats']['hitCount'];
+      const subactionSkillHitCount =
+        subactionUpdates['generalStats']['skillHits'];
       const subactionDebuffs =
         subactionUpdates['generalStats']['debuffsInflictedCount'];
       const subactionSkillDamage =
@@ -92,6 +94,8 @@ export class ChargedAttackAction extends BattleAction {
 
       subactionUpdates['characterStats'][this.attackerIndex]['hitCount'] +=
         subactionHitCount;
+      subactionUpdates['characterStats'][this.attackerIndex]['skillHits'] +=
+        subactionSkillHitCount;
       subactionUpdates['characterStats'][this.attackerIndex][
         'debuffsInflictedCount'
       ] += subactionDebuffs;
@@ -99,6 +103,9 @@ export class ChargedAttackAction extends BattleAction {
         subactionUpdates['characterBeforeBossTurnStats'][this.attackerIndex][
           'hitCount'
         ] += subactionHitCount;
+        subactionUpdates['characterBeforeBossTurnStats'][this.attackerIndex][
+          'skillHits'
+        ] += subactionSkillHitCount;
         subactionUpdates['characterBeforeBossTurnStats'][this.attackerIndex][
           'debuffsInflictedCount'
         ] += subactionDebuffs;

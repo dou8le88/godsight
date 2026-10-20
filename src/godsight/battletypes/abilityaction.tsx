@@ -76,6 +76,9 @@ export class AbilityAction extends BattleAction {
         // The subactions have no way to associate certain general stats with
         // a specific character, so we must do it here.
         const subactionHitCount = allUpdates['generalStats']['hitCount'];
+        const subactionNormalAttackHitCount =
+          allUpdates['generalStats']['normalAttackHits'];
+        const subactionSkillHitCount = allUpdates['generalStats']['skillHits'];
         const subactionDebuffs =
           allUpdates['generalStats']['debuffsInflictedCount'];
         const subactionNormalAttackDamage =
@@ -96,6 +99,10 @@ export class AbilityAction extends BattleAction {
 
         allUpdates['characterStats'][this.sourceIndex]['hitCount'] +=
           subactionHitCount;
+        allUpdates['characterStats'][this.sourceIndex]['normalAttackHits'] +=
+          subactionNormalAttackHitCount;
+        allUpdates['characterStats'][this.sourceIndex]['skillHits'] +=
+          subactionSkillHitCount;
         allUpdates['characterStats'][this.sourceIndex][
           'debuffsInflictedCount'
         ] += subactionDebuffs;
@@ -103,6 +110,12 @@ export class AbilityAction extends BattleAction {
           allUpdates['characterBeforeBossTurnStats'][this.sourceIndex][
             'hitCount'
           ] += subactionHitCount;
+          allUpdates['characterBeforeBossTurnStats'][this.sourceIndex][
+            'normalAttackHits'
+          ] += subactionNormalAttackHitCount;
+          allUpdates['characterBeforeBossTurnStats'][this.sourceIndex][
+            'skillHits'
+          ] += subactionSkillHitCount;
           allUpdates['characterBeforeBossTurnStats'][this.sourceIndex][
             'debuffsInflictedCount'
           ] += subactionDebuffs;

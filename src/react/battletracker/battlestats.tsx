@@ -104,7 +104,7 @@ export function BattleStats({
       [StatsView.CHARACTER]: {},
     };
     const viewNames = {
-      [StatsView.TOTAL]: 'Party Stat Breakdown',
+      [StatsView.TOTAL]: 'Party Breakdown',
       [StatsView.DPT]: 'Average DPT Breakdown',
       [StatsView.CURRENT_TURN]: 'Current Turn Breakdown',
       [StatsView.PREV_TURN]: 'Previous Turn Breakdown',

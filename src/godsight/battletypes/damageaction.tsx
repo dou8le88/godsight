@@ -51,8 +51,10 @@ export class DamageAction extends BattleAction {
             }
             if (instance['value'] > 0) {
               update['generalStats']['hitCount'] += 1;
+              update['generalStats']['skillHits'] += 1;
               if (this.beforeBossTurn) {
                 update['beforeBossTurnStats']['hitCount'] += 1;
+                update['beforeBossTurnStats']['skillHits'] += 1;
               }
             }
           }

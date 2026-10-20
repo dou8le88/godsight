@@ -134,6 +134,8 @@ export class SummonAction extends BattleAction {
 
     update['characterStats'][summonSourceIndex]['hitCount'] +=
       nonAbilitySubactionHitCount;
+    update['characterStats'][summonSourceIndex]['skillHits'] +=
+      nonAbilitySubactionHitCount;
     update['characterStats'][summonSourceIndex]['debuffsInflictedCount'] +=
       nonAbilitySubactionDebuffCount;
     GameElementHelper.getAllElements().forEach((element) => {
@@ -143,6 +145,8 @@ export class SummonAction extends BattleAction {
 
     if (this.beforeBossTurn) {
       update['characterBeforeBossTurnStats'][summonSourceIndex]['hitCount'] +=
+        nonAbilitySubactionHitCount;
+      update['characterBeforeBossTurnStats'][summonSourceIndex]['skillHits'] +=
         nonAbilitySubactionHitCount;
       update['characterBeforeBossTurnStats'][summonSourceIndex][
         'debuffsInflictedCount'

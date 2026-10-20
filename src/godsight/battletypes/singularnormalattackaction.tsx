@@ -54,11 +54,17 @@ export class SingularNormalAttackAction extends BattleAction {
           }
           if (instance['value'] > 0) {
             update['generalStats']['hitCount'] += 1;
+            update['generalStats']['normalAttackHits'] += 1;
             update['characterStats'][attackerIndex]['hitCount'] += 1;
+            update['characterStats'][attackerIndex]['normalAttackHits'] += 1;
             if (this.beforeBossTurn) {
               update['beforeBossTurnStats']['hitCount'] += 1;
+              update['beforeBossTurnStats']['normalAttackHits'] += 1;
               update['characterBeforeBossTurnStats'][attackerIndex][
                 'hitCount'
+              ] += 1;
+              update['characterBeforeBossTurnStats'][attackerIndex][
+                'normalAttackHits'
               ] += 1;
             }
           }

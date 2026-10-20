@@ -2,6 +2,8 @@ import { GameElementHelper } from '../../gbf/battletypes/scenariodata/mechanics/
 
 export interface Stats {
   'hitCount': number;
+  'normalAttackHits': number;
+  'skillHits': number;
   'debuffsInflictedCount': number;
   'healingReceived': number;
   'normalAttackDamage': DamageByElement;
@@ -37,6 +39,8 @@ export class StatsUpdateHelper {
   static getEmptyStats(): Stats {
     return {
       'hitCount': 0,
+      'normalAttackHits': 0,
+      'skillHits': 0,
       'debuffsInflictedCount': 0,
       'healingReceived': 0,
       'normalAttackDamage': this.getEmptyElementValues(),

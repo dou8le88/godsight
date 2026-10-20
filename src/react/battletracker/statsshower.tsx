@@ -50,6 +50,8 @@ export function StatsShower({
   );
 
   const hitCount = Math.round(stats['hitCount']);
+  const normalAttackHits = Math.round(stats['normalAttackHits']);
+  const skillHits = Math.round(stats['skillHits']);
   const debuffs = Math.round(stats['debuffsInflictedCount']);
 
   const dotDamage = Math.round(stats['dotDamage']);
@@ -124,6 +126,14 @@ export function StatsShower({
         <div className="stat-line">
           <span className="stat-label">Hit count:</span>{' '}
           <span className="stat-value">{hitCount}</span>
+        </div>
+        <div className="stat-line">
+          <span className="stat-label">NA hits:</span>{' '}
+          <span className="stat-value">{normalAttackHits}</span>
+        </div>
+        <div className="stat-line">
+          <span className="stat-label">Skill hits:</span>{' '}
+          <span className="stat-value">{skillHits}</span>
         </div>
         <div className="stat-line">
           <span className="stat-label">Debuffs:</span>{' '}
