@@ -43,7 +43,6 @@ The only code that interfaces with the devtools APIs is in [/src/devtools.ts](/s
 
 - **This extension does not currently support the ingame Japanese language option. For now, please only use the extension with the ingame language set to English.**
 - This extension cannot intercept battle updates from other players. Thus, you will not see HP update inside the extension until you perform an action (similar to the ingame "Live Battle Feed" setting being off).
-- Multihit summons may have incorrect hitcounts when called with a cross-summon. This is because when a summon is "reskinned" (either through setting an actual skin for your main summon, or cross-summoning), it will only display a single hit in the damage data for mono-elemental summon damage, even if it's actually several hits mechanically. We can get around this for reskinned main summons, as we can look up the summon by its call name and parse its description for the real hitcount, but cross-summons don't give us any way to find the original summon data to correct the hitcount.
 
 ## Bug Reports and Contributions
 

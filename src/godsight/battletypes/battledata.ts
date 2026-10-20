@@ -6,6 +6,7 @@ import {
   GodsightPartyMemberData,
 } from './partyformationdata';
 import { TurnData } from './turndata';
+import { GodsightSummonData } from './summondata';
 
 export interface GodsightBattleData {
   'raidId': number;
@@ -29,6 +30,9 @@ export interface GodsightBattleData {
   'expirationTime': number;
   'lastUpdated': number;
   'party': GodsightPartyFormationData;
+  'lyriaIndex': number;
+  'summons': GodsightSummonData[];
+  'supportSummon'?: GodsightSummonData;
   'boss': GodsightBossData[];
   'battleStats': BattleStats;
   'turnData': Record<number | string, TurnData>;

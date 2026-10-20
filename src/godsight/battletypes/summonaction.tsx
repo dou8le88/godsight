@@ -14,7 +14,9 @@ export class SummonAction extends BattleAction {
   public actionType: ActionType = ActionType.CALLED_SUMMON;
 
   constructor(
+    public summonName: string,
     public summonCallName: string,
+    public lyriaIndex: number,
     public mainCharacterName: string,
     public partySize: number,
     public beforeBossTurn: boolean,
@@ -35,13 +37,18 @@ export class SummonAction extends BattleAction {
       );
     }
 
+    let summonerName = this.mainCharacterName;
+    if (this.lyriaIndex != -1) {
+      summonerName = 'Lyria';
+    }
+
     return (
       <div
         key={key}
         className="action-description"
       >
-        {this.mainCharacterName} called {this.summonCallName}!
-        {damageInstanceJsx}
+        {summonerName} summoned {this.summonName} with the call{' '}
+        {this.summonCallName}!{damageInstanceJsx}
         {this.subactions.map((subaction, idx) =>
           subaction.getDescription(idx, settings),
         )}
@@ -51,38 +58,46 @@ export class SummonAction extends BattleAction {
 
   getStats(): StatsUpdate {
     const update = StatsUpdateHelper.getEmptyStatsUpdate(this.partySize);
+    // Summons are attributed to Lyria if she's in the party, and MC otherwise.
+    const summonSourceIndex = this.lyriaIndex != -1 ? this.lyriaIndex : 0;
 
     this.damageInstances.forEach((instance) => {
       update['generalStats']['otherDamage'][instance['element']] +=
         instance['value'];
-      // The game considers summon damage to belong to MC
-      update['characterStats'][0]['otherDamage'][instance['element']] +=
-        instance['value'];
+      update['characterStats'][summonSourceIndex]['otherDamage'][
+        instance['element']
+      ] += instance['value'];
       if (this.beforeBossTurn) {
         update['beforeBossTurnStats']['otherDamage'][instance['element']] +=
           instance['value'];
-        update['characterBeforeBossTurnStats'][0]['otherDamage'][
-          instance['element']
-        ] += instance['value'];
+        update['characterBeforeBossTurnStats'][summonSourceIndex][
+          'otherDamage'
+        ][instance['element']] += instance['value'];
       }
 
       if (instance['value'] > 0) {
         update['generalStats']['hitCount'] += 1;
-        update['characterStats'][0]['hitCount'] += 1;
+        update['characterStats'][summonSourceIndex]['hitCount'] += 1;
         if (this.beforeBossTurn) {
           update['beforeBossTurnStats']['hitCount'] += 1;
-          update['characterBeforeBossTurnStats'][0]['hitCount'] += 1;
+          update['characterBeforeBossTurnStats'][summonSourceIndex][
+            'hitCount'
+          ] += 1;
         }
       }
     });
 
     const maybeHitCountOverride = this.trueSummonHitCount;
-    if (maybeHitCountOverride !== undefined) {
+    if (
+      maybeHitCountOverride !== undefined &&
+      maybeHitCountOverride > update['generalStats']['hitCount']
+    ) {
       update['generalStats']['hitCount'] = maybeHitCountOverride;
-      update['characterStats'][0]['hitCount'] = maybeHitCountOverride;
+      update['characterStats'][summonSourceIndex]['hitCount'] =
+        maybeHitCountOverride;
       if (this.beforeBossTurn) {
         update['beforeBossTurnStats']['hitCount'] = maybeHitCountOverride;
-        update['characterBeforeBossTurnStats'][0]['hitCount'] =
+        update['characterBeforeBossTurnStats'][summonSourceIndex]['hitCount'] =
           maybeHitCountOverride;
       }
     }
@@ -90,7 +105,7 @@ export class SummonAction extends BattleAction {
     // Summon skill damage is weird. Some summons like Bubs do skill damage
     // as a direct subaction of the summon call, while some like M3 summons
     // do it with an Ability subaction that itself contains a damage action.
-    // In the former case, we want to correct the damage dealt to attribute it to MC.
+    // In the former case, we want to correct the damage dealt to attribute it to MC/Lyria.
     // In the latter case, the Ability subaction does that for us.
     const abilitySubactionUpdates = this.subactions
       .filter((a) => a instanceof AbilityAction)
@@ -117,22 +132,25 @@ export class SummonAction extends BattleAction {
     const nonAbilitySubactionDebuffCount =
       mergedNonAbilitySubactionUpdates['generalStats']['debuffsInflictedCount'];
 
-    update['characterStats'][0]['hitCount'] += nonAbilitySubactionHitCount;
-    update['characterStats'][0]['debuffsInflictedCount'] +=
+    update['characterStats'][summonSourceIndex]['hitCount'] +=
+      nonAbilitySubactionHitCount;
+    update['characterStats'][summonSourceIndex]['debuffsInflictedCount'] +=
       nonAbilitySubactionDebuffCount;
     GameElementHelper.getAllElements().forEach((element) => {
-      update['characterStats'][0]['skillDamage'][element] +=
+      update['characterStats'][summonSourceIndex]['skillDamage'][element] +=
         nonAbilitySubactionSkillDamage[element];
     });
 
     if (this.beforeBossTurn) {
-      update['characterBeforeBossTurnStats'][0]['hitCount'] +=
+      update['characterBeforeBossTurnStats'][summonSourceIndex]['hitCount'] +=
         nonAbilitySubactionHitCount;
-      update['characterBeforeBossTurnStats'][0]['debuffsInflictedCount'] +=
-        nonAbilitySubactionDebuffCount;
+      update['characterBeforeBossTurnStats'][summonSourceIndex][
+        'debuffsInflictedCount'
+      ] += nonAbilitySubactionDebuffCount;
       GameElementHelper.getAllElements().forEach((element) => {
-        update['characterBeforeBossTurnStats'][0]['skillDamage'][element] +=
-          nonAbilitySubactionSkillDamage[element];
+        update['characterBeforeBossTurnStats'][summonSourceIndex][
+          'skillDamage'
+        ][element] += nonAbilitySubactionSkillDamage[element];
       });
     }
 
@@ -148,7 +166,9 @@ export class SummonAction extends BattleAction {
     const actionType = json['actionType'];
     if (actionType == ActionType.CALLED_SUMMON) {
       return new this(
+        assertNotNullOrUndefined(json['summonName'] as string),
         assertNotNullOrUndefined(json['summonCallName'] as string),
+        assertNotNullOrUndefined(json['lyriaIndex'] as number),
         assertNotNullOrUndefined(json['mainCharacterName'] as string),
         assertNotNullOrUndefined(json['partySize'] as number),
         assertNotNullOrUndefined(json['beforeBossTurn'] as boolean),

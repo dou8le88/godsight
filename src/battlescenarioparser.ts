@@ -102,6 +102,7 @@ import { PartyChangeScenarioData } from './gbf/battletypes/scenariodata/partycha
 import { identity } from './util/functional';
 import { range } from './util/range';
 import { PartyChangeAction } from './godsight/battletypes/partychangeaction';
+import { GodsightSummonData } from './godsight/battletypes/summondata';
 
 export class BattleScenarioParser {
   constructor() {
@@ -1023,43 +1024,70 @@ export class BattleScenarioParser {
             );
             return damageInstance;
           });
-          const summonAction = new SummonAction(
-            summonScenario['name'],
-            BattleActionHelper.getMainCharacterName(
-              godsightBattleData['party'],
-            ),
-            godsightBattleData['party']['partyMemberCount'],
-            !isBossAttackPhase,
-            damageInstances,
-            subactions.actions,
-            undefined,
-          );
           // This occurs due to the fact that you can reskin summons. There are two summon commands,
           // one to show the summon animation and one to show the actual damage.
-          const subsummonaction = summonAction.subactions.find(
+          const summonAction = subactions.actions.find(
             (a) => a instanceof SummonAction,
           );
-          if (subsummonaction) {
-            summonAction.damageInstances = subsummonaction.damageInstances;
-            summonAction.subactions = subsummonaction.subactions;
-          }
-          let trueSummonHitCount: number | undefined;
-          if (summonScenario['name']) {
-            const currentSummon =
+
+          if (summonAction) {
+            summonAction.summonCallName =
+              summonAction.summonCallName || summonScenario['name'];
+            actions.push(summonAction);
+          } else {
+            // Update recorded summon info.
+            const newSummonInfo =
+              (gbfBattleData['status'] && gbfBattleData['status']['summon']) ||
+              [];
+
+            const calledSummons: GodsightSummonData[] = [];
+            newSummonInfo.forEach((summon, idx) => {
+              const matchingBattleDataSummon =
+                godsightBattleData['summons'][idx];
+              const newCooldown = Number(summon['recast']);
+              if (newCooldown > matchingBattleDataSummon['cooldown']) {
+                calledSummons.push(matchingBattleDataSummon);
+              }
+              matchingBattleDataSummon['cooldown'] = newCooldown;
+              // These two updates are for summons that change after calling, like Triple Zero.
+              matchingBattleDataSummon['callName'] = summon['skill'];
+              matchingBattleDataSummon['description'] = summon['comment'];
+            });
+
+            if (
+              godsightBattleData['supportSummon'] &&
               gbfBattleData['status'] &&
-              gbfBattleData['status']['summon'].find(
-                (summon) => summon['skill'] == summonScenario['name'],
+              gbfBattleData['status']['supporter']
+            ) {
+              const newCooldown = Number(
+                gbfBattleData['status']['supporter']['recast'],
               );
-            if (currentSummon) {
-              const matchResult = currentSummon['comment'].match(
+              if (
+                newCooldown > godsightBattleData['supportSummon']['cooldown']
+              ) {
+                calledSummons.push(godsightBattleData['supportSummon']);
+              }
+              godsightBattleData['supportSummon']['cooldown'] = newCooldown;
+            }
+
+            const calledSummon =
+              calledSummons.length == 1
+                ? calledSummons[0]
+                : calledSummons.find((summon) => {
+                    return summon['callName'] == summonScenario['name'];
+                  });
+
+            let trueSummonHitCount: number | undefined;
+            if (calledSummon) {
+              const matchResult = calledSummon['description'].match(
                 this.summonHitCountRegex,
               );
               if (matchResult) {
                 trueSummonHitCount = Number(matchResult.at(-1)!);
 
-                if (this.summonTargetRegex.test(currentSummon['comment'])) {
+                if (this.summonTargetRegex.test(calledSummon['description'])) {
                   const uniqueTargets = new Set(
-                    summonAction.damageInstances.map((d) => d['receiverIndex']),
+                    damageInstances.map((d) => d['receiverIndex']),
                   );
                   trueSummonHitCount *= [...uniqueTargets.values()].length;
                 }
@@ -1069,9 +1097,23 @@ export class BattleScenarioParser {
                 `Unable to find summon matching ${summonScenario['name']}! Hitcount may be inaccurate!`,
               );
             }
+
+            actions.push(
+              new SummonAction(
+                calledSummon ? calledSummon['name'] : 'Unknown Summon',
+                summonScenario['name'],
+                godsightBattleData['lyriaIndex'],
+                BattleActionHelper.getMainCharacterName(
+                  godsightBattleData['party'],
+                ),
+                godsightBattleData['party']['partyMemberCount'],
+                !isBossAttackPhase,
+                damageInstances,
+                subactions.actions,
+                trueSummonHitCount,
+              ),
+            );
           }
-          summonAction.trueSummonHitCount = trueSummonHitCount;
-          actions.push(summonAction);
           i += subactions.lastIndex;
           break;
         }
@@ -1883,6 +1925,25 @@ export class BattleScenarioParser {
       'abilityTurns': [0],
       'turnsWithSkippedOrRecordedAttackActions': [],
       'party': party,
+      'lyriaIndex': startData['lyria_num'],
+      'summons': startData['summon'].map((gbfSummon) => {
+        const cooldown = Number(gbfSummon['recast']);
+        const summon: GodsightSummonData = {
+          'name': gbfSummon['name'],
+          'callName': gbfSummon['skill'],
+          'description': gbfSummon['comment'],
+          'cooldown': cooldown,
+        };
+        return summon;
+      }),
+      'supportSummon': startData['supporter']
+        ? {
+            'name': startData['supporter']['name'],
+            'callName': startData['supporter']['skill'],
+            'description': startData['supporter']['comment'],
+            'cooldown': Number(startData['supporter']['recast']),
+          }
+        : undefined,
       'boss': startData['boss']['param'].map((b) => this.getBossData(b)),
       'turnData': {},
     };
@@ -2014,6 +2075,27 @@ export class BattleScenarioParser {
         totalStats['characterBeforeBossTurnStats'],
       'turnActions': battleActions,
     };
+  }
+
+  public updateSummonCooldowns(
+    godsightBattleData: GodsightBattleData,
+    gbfBattleData: GranblueBattleData,
+  ): void {
+    if (gbfBattleData['status']) {
+      gbfBattleData['status']['summon'].forEach((summon, idx) => {
+        const matchingBattleDataSummon = godsightBattleData['summons'][idx];
+        matchingBattleDataSummon['cooldown'] = Number(summon['recast']);
+      });
+    }
+    if (
+      godsightBattleData['supportSummon'] &&
+      gbfBattleData['status'] &&
+      gbfBattleData['status']['supporter']
+    ) {
+      godsightBattleData['supportSummon']['cooldown'] = Number(
+        gbfBattleData['status']['supporter']['recast'],
+      );
+    }
   }
 
   private getBossData(b: BossData): GodsightBossData {

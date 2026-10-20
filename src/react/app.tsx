@@ -275,6 +275,8 @@ export default function GodsightPanel() {
             draft['party'],
           );
 
+          battleScenarioParser.updateSummonCooldowns(draft, data);
+
           if (
             data['status'] &&
             data['status']['ability_turn'] !== null &&

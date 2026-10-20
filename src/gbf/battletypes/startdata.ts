@@ -50,6 +50,12 @@ export type StartData = GranblueBattleData & {
    * Battle refreshes will show an empty scenario.
    */
   'scenario': GenericScenarioData[];
+  /**
+   * Lyria's party index.
+   */
+  'lyria_num': number;
+  'summon': StartSummonData[];
+  'supporter': StartSummonData;
   'status'?: BattleStatus;
   'chain_burst_gauge'?: string;
 
@@ -60,6 +66,49 @@ export type StartData = GranblueBattleData & {
   'tower_front_party_num'?: number;
   'tower_formation'?: Record<string | number, (string | number)[]>;
 };
+
+export interface StartSummonData {
+  'id': string;
+  'name': string;
+  'attribute': GameElementValue;
+  /**
+   * Summon call name.
+   */
+  'skill': string;
+  /**
+   * Summon call description.
+   */
+  'comment': string;
+  /**
+   * Numeric string of current CD.
+   * E.g., "3" is 3t, "0" is off CD.
+   */
+  'recast': string;
+  /**
+   * Numeric string of inherent summon ICD at battle start.
+   * Note that element-matching summon ICDs are shortened by 3t in gameplay,
+   * and main/friend summons start off CD.
+   * No ICD is represented by the empty string "".
+   */
+  'start_recast': string;
+  /**
+   * Numeric string of the summon "cooldown".
+   * Usually means the summon's own cooldown, but for some summons that
+   * can't be recast but trigger a recurring effect (e.g., Belial), it
+   * can be used to represent that cooldown. Best to parse the summon
+   * call description if updating summon cooldown.
+   */
+  'require': string;
+  /**
+   * Summon aura or subaura name.
+   */
+  'protection_name': string;
+  /**
+   * Summon aura or subaura description.
+   */
+  'protection': string;
+  // "summon_skin_id": string | null;
+}
 
 export interface WaveData {
   'total': number;

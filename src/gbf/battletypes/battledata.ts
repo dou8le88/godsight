@@ -34,11 +34,18 @@ export interface BattleStatus {
   // "lyria_pos": number,
   'group_gauge': GroupGaugeStatus;
   'summon': SummonData[];
+  'supporter'?: {
+    'recast': string;
+  };
 }
 
 export interface SummonData {
   'skill': string;
   'comment': string;
+  /**
+   * Numeric string of summon cooldown.
+   */
+  'recast': string;
 }
 
 export interface GranblueBattleData {
