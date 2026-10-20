@@ -512,6 +512,9 @@ body,
 
     background-color: #242424;
 
+    cursor: pointer;
+    user-select: none;
+
     &.selected {
       border-bottom: 1px solid transparent;
       background-color: #282828;
