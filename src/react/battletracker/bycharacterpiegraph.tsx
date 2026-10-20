@@ -8,6 +8,7 @@ import {
   useActiveTooltipDataPoints,
   useIsTooltipActive,
   PieLabelRenderProps,
+  TooltipContentProps,
 } from 'recharts';
 import { GodsightBattleData } from '../../godsight/battletypes/battledata';
 import { Stats } from '../../godsight/battletypes/stats';
@@ -22,6 +23,7 @@ const tooltipStyle: CSSProperties = {
 interface ByCharacterGraphData {
   name: string;
   damage: number;
+  hitCount: number;
   fill: string;
 }
 
@@ -76,9 +78,12 @@ function byCharacterBreakdown(
       totalOtherDamage +
       stats['dotDamage'];
 
+    const hitCount = stats['hitCount'];
+
     return {
       name: charName,
       damage: totalDamage,
+      hitCount: hitCount,
       fill: CharacterColors[charIdx],
     };
   });
@@ -110,12 +115,55 @@ function byCharacterBreakdown(
     );
   };
 
+  const CustomTooltip = ({
+    active,
+    payload,
+    activeIndex,
+  }: TooltipContentProps) => {
+    if (active && payload && payload.length) {
+      const numericIndex = Number(activeIndex);
+
+      return (
+        <div
+          className="custom-tooltip"
+          style={{
+            backgroundColor: '#282828',
+            padding: '10px',
+            border: '1px solid #c2c2c2',
+          }}
+        >
+          {payload.map((entry, index) =>
+            entry.value !== 0 && entry.value != null ? (
+              <p
+                key={`item-${index}`}
+                style={{ color: CharacterColors[index] }}
+              >
+                {entry.name}: {entry.value?.toLocaleString()} (
+                {((Number(entry.value) / totalDamage) * 100).toFixed(0)}%) (
+                {data[numericIndex]['hitCount']} hits)
+              </p>
+            ) : (
+              <span key={`item-${index}`}></span>
+            ),
+          )}
+        </div>
+      );
+    }
+
+    return null;
+  };
+
   const customLabel = (props: PieLabelRenderProps) => {
     if (props.percent !== undefined && props.percent < 0.02) {
       return null;
     }
+    let hitsText = '';
+    const character = data.find((charStat) => charStat.name == props.name);
+    if (character) {
+      hitsText = ` (${character['hitCount']} hits)`;
+    }
     const percent = ((props.value / totalDamage) * 100).toFixed(0);
-    return `${props.value.toLocaleString()} (${percent}%)`;
+    return `${props.value.toLocaleString()} (${percent}%)${hitsText}`;
   };
 
   return (
@@ -124,7 +172,7 @@ function byCharacterBreakdown(
         style={{
           width: '100%',
           height: '100%',
-          maxWidth: '500px',
+          maxWidth: '600px',
           maxHeight: '500px',
           aspectRatio: 1,
         }}
@@ -147,6 +195,7 @@ function byCharacterBreakdown(
           formatter={(a) =>
             `${a?.toLocaleString()} (${((Number(a) / totalDamage) * 100).toFixed(0)}%)`
           }
+          content={CustomTooltip}
         />
         <Legend
           iconType="circle"

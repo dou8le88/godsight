@@ -8,6 +8,7 @@ import {
   Legend,
   PieLabelRenderProps,
   Tooltip,
+  TooltipContentProps,
 } from 'recharts';
 import { Stats } from '../../godsight/battletypes/stats';
 import { Breakdown } from './breakdown';
@@ -64,8 +65,11 @@ function byTypeBreakdown(stats: Stats) {
       totalOtherDamage +
       stats['dotDamage'] || 1;
 
+  const normalAttackHits = Math.round(stats['normalAttackHits']);
+  const skillHits = Math.round(stats['skillHits']);
+
   function getDamageByTypePieChartData(): [
-    { name: string; value: number; fill: string }[],
+    { name: string; value: number; hitCount?: number; fill: string }[],
     string[],
   ] {
     const damageTypeSectorColors: string[] = [];
@@ -73,6 +77,7 @@ function byTypeBreakdown(stats: Stats) {
     const data: {
       name: string;
       value: number;
+      hitCount?: number;
       fill: string;
     }[] = [];
 
@@ -80,6 +85,7 @@ function byTypeBreakdown(stats: Stats) {
       data.push({
         name: 'NA',
         value: totalNormalAttackDamage,
+        hitCount: normalAttackHits,
         fill: DamageTypeColors.NORMAL_ATTACK,
       });
       damageTypeSectorColors.push(DamageTypeColors.NORMAL_ATTACK);
@@ -96,6 +102,7 @@ function byTypeBreakdown(stats: Stats) {
       data.push({
         name: 'Skill',
         value: totalSkillDamage,
+        hitCount: skillHits,
         fill: DamageTypeColors.SKILL,
       });
       damageTypeSectorColors.push(DamageTypeColors.SKILL);
@@ -139,8 +146,56 @@ function byTypeBreakdown(stats: Stats) {
     if (props.percent !== undefined && props.percent < 0.02) {
       return null;
     }
+
+    let hitsText = '';
+    if (props.name == 'NA') {
+      hitsText = ` (${normalAttackHits} hits)`;
+    } else if (props.name == 'Skill') {
+      hitsText = ` (${skillHits} hits)`;
+    }
+
     const percent = ((props.value / totalDamage) * 100).toFixed(0);
-    return `${props.value.toLocaleString()} (${percent}%)`;
+    return `${props.value.toLocaleString()} (${percent}%)${hitsText}`;
+  };
+
+  const CustomTooltip = ({
+    active,
+    payload,
+    activeIndex,
+  }: TooltipContentProps) => {
+    if (active && payload && payload.length) {
+      const numericIndex = Number(activeIndex);
+
+      const dataPoint = data[numericIndex];
+
+      return (
+        <div
+          className="custom-tooltip"
+          style={{
+            backgroundColor: '#282828',
+            padding: '10px',
+            border: '1px solid #c2c2c2',
+          }}
+        >
+          {payload.map((entry, index) =>
+            entry.value !== 0 && entry.value != null ? (
+              <p
+                key={`item-${index}`}
+                style={{ color: dataPoint['fill'] }}
+              >
+                {entry.name}: {entry.value?.toLocaleString()} (
+                {((Number(entry.value) / totalDamage) * 100).toFixed(0)}%) (
+                {dataPoint['hitCount']} hits)
+              </p>
+            ) : (
+              <span key={`item-${index}`}></span>
+            ),
+          )}
+        </div>
+      );
+    }
+
+    return null;
   };
 
   return (
@@ -150,7 +205,7 @@ function byTypeBreakdown(stats: Stats) {
           style={{
             width: '100%',
             height: '100%',
-            maxWidth: '500px',
+            maxWidth: '600px',
             maxHeight: '500px',
             aspectRatio: 1,
           }}
@@ -173,6 +228,7 @@ function byTypeBreakdown(stats: Stats) {
             formatter={(a) =>
               `${a?.toLocaleString()} (${((Number(a) / totalDamage) * 100).toFixed(0)}%)`
             }
+            content={CustomTooltip}
           />
           <Legend
             iconType="circle"

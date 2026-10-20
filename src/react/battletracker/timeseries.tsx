@@ -23,8 +23,11 @@ import { Stats } from '../../godsight/battletypes/stats';
 
 interface ByTypeChartData {
   turn: string;
+  hitCount: number;
   normalAttackDamage: number;
+  normalAttackHits: number;
   skillDamage: number;
+  skillHits: number;
   chargedAttackDamage: number;
   otherDamage: number;
   totalDamage: number;
@@ -46,7 +49,11 @@ interface ByElementChartData {
 interface ByCharacterChartData {
   turn: string;
   totalDamage: number;
-  [key: number]: number;
+  hitCount: number;
+  [key: number]: {
+    damage: number;
+    hitCount: number;
+  };
 }
 
 interface TurnStats {
@@ -121,10 +128,17 @@ function getDamageByTypeData(turnStats: TurnStats[]): ByTypeChartData[] {
         .reduce((prev, cur) => prev + cur, 0),
     );
 
+    const hitCount = statsByTurn.stats['hitCount'];
+    const normalAttackHits = statsByTurn.stats['normalAttackHits'];
+    const skillHits = statsByTurn.stats['skillHits'];
+
     return {
       turn: `${statsByTurn.turn}`,
+      hitCount: hitCount,
       normalAttackDamage: totalNormalAttackDamage,
+      normalAttackHits: normalAttackHits,
       skillDamage: totalSkillDamage,
+      skillHits: skillHits,
       chargedAttackDamage: totalChargedAttackDamage,
       otherDamage: totalOtherDamage,
       totalDamage:
@@ -207,25 +221,37 @@ function getDamageByCharacterData(
             .reduce((prev, cur) => prev + cur, 0),
         );
 
+        const hitCount = Math.round(statsByTurn.stats[charIdx]['hitCount']);
+
         return {
-          [charIdx]:
-            totalNormalAttackDamage +
-            totalChargedAttackDamage +
-            totalSkillDamage +
-            totalOtherDamage,
+          [charIdx]: {
+            damage:
+              totalNormalAttackDamage +
+              totalChargedAttackDamage +
+              totalSkillDamage +
+              totalOtherDamage,
+            hitCount: hitCount,
+          },
         };
       })
       .reduce((acc, cur) => {
         return { ...acc, ...cur };
       }, {});
 
-    const totalDamage = Object.values(characterData).reduce(
-      (prev, cur) => prev + cur,
+    const totalDamage = Object.values(characterData).reduce<number>(
+      (prev, cur) => prev + cur['damage'],
+      0,
+    );
+
+    const totalHitCount = Object.values(characterData).reduce<number>(
+      (prev, cur) => prev + cur['hitCount'],
+      0,
     );
 
     return {
       turn: `${statsByTurn.turn}`,
       totalDamage,
+      hitCount: totalHitCount,
       ...characterData,
     };
   });
@@ -250,11 +276,15 @@ function damageByTypeTimeSeries(data: ByTypeChartData[]) {
       const filteredPayload = payload.filter(
         (item) => item.value !== 0 && item.value != null,
       );
+      const index = Number(activeIndex);
 
       // If everything is filtered out, render nothing
       if (filteredPayload.length === 0) return null;
 
-      const totalDamage = data[Number(activeIndex)]['totalDamage'];
+      const totalDamage = data[index]['totalDamage'];
+      const hitCount = data[index]['hitCount'];
+      const normalAttackHits = data[index]['normalAttackHits'];
+      const skillHits = data[index]['skillHits'];
 
       return (
         <div
@@ -266,7 +296,9 @@ function damageByTypeTimeSeries(data: ByTypeChartData[]) {
           }}
         >
           <p className="label">Turn {label}</p>
-          <p className="label">Total: {totalDamage.toLocaleString()}</p>
+          <p className="label">
+            Total: {totalDamage.toLocaleString()} ({hitCount} hits)
+          </p>
           {filteredPayload.map((entry, index) => (
             <p
               key={`item-${index}`}
@@ -275,7 +307,9 @@ function damageByTypeTimeSeries(data: ByTypeChartData[]) {
               }}
             >
               {entry.name}: {entry.value?.toLocaleString()} (
-              {((Number(entry.value) / totalDamage) * 100).toFixed(0)}%)
+              {((Number(entry.value) / totalDamage) * 100).toFixed(0)}%){' '}
+              {entry.name == 'NA' ? <>({normalAttackHits} hits)</> : <></>}
+              {entry.name == 'Skill' ? <>({skillHits} hits)</> : <></>}
             </p>
           ))}
         </div>
@@ -515,6 +549,7 @@ function damageByCharacterTimeSeries(
     if (active && payload && payload.length) {
       const numericIndex = Number(activeIndex);
       const totalDamage = data[numericIndex]['totalDamage'];
+      const hitCount = data[numericIndex]['hitCount'];
 
       return (
         <div
@@ -526,7 +561,9 @@ function damageByCharacterTimeSeries(
           }}
         >
           <p className="label">Turn {label}</p>
-          <p className="label">Total: {totalDamage.toLocaleString()}</p>
+          <p className="label">
+            Total: {totalDamage.toLocaleString()} ({hitCount} hits)
+          </p>
           {payload.map((entry, index) =>
             entry.value !== 0 && entry.value != null ? (
               <p
@@ -534,7 +571,8 @@ function damageByCharacterTimeSeries(
                 style={{ color: CharacterColors[index] }}
               >
                 {entry.name}: {entry.value?.toLocaleString()} (
-                {((Number(entry.value) / totalDamage) * 100).toFixed(0)}%)
+                {((Number(entry.value) / totalDamage) * 100).toFixed(0)}%) (
+                {data[numericIndex][index]['hitCount']} hits)
               </p>
             ) : (
               <span key={`item-${index}`}></span>
@@ -585,7 +623,7 @@ function damageByCharacterTimeSeries(
           key={charIdx}
           name={battleData['party']['members'][charIdx]['name']}
           maxBarSize={50}
-          dataKey={charIdx}
+          dataKey={(data) => data[charIdx]['damage']}
           stackId="turn"
           fill={CharacterColors[charIdx]}
         />
