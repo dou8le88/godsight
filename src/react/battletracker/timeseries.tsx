@@ -29,7 +29,9 @@ interface ByTypeChartData {
   skillDamage: number;
   skillHits: number;
   chargedAttackDamage: number;
+  chargedAttackHits: number;
   otherDamage: number;
+  otherHits: number;
   totalDamage: number;
 }
 
@@ -131,6 +133,8 @@ function getDamageByTypeData(turnStats: TurnStats[]): ByTypeChartData[] {
     const hitCount = statsByTurn.stats['hitCount'];
     const normalAttackHits = statsByTurn.stats['normalAttackHits'];
     const skillHits = statsByTurn.stats['skillHits'];
+    const chargedAttackHits = statsByTurn.stats['chargedAttackHits'];
+    const otherHits = statsByTurn.stats['otherHits'];
 
     return {
       turn: `${statsByTurn.turn}`,
@@ -140,7 +144,9 @@ function getDamageByTypeData(turnStats: TurnStats[]): ByTypeChartData[] {
       skillDamage: totalSkillDamage,
       skillHits: skillHits,
       chargedAttackDamage: totalChargedAttackDamage,
+      chargedAttackHits: chargedAttackHits,
       otherDamage: totalOtherDamage,
+      otherHits: otherHits,
       totalDamage:
         totalNormalAttackDamage +
         totalSkillDamage +
@@ -285,6 +291,8 @@ function damageByTypeTimeSeries(data: ByTypeChartData[]) {
       const hitCount = data[index]['hitCount'];
       const normalAttackHits = data[index]['normalAttackHits'];
       const skillHits = data[index]['skillHits'];
+      const chargedAttackHits = data[index]['chargedAttackHits'];
+      const otherHits = data[index]['otherHits'];
 
       return (
         <div
@@ -310,6 +318,8 @@ function damageByTypeTimeSeries(data: ByTypeChartData[]) {
               {((Number(entry.value) / totalDamage) * 100).toFixed(0)}%){' '}
               {entry.name == 'NA' ? <>({normalAttackHits} hits)</> : <></>}
               {entry.name == 'Skill' ? <>({skillHits} hits)</> : <></>}
+              {entry.name == 'CA' ? <>({chargedAttackHits} hits)</> : <></>}
+              {entry.name == 'Other' ? <>({otherHits} hits)</> : <></>}
             </p>
           ))}
         </div>

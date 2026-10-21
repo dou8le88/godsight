@@ -65,11 +65,18 @@ export class ChargedAttackAction extends BattleAction {
         }
         if (instance['value'] > 0) {
           update['generalStats']['hitCount'] += 1;
+          update['generalStats']['chargedAttackHits'] += 1;
           update['characterStats'][this.attackerIndex]['hitCount'] += 1;
+          update['characterStats'][this.attackerIndex]['chargedAttackHits'] +=
+            1;
           if (this.beforeBossTurn) {
             update['beforeBossTurnStats']['hitCount'] += 1;
             update['characterBeforeBossTurnStats'][this.attackerIndex][
               'hitCount'
+            ] += 1;
+            update['beforeBossTurnStats']['chargedAttackHits'] += 1;
+            update['characterBeforeBossTurnStats'][this.attackerIndex][
+              'chargedAttackHits'
             ] += 1;
           }
         }

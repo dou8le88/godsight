@@ -56,10 +56,15 @@ export class ChainBurstAction extends BattleAction {
       }
       if (instance['value'] > 0) {
         update['generalStats']['hitCount'] += 1;
+        update['generalStats']['otherHits'] += 1;
+        update['characterStats'][0]['hitCount'] += 1;
+        update['characterStats'][0]['otherHits'] += 1;
         if (this.beforeBossTurn) {
           update['beforeBossTurnStats']['hitCount'] += 1;
+          update['beforeBossTurnStats']['otherHits'] += 1;
+          update['characterBeforeBossTurnStats'][0]['hitCount'] += 1;
+          update['characterBeforeBossTurnStats'][0]['otherHits'] += 1;
         }
-        update['characterStats'][0]['hitCount'] += 1;
       }
     });
 

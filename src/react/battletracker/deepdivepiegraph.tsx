@@ -67,6 +67,8 @@ function byTypeBreakdown(stats: Stats) {
 
   const normalAttackHits = Math.round(stats['normalAttackHits']);
   const skillHits = Math.round(stats['skillHits']);
+  const chargedAttackHits = Math.round(stats['chargedAttackHits']);
+  const otherHits = Math.round(stats['otherHits']);
 
   function getDamageByTypePieChartData(): [
     { name: string; value: number; hitCount?: number; fill: string }[],
@@ -77,7 +79,7 @@ function byTypeBreakdown(stats: Stats) {
     const data: {
       name: string;
       value: number;
-      hitCount?: number;
+      hitCount: number;
       fill: string;
     }[] = [];
 
@@ -94,6 +96,7 @@ function byTypeBreakdown(stats: Stats) {
       data.push({
         name: 'CA',
         value: totalChargedAttackDamage,
+        hitCount: chargedAttackHits,
         fill: DamageTypeColors.CHARGED_ATTACK,
       });
       damageTypeSectorColors.push(DamageTypeColors.CHARGED_ATTACK);
@@ -111,6 +114,7 @@ function byTypeBreakdown(stats: Stats) {
       data.push({
         name: 'Other',
         value: totalOtherDamage,
+        hitCount: otherHits,
         fill: DamageTypeColors.OTHER,
       });
       damageTypeSectorColors.push(DamageTypeColors.OTHER);
@@ -142,17 +146,21 @@ function byTypeBreakdown(stats: Stats) {
     );
   };
 
+  const hitCounts: Record<string, number> = {
+    'NA': normalAttackHits,
+    'Skill': skillHits,
+    'CA': chargedAttackHits,
+    'Other': otherHits,
+  };
+
   const customLabel = (props: PieLabelRenderProps) => {
     if (props.percent !== undefined && props.percent < 0.02) {
       return null;
     }
 
-    let hitsText = '';
-    if (props.name == 'NA') {
-      hitsText = ` (${normalAttackHits} hits)`;
-    } else if (props.name == 'Skill') {
-      hitsText = ` (${skillHits} hits)`;
-    }
+    const hitCount = hitCounts[props.name || ''];
+
+    const hitsText = hitCount ? ` (${hitCount} hits)` : '';
 
     const percent = ((props.value / totalDamage) * 100).toFixed(0);
     return `${props.value.toLocaleString()} (${percent}%)${hitsText}`;

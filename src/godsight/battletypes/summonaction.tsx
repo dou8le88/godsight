@@ -77,11 +77,17 @@ export class SummonAction extends BattleAction {
 
       if (instance['value'] > 0) {
         update['generalStats']['hitCount'] += 1;
+        update['generalStats']['otherHits'] += 1;
         update['characterStats'][summonSourceIndex]['hitCount'] += 1;
+        update['characterStats'][summonSourceIndex]['otherHits'] += 1;
         if (this.beforeBossTurn) {
           update['beforeBossTurnStats']['hitCount'] += 1;
+          update['beforeBossTurnStats']['otherHits'] += 1;
           update['characterBeforeBossTurnStats'][summonSourceIndex][
             'hitCount'
+          ] += 1;
+          update['characterBeforeBossTurnStats'][summonSourceIndex][
+            'otherHits'
           ] += 1;
         }
       }
@@ -93,11 +99,17 @@ export class SummonAction extends BattleAction {
       maybeHitCountOverride > update['generalStats']['hitCount']
     ) {
       update['generalStats']['hitCount'] = maybeHitCountOverride;
+      update['generalStats']['otherHits'] = maybeHitCountOverride;
       update['characterStats'][summonSourceIndex]['hitCount'] =
+        maybeHitCountOverride;
+      update['characterStats'][summonSourceIndex]['otherHits'] =
         maybeHitCountOverride;
       if (this.beforeBossTurn) {
         update['beforeBossTurnStats']['hitCount'] = maybeHitCountOverride;
+        update['beforeBossTurnStats']['otherHits'] = maybeHitCountOverride;
         update['characterBeforeBossTurnStats'][summonSourceIndex]['hitCount'] =
+          maybeHitCountOverride;
+        update['characterBeforeBossTurnStats'][summonSourceIndex]['otherHits'] =
           maybeHitCountOverride;
       }
     }

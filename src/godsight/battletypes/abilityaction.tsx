@@ -78,7 +78,6 @@ export class AbilityAction extends BattleAction {
         const subactionHitCount = allUpdates['generalStats']['hitCount'];
         const subactionNormalAttackHitCount =
           allUpdates['generalStats']['normalAttackHits'];
-        const subactionSkillHitCount = allUpdates['generalStats']['skillHits'];
         const subactionDebuffs =
           allUpdates['generalStats']['debuffsInflictedCount'];
         const subactionNormalAttackDamage =
@@ -95,6 +94,8 @@ export class AbilityAction extends BattleAction {
             subactionOtherDamage[element] +=
               firstDamageActionStats['generalStats']['skillDamage'][element];
           });
+          allUpdates['generalStats']['skillHits'] -= 1;
+          allUpdates['generalStats']['otherHits'] += 1;
         }
 
         allUpdates['characterStats'][this.sourceIndex]['hitCount'] +=
@@ -102,7 +103,9 @@ export class AbilityAction extends BattleAction {
         allUpdates['characterStats'][this.sourceIndex]['normalAttackHits'] +=
           subactionNormalAttackHitCount;
         allUpdates['characterStats'][this.sourceIndex]['skillHits'] +=
-          subactionSkillHitCount;
+          allUpdates['generalStats']['skillHits'];
+        allUpdates['characterStats'][this.sourceIndex]['otherHits'] +=
+          allUpdates['generalStats']['otherHits'];
         allUpdates['characterStats'][this.sourceIndex][
           'debuffsInflictedCount'
         ] += subactionDebuffs;
@@ -115,7 +118,10 @@ export class AbilityAction extends BattleAction {
           ] += subactionNormalAttackHitCount;
           allUpdates['characterBeforeBossTurnStats'][this.sourceIndex][
             'skillHits'
-          ] += subactionSkillHitCount;
+          ] += allUpdates['generalStats']['skillHits'];
+          allUpdates['characterBeforeBossTurnStats'][this.sourceIndex][
+            'otherHits'
+          ] += allUpdates['generalStats']['otherHits'];
           allUpdates['characterBeforeBossTurnStats'][this.sourceIndex][
             'debuffsInflictedCount'
           ] += subactionDebuffs;

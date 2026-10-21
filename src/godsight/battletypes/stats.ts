@@ -4,6 +4,8 @@ export interface Stats {
   'hitCount': number;
   'normalAttackHits': number;
   'skillHits': number;
+  'chargedAttackHits': number;
+  'otherHits': number;
   'debuffsInflictedCount': number;
   'healingReceived': number;
   'normalAttackDamage': DamageByElement;
@@ -41,6 +43,8 @@ export class StatsUpdateHelper {
       'hitCount': 0,
       'normalAttackHits': 0,
       'skillHits': 0,
+      'chargedAttackHits': 0,
+      'otherHits': 0,
       'debuffsInflictedCount': 0,
       'healingReceived': 0,
       'normalAttackDamage': this.getEmptyElementValues(),
