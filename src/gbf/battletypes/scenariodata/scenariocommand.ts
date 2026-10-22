@@ -92,6 +92,10 @@ export enum ScenarioCommand {
    */
   WON_BATTLE = 'win',
   /**
+   * The raid battle ended while the player was trying to execute another action.
+   */
+  FINISHED = 'finished',
+  /**
    * Used a Full Elixir.
    */
   FULL_ELIXIR = 'rematch',
@@ -147,6 +151,10 @@ export enum ScenarioCommand {
    * In Babyl, swapping which party you're using.
    */
   PARTY_CHANGE = 'party_change',
+  /**
+   * Star character instakill in Dread Barrage.
+   */
+  ONESHOT_KILL_MESSAGE = 'one_shot_kill_message',
 
   /**
    * Sometimes contains useful information about certain actions, such as attacking under the effects of Confusion.
@@ -233,4 +241,12 @@ export enum ScenarioCommand {
    * Ignored command, do not use, exists for completeness in the parser.
    */
   _LINE_MESSAGE = 'line_message',
+  /**
+   * Star character instakill in Dread Barrage.
+   * This command has the info about the character's "CA"
+   * that oneshots the boss but we don't really need that
+   * for the extension.
+   * Ignored command, do not use, exists for completeness in the parser.
+   */
+  _ONESHOT_KILL = 'oneshot_onekill',
 }

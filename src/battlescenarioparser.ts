@@ -103,6 +103,7 @@ import { identity } from './util/functional';
 import { range } from './util/range';
 import { PartyChangeAction } from './godsight/battletypes/partychangeaction';
 import { GodsightSummonData } from './godsight/battletypes/summondata';
+import { DBStarCharacterRescueAction } from './godsight/battletypes/dbstarcharacterrescueaction';
 
 export class BattleScenarioParser {
   constructor() {
@@ -1280,6 +1281,7 @@ export class BattleScenarioParser {
           break baseLoop;
         }
 
+        case ScenarioCommand.FINISHED:
         case ScenarioCommand.WON_BATTLE: {
           const wonBattleScenario = scenario as WonBattleScenarioData;
           if (wonBattleScenario['is_last_raid']) {
@@ -1529,6 +1531,12 @@ export class BattleScenarioParser {
           break;
         }
 
+        case ScenarioCommand.ONESHOT_KILL_MESSAGE: {
+          const starCharacterRescueAction = new DBStarCharacterRescueAction();
+          actions.push(starCharacterRescueAction);
+          break;
+        }
+
         // All of these commands are recognized but ignored.
         case ScenarioCommand._BACKGROUND_CHANGE:
         case ScenarioCommand._BGM:
@@ -1541,6 +1549,7 @@ export class BattleScenarioParser {
         case ScenarioCommand._MODE_CHANGE:
         case ScenarioCommand._MOTION:
         case ScenarioCommand._MOTION_LINK:
+        case ScenarioCommand._ONESHOT_KILL:
         case ScenarioCommand._POTIONS_CHANGED:
         case ScenarioCommand._SCREEN_EFFECT:
         case ScenarioCommand._SPECIAL_CHANGE:

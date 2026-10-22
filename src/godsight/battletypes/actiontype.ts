@@ -33,6 +33,7 @@ export enum ActionType {
   RESURRECTED = 'resurrected',
   RETREAT = 'retreat',
   STANDBY = 'standby',
+  STAR_CHARACTER_RESCUE = 'star_character_rescue',
   SWITCHED_PARTIES = 'switched_parties',
   TURN_CHANGE = 'turn_change',
   USED_FULL_ELIXIR = 'used_full_elixir',

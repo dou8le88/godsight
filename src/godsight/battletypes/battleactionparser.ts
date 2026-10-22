@@ -7,6 +7,7 @@ import { ChainBurstAction } from './chainburstaction';
 import { ChargedAttackAction } from './chargedattackaction';
 import { ConditionChangeAction } from './conditionchangeaction';
 import { DamageAction } from './damageaction';
+import { DBStarCharacterRescueAction } from './dbstarcharacterrescueaction';
 import { DeathAction } from './deathaction';
 import { FormChangeAction } from './formchangeaction';
 import { FullElixirAction } from './fullelixiraction';
@@ -97,6 +98,9 @@ export class BattleActionParser {
 
         case ActionType.SWITCHED_PARTIES:
           return PartyChangeAction.fromJSON(json);
+
+        case ActionType.STAR_CHARACTER_RESCUE:
+          return DBStarCharacterRescueAction.fromJSON(json);
 
         default:
           console.error(`Unknown action type ${actionType}!`);
