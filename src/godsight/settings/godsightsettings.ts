@@ -7,6 +7,20 @@ export interface GodsightSettings {
   'onRaidLoadBehavior': OnRaidLoadBehavior;
   'enableImageLoading': boolean;
   'clickStatusToLoadImage': boolean;
+  'visibleStats': {
+    'totalDamage': boolean;
+    'normalAttackDamage': boolean;
+    'skillDamage': boolean;
+    'chargedAttackDamage': boolean;
+    'otherDamage': boolean;
+    'hitCount': boolean;
+    'normalAttackHits': boolean;
+    'skillHits': boolean;
+    'chargedAttackHits': boolean;
+    'otherHits': boolean;
+    'debuffs': boolean;
+    'tripleAttacks': boolean;
+  };
 }
 
 export enum DefaultBattleView {
@@ -40,4 +54,18 @@ export const DefaultSettings: GodsightSettings = {
   'onRaidLoadBehavior': OnRaidLoadBehavior.SWITCH,
   'enableImageLoading': false,
   'clickStatusToLoadImage': false,
+  'visibleStats': {
+    'totalDamage': true,
+    'normalAttackDamage': true,
+    'skillDamage': true,
+    'chargedAttackDamage': true,
+    'otherDamage': true,
+    'hitCount': true,
+    'normalAttackHits': false,
+    'skillHits': false,
+    'chargedAttackHits': false,
+    'otherHits': false,
+    'debuffs': true,
+    'tripleAttacks': true,
+  },
 };
