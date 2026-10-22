@@ -126,6 +126,8 @@ export class BattleScenarioParser {
       gbfBattleData,
       battleData,
       false,
+      false,
+      false,
     ).actions;
   }
 
@@ -141,6 +143,7 @@ export class BattleScenarioParser {
    * @param scenarioData The data to process
    * @param godsightBattleData Main info about the battle, such as boss and party member status.
    * @param stopOnMainAction Used when calling the method recursively to stop when a "separate" action is reached while processing subactions.
+   * @param stopOnTheseActions Used when calling the method recursively to stop on specific commands.
    * @returns a list of actions and the last index processed in the array.
    */
   private _parseScenarioData(
@@ -148,7 +151,8 @@ export class BattleScenarioParser {
     gbfBattleData: GranblueBattleData,
     godsightBattleData: GodsightBattleData,
     isBossAttackPhase: boolean,
-    stopOnMainAction?: boolean,
+    isRecursive: boolean,
+    stopOnMainAction: boolean,
     stopOnTheseActions?: ScenarioCommand[],
   ): {
     actions: BattleAction[];
@@ -194,7 +198,8 @@ export class BattleScenarioParser {
             gbfBattleData,
             godsightBattleData,
             isBossAttackPhase,
-            true,
+            /* isRecursive */ true,
+            /* stopOnMainAction */ true,
           );
           isBossAttackPhase = subactions.isBossAttackPhase;
           const bossSpecialAttackAction = new BossSpecialAttackAction(
@@ -279,7 +284,29 @@ export class BattleScenarioParser {
             buffDebuffChangeScenario,
             isBossAttackPhase,
           );
-          actions.push(...buffDebuffActions);
+          if (
+            !isRecursive &&
+            buffDebuffActions.reduce<number>(
+              (prev, cur) => prev + cur.debuffs.length,
+              0,
+            ) > 0
+          ) {
+            // Top-level debuff application can't attribute itself to any particular character.
+            // There are a few scenarios where we can generally assume it to actually belong to
+            // a previous action.
+            const previousAction = actions.at(-1);
+            if (previousAction) {
+              if (previousAction instanceof NormalAttackAction) {
+                previousAction.subactions.push(...buffDebuffActions);
+              } else {
+                actions.push(...buffDebuffActions);
+              }
+            } else {
+              actions.push(...buffDebuffActions);
+            }
+          } else {
+            actions.push(...buffDebuffActions);
+          }
           break;
         }
 
@@ -333,7 +360,8 @@ export class BattleScenarioParser {
             gbfBattleData,
             godsightBattleData,
             isBossAttackPhase,
-            true,
+            /* isRecursive */ true,
+            /* stopOnMainAction */ true,
           );
           isBossAttackPhase = subactions.isBossAttackPhase;
           if (subactions.actions.length == 0) {
@@ -656,7 +684,8 @@ export class BattleScenarioParser {
             gbfBattleData,
             godsightBattleData,
             isBossAttackPhase,
-            false,
+            /* isRecursive */ true,
+            /* stopOnMainAction */ false,
             [
               ScenarioCommand.NORMAL_ATTACK_START,
               ScenarioCommand.NORMAL_ATTACK_END,
@@ -807,7 +836,8 @@ export class BattleScenarioParser {
             gbfBattleData,
             godsightBattleData,
             isBossAttackPhase,
-            true,
+            /* isRecursive */ true,
+            /* stopOnMainAction */ true,
           );
           isBossAttackPhase = subactions.isBossAttackPhase;
           const attackerIndex = BattleActionHelper.getCharacterIndexAtPosition(
@@ -887,6 +917,8 @@ export class BattleScenarioParser {
             gbfBattleData,
             godsightBattleData,
             isBossAttackPhase,
+            /* isRecursive */ true,
+            /* stopOnMainAction */ false,
           );
           isBossAttackPhase = subactions.isBossAttackPhase;
           const fullElixirAction = new FullElixirAction(
@@ -956,6 +988,8 @@ export class BattleScenarioParser {
             gbfBattleData,
             godsightBattleData,
             isBossAttackPhase,
+            /* isRecursive */ true,
+            /* stopOnMainAction */ true,
           );
           // This is meant to guard against other characters stealing credit
           // for effects caused by summoning when using party 2 or 3 in Babyl.
@@ -1639,8 +1673,8 @@ export class BattleScenarioParser {
     battleData: GodsightBattleData,
     buffDebuffChangeScenario: MessageScenarioData,
     isBossAttackPhase: boolean,
-  ): BattleAction[] {
-    const actions: BattleAction[] = [];
+  ): ConditionChangeAction[] {
+    const actions: ConditionChangeAction[] = [];
     // Buffs and debuffs changed.
     const bossChanges = buffDebuffChangeScenario['data']['boss'];
     const playerChanges = buffDebuffChangeScenario['data']['player'];

@@ -7,6 +7,7 @@ import { SingularNormalAttackAction } from './singularnormalattackaction';
 import { assertNotNullOrUndefined } from '../../util/assert';
 import { GodsightSettings } from '../settings/godsightsettings';
 import { Actor } from '../../gbf/battletypes/scenariodata/mechanics/actor';
+import { ConditionChangeAction } from './conditionchangeaction';
 
 export class NormalAttackAction extends BattleAction {
   public actionType: ActionType = ActionType.NORMAL_ATTACK;
@@ -66,6 +67,19 @@ export class NormalAttackAction extends BattleAction {
     );
     const attackCount = attacks.length;
 
+    const nonStatusEffectSubactionUpdates = this.subactions
+      .filter((a) => !(a instanceof ConditionChangeAction))
+      .map((action) => action.getStats());
+
+    const statusEffectSubactionUpdates = this.subactions
+      .filter((a) => a instanceof ConditionChangeAction)
+      .map((action) => action.getStats());
+
+    const statusEffectUpdate = statusEffectSubactionUpdates.reduce(
+      (prev, cur) => StatsUpdateHelper.concatUpdates(prev, cur),
+      StatsUpdateHelper.getEmptyStatsUpdate(),
+    );
+
     if (
       attackCount > 0 &&
       !this.isCounter &&
@@ -74,6 +88,8 @@ export class NormalAttackAction extends BattleAction {
       const attacker = attacks[0]['attackerIndex'];
       update['generalStats']['normalAttacks'] += 1;
       update['characterStats'][attacker]['normalAttacks'] += 1;
+      update['characterStats'][attacker]['debuffsInflictedCount'] +=
+        statusEffectUpdate['generalStats']['debuffsInflictedCount'];
       if (attackCount == 3) {
         update['generalStats']['tripleAttacks'] += 1;
         update['characterStats'][attacker]['tripleAttacks'] += 1;
@@ -81,6 +97,9 @@ export class NormalAttackAction extends BattleAction {
       if (this.beforeBossTurn) {
         update['beforeBossTurnStats']['normalAttacks'] += 1;
         update['characterBeforeBossTurnStats'][attacker]['normalAttacks'] += 1;
+        update['characterBeforeBossTurnStats'][attacker][
+          'debuffsInflictedCount'
+        ] += statusEffectUpdate['generalStats']['debuffsInflictedCount'];
 
         if (attackCount == 3) {
           update['beforeBossTurnStats']['tripleAttacks'] += 1;
@@ -90,11 +109,12 @@ export class NormalAttackAction extends BattleAction {
       }
     }
 
-    const subactionUpdates = this.subactions.map((action) => action.getStats());
-
-    return subactionUpdates.reduce(
-      (prev, cur) => StatsUpdateHelper.concatUpdates(prev, cur),
-      update,
+    return StatsUpdateHelper.concatUpdates(
+      nonStatusEffectSubactionUpdates.reduce(
+        (prev, cur) => StatsUpdateHelper.concatUpdates(prev, cur),
+        update,
+      ),
+      statusEffectUpdate,
     );
   }
 
