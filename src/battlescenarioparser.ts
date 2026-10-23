@@ -990,7 +990,7 @@ export class BattleScenarioParser {
             godsightBattleData,
             isBossAttackPhase,
             /* isRecursive */ true,
-            /* stopOnMainAction */ true,
+            /* stopOnMainAction */ false,
           );
           // This is meant to guard against other characters stealing credit
           // for effects caused by summoning when using party 2 or 3 in Babyl.
