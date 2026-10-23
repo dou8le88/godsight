@@ -66,7 +66,6 @@ export default function GodsightPanel() {
   }, []);
 
   const storageManager = GodsightStorageManager.getInstance();
-  const battleScenarioParser = new BattleScenarioParser();
   const godsightStorage = useGodsightStorage();
 
   const settings = useGodsightSettings();
@@ -102,6 +101,7 @@ export default function GodsightPanel() {
   // Only listen for network requests when we're inspecting GBF.
   useEffect(() => {
     if (!onGbfPage) return;
+    const battleScenarioParser = new BattleScenarioParser();
 
     function startDataHandler(data: StartData, endpoint: string) {
       console.info(`Got start data for ${endpoint}`);
@@ -516,6 +516,7 @@ export default function GodsightPanel() {
     lastUpdatedBattle,
     settings,
     notifications,
+    storageManager,
   ]);
 
   const allBattles = godsightStorage['battles'];

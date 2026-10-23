@@ -13,6 +13,12 @@ export function BattleStats({
 }: {
   battleData: GodsightBattleData | undefined;
 }) {
+  const [selectedStatsView, setSelectedStatsView] = useState<
+    StatsView | undefined
+  >(undefined);
+  const [selectedCharacter, setSelectedCharacter] = useState<number>(0);
+  const [selectedBreakdown, setSelectedBreakdown] = useState(Breakdown.BY_TYPE);
+
   if (!battleData) {
     return <div>No battle data available yet, or battle data was deleted.</div>;
   } else {
@@ -77,11 +83,6 @@ export function BattleStats({
       );
     });
 
-    const [selectedStatsView, setSelectedStatsView] = useState<
-      StatsView | undefined
-    >(undefined);
-    const [selectedCharacter, setSelectedCharacter] = useState<number>(0);
-
     const views = {
       [StatsView.TOTAL]: totalStats,
       [StatsView.DPT]: damagePerTurnStats,
@@ -112,10 +113,6 @@ export function BattleStats({
         'Previous Turn Omen-Contributing Breakdown',
       [StatsView.CHARACTER]: `${battleData['party']['members'][selectedCharacter]['name']}'s Stat Breakdown`,
     };
-
-    const [selectedBreakdown, setSelectedBreakdown] = useState(
-      Breakdown.BY_TYPE,
-    );
 
     return (
       <>

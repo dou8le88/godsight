@@ -3,6 +3,10 @@ import { useEffect, useRef, useState } from 'react';
 const debounceTime = 100;
 let debounceId = 0;
 
+/**
+ * This thing abuses incomplete React dep lists and breaks
+ * all sorts of rules, it should probably be refactored.
+ */
 export default function SearchHandler() {
   const [visible, setVisible] = useState(false);
   const [query, setQuery] = useState({ query: '' });
@@ -120,7 +124,9 @@ export default function SearchHandler() {
       });
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMatchingActions(newMatchingActions);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
   useEffect(() => {
@@ -135,14 +141,17 @@ export default function SearchHandler() {
             action.className =
               clearSearchClassName(action.className) + ' highlighted';
           });
+          // eslint-disable-next-line react-hooks/immutability
           matchingAction.className =
             clearSearchClassName(matchingAction.className) +
             ' highlighted selected';
         } else {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setQuery({ query: query.query });
         }
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentActionIndex, matchingActions]);
 
   function selectNext() {
@@ -161,6 +170,28 @@ export default function SearchHandler() {
       setCurrentActionIndex(newIndex);
     }
   }
+
+  useEffect(() => {
+    function escapeHandler(e: KeyboardEvent) {
+      if (
+        e.key == 'Escape' &&
+        !document.querySelector('.config-window') &&
+        visible &&
+        searchRef.current
+      ) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        setQuery({ query: '' });
+        setVisible(false);
+      }
+    }
+
+    window.addEventListener('keydown', escapeHandler, true);
+
+    return () => {
+      window.removeEventListener('keydown', escapeHandler, true);
+    };
+  }, [query, visible]);
 
   return (
     <div
@@ -186,12 +217,6 @@ export default function SearchHandler() {
               } else {
                 selectNext();
               }
-            }
-          } else if (e.key == 'Escape') {
-            if (searchRef.current && searchRef.current.value == '') {
-              setVisible(false);
-              e.preventDefault();
-              e.stopPropagation();
             }
           }
         }}

@@ -189,7 +189,7 @@ export function Config({ onExit }: { onExit: () => void }) {
     return () => {
       window.removeEventListener('keydown', listener, true);
     };
-  }, []);
+  }, [onExit]);
 
   const configWindowRef = useRef<HTMLDivElement>(null);
 

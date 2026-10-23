@@ -489,27 +489,18 @@ export class BattleActionHelper {
           status.icon &&
           !BattleActionHelper.IconlessStatusEffects.includes(status.icon) && {
             onClick: (e) => {
-              const target = e.target as HTMLElement;
-              let wrapper: HTMLElement | null = target;
-              while (wrapper && !wrapper.className.includes('status-wrapper')) {
-                wrapper = target.parentElement;
-              }
-              const children = wrapper
-                ? wrapper.querySelectorAll('.removable')
-                : null;
-              if (
-                children &&
-                !children.values().some((elt) => elt.nodeName == 'IMG')
-              ) {
-                children?.forEach((child) => {
-                  wrapper?.removeChild(child);
+              const target = e.currentTarget as HTMLElement;
+              const children = target.querySelectorAll('.removable');
+              if (!children.values().some((elt) => elt.nodeName == 'IMG')) {
+                children.forEach((child) => {
+                  target.removeChild(child);
                 });
                 const icon = document.createElement('img');
                 icon.className = 'status-icon removable';
                 icon.src =
                   statusUrlOverride ||
                   BattleActionHelper.getStatusUrl(status.icon!);
-                wrapper?.prepend(icon);
+                target.prepend(icon);
               }
             },
           })}
