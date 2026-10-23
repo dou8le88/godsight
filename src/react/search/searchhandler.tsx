@@ -157,7 +157,13 @@ export default function SearchHandler() {
   function selectNext() {
     if (matchingActions.length) {
       const newIndex = (currentActionIndex + 1) % matchingActions.length;
-      setCurrentActionIndex(newIndex);
+      if (newIndex == currentActionIndex) {
+        matchingActions[currentActionIndex]?.scrollIntoView({
+          'block': 'nearest',
+        });
+      } else {
+        setCurrentActionIndex(newIndex);
+      }
     }
   }
 
@@ -167,7 +173,13 @@ export default function SearchHandler() {
         currentActionIndex - 1 < 0
           ? matchingActions.length - 1
           : currentActionIndex - 1;
-      setCurrentActionIndex(newIndex);
+      if (newIndex == currentActionIndex) {
+        matchingActions[currentActionIndex]?.scrollIntoView({
+          'block': 'nearest',
+        });
+      } else {
+        setCurrentActionIndex(newIndex);
+      }
     }
   }
 
@@ -224,7 +236,8 @@ export default function SearchHandler() {
       <div id="custom-search-result">
         {matchingActions.length > 0 ? (
           <>
-            {currentActionIndex + 1} of {matchingActions.length}
+            {Math.min(currentActionIndex + 1, matchingActions.length)} of{' '}
+            {matchingActions.length}
           </>
         ) : (
           <></>
