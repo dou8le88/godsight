@@ -36,7 +36,11 @@ export function TurnTracker({
               return <></>;
             }
           })}
-          <div className="frontline-backline-divider"></div>
+          {backliners.length > 0 ? (
+            <div className="frontline-backline-divider"></div>
+          ) : (
+            <></>
+          )}
           {backliners.map((char) => {
             if (char) {
               return (
