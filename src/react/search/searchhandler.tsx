@@ -203,7 +203,7 @@ export default function SearchHandler() {
     return () => {
       window.removeEventListener('keydown', escapeHandler, true);
     };
-  }, [query, visible]);
+  }, [visible]);
 
   return (
     <div
