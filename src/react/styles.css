@@ -572,6 +572,7 @@ body,
   justify-content: flex-start;
   align-items: center;
   flex: 1;
+  margin-top: 10px;
 }
 
 .battle-stats-deepdive {

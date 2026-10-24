@@ -215,6 +215,7 @@ export default function SearchHandler() {
         id="custom-search-input"
         ref={searchRef}
         type="search"
+        placeholder="Search Godsight"
         onInput={(e) => setQueryDebounced(e.currentTarget.value)}
         onKeyDown={(e) => {
           if (e.key == 'Enter') {
