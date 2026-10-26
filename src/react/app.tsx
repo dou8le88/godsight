@@ -408,6 +408,7 @@ export default function GodsightPanel() {
               case 'user_recovery.json':
               case 'retire.json':
               case 'tower_party_change.json':
+              case 'group_gauge_action_result.json':
                 try {
                   const body = JSON.parse(content) as GranblueBattleData;
                   battleDataHandler(body, endpoint);

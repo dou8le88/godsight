@@ -1469,6 +1469,7 @@ export class BattleScenarioParser {
         }
 
         case ScenarioCommand.BACKLINE_STATUS:
+          // TODO: this
           break;
 
         case ScenarioCommand.IMAGE_CHANGE: {
@@ -1744,12 +1745,14 @@ export class BattleScenarioParser {
             }
         }
 
-        destination.push({
-          'name': change['text'],
-          'type': type,
-          'icon': change['status'] ? `${change['status']}` : null,
-          'dispelled': 'dispel' in change && change['dispel'] == 1,
-        });
+        if (change['text']) {
+          destination.push({
+            'name': change['text'],
+            'type': type,
+            'icon': change['status'] ? `${change['status']}` : null,
+            'dispelled': 'dispel' in change && change['dispel'] == 1,
+          });
+        }
       });
 
       Object.keys(allBossConditionActions).forEach((pos) => {
