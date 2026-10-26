@@ -445,6 +445,26 @@ export function Config({ onExit }: { onExit: () => void }) {
                 </td>
               </tr>
               <tr className="config-option">
+                <td className="config-description">Display DPM:</td>
+                <td className="config-input-container">
+                  <input
+                    type="checkbox"
+                    className="config-checkbox"
+                    checked={settings['displayDPM']}
+                    onChange={(e) => {
+                      settingsManager.updateSingleSetting(
+                        'displayDPM',
+                        e.target.checked,
+                      );
+                    }}
+                  />
+                </td>
+                <td className="config-explanation">
+                  Displays DPM calculated from first load to the time of the
+                  last action taken.
+                </td>
+              </tr>
+              <tr className="config-option">
                 <td className="config-description">
                   Enable loading images from the GBF CDN:
                 </td>

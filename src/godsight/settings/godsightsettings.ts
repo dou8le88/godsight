@@ -5,6 +5,7 @@ export interface GodsightSettings {
   'maxRememberedBattles': number;
   'damageDisplay': DamageDisplay;
   'onRaidLoadBehavior': OnRaidLoadBehavior;
+  'displayDPM': boolean;
   'enableImageLoading': boolean;
   'clickStatusToLoadImage': boolean;
   'visibleStats': {
@@ -52,6 +53,7 @@ export const DefaultSettings: GodsightSettings = {
   'maxRememberedBattles': 10,
   'damageDisplay': DamageDisplay.ONE_PER_ELEMENT,
   'onRaidLoadBehavior': OnRaidLoadBehavior.SWITCH,
+  'displayDPM': false,
   'enableImageLoading': false,
   'clickStatusToLoadImage': false,
   'visibleStats': {

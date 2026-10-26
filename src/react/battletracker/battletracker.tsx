@@ -96,11 +96,8 @@ export default function BattleTracker({
       ) : (
         <></>
       )}
-      {totalDamage > 0 ? (
-        <div
-          className="dpm-calculation"
-          title="Calculated from the time the battle was first loaded to the time of the last action."
-        >
+      {settings['displayDPM'] && totalDamage > 0 ? (
+        <div className="dpm-calculation">
           {Math.round(totalDamage / dpmDivisor).toLocaleString()} DPM
         </div>
       ) : (
