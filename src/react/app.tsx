@@ -130,6 +130,8 @@ export default function GodsightPanel() {
         godsightBattleData['abilityTurns'] = abilityTurns;
         godsightBattleData['turnsWithSkippedOrRecordedAttackActions'] =
           existingRaid['turnsWithSkippedOrRecordedAttackActions'];
+
+        godsightBattleData['firstRecorded'] = existingRaid['firstRecorded'];
       }
 
       if ('updateTurnTo' in godsightBattleData) {

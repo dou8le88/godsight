@@ -2036,6 +2036,7 @@ export class BattleScenarioParser {
        * we can use this time reference to determine if it has already expired.
        */
       'expirationTime': Date.now() + startData['timer'] * 1000,
+      'firstRecorded': Date.now(),
       'lastUpdated': Date.now(),
       'currentWave':
         (startData['battle'] && Number(startData['battle']['count'])) || 1,

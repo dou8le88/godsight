@@ -11,7 +11,7 @@ import {
   TooltipContentProps,
 } from 'recharts';
 import { GodsightBattleData } from '../../godsight/battletypes/battledata';
-import { Stats } from '../../godsight/battletypes/stats';
+import { Stats, StatsUpdateHelper } from '../../godsight/battletypes/stats';
 import { CSSProperties } from 'react';
 import { CharacterColors } from './charactercolors';
 
@@ -38,51 +38,13 @@ function byCharacterBreakdown(
   const data: ByCharacterGraphData[] = allCharacters.map((charIdx) => {
     const stats = characterStats[charIdx];
     const charName = battleData['party']['members'][Number(charIdx)]['name'];
-
-    const totalNormalAttackDamage = Math.round(
-      Object.keys(stats['normalAttackDamage'])
-        .map((element) => {
-          return stats['normalAttackDamage'][element];
-        })
-        .reduce((prev, cur) => prev + cur, 0),
-    );
-
-    const totalChargedAttackDamage = Math.round(
-      Object.keys(stats['chargedAttackDamage'])
-        .map((element) => {
-          return stats['chargedAttackDamage'][element];
-        })
-        .reduce((prev, cur) => prev + cur, 0),
-    );
-
-    const totalSkillDamage = Math.round(
-      Object.keys(stats['skillDamage'])
-        .map((element) => {
-          return stats['skillDamage'][element];
-        })
-        .reduce((prev, cur) => prev + cur, 0),
-    );
-
-    const totalOtherDamage = Math.round(
-      Object.keys(stats['otherDamage'])
-        .map((element) => {
-          return stats['otherDamage'][element];
-        })
-        .reduce((prev, cur) => prev + cur, 0),
-    );
-
-    const totalDamage =
-      totalNormalAttackDamage +
-      totalChargedAttackDamage +
-      totalSkillDamage +
-      totalOtherDamage +
-      stats['dotDamage'];
+    const totals = StatsUpdateHelper.getTotalDamage(stats);
 
     const hitCount = stats['hitCount'];
 
     return {
       name: charName,
-      damage: totalDamage,
+      damage: totals.totalDamage,
       hitCount: hitCount,
       fill: CharacterColors[charIdx],
     };

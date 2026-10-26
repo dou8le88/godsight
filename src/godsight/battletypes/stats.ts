@@ -184,4 +184,59 @@ export class StatsUpdateHelper {
       }
     });
   }
+
+  static getTotalDamage(stats: Stats): {
+    totalNormalAttackDamage: number;
+    totalChargedAttackDamage: number;
+    totalSkillDamage: number;
+    totalOtherDamage: number;
+    totalDamage: number;
+  } {
+    const totalNormalAttackDamage = Math.round(
+      Object.keys(stats['normalAttackDamage'])
+        .map((element) => {
+          return stats['normalAttackDamage'][element];
+        })
+        .reduce((prev, cur) => prev + cur, 0),
+    );
+
+    const totalChargedAttackDamage = Math.round(
+      Object.keys(stats['chargedAttackDamage'])
+        .map((element) => {
+          return stats['chargedAttackDamage'][element];
+        })
+        .reduce((prev, cur) => prev + cur, 0),
+    );
+
+    const totalSkillDamage = Math.round(
+      Object.keys(stats['skillDamage'])
+        .map((element) => {
+          return stats['skillDamage'][element];
+        })
+        .reduce((prev, cur) => prev + cur, 0),
+    );
+
+    const totalOtherDamage = Math.round(
+      Object.keys(stats['otherDamage'])
+        .map((element) => {
+          return stats['otherDamage'][element];
+        })
+        .reduce((prev, cur) => prev + cur, 0),
+    );
+
+    const totalDamage =
+      totalNormalAttackDamage +
+      totalChargedAttackDamage +
+      totalSkillDamage +
+      totalOtherDamage +
+      stats['dotDamage'];
+
+    return {
+      totalNormalAttackDamage: totalNormalAttackDamage,
+      totalChargedAttackDamage: totalChargedAttackDamage,
+      totalSkillDamage: totalSkillDamage,
+      totalOtherDamage: totalOtherDamage,
+      totalDamage: totalDamage,
+    };
+  }
 }

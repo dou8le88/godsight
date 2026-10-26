@@ -10,7 +10,7 @@ import {
   Tooltip,
   TooltipContentProps,
 } from 'recharts';
-import { Stats } from '../../godsight/battletypes/stats';
+import { Stats, StatsUpdateHelper } from '../../godsight/battletypes/stats';
 import { Breakdown } from './breakdown';
 import {
   GameElement,
@@ -26,44 +26,7 @@ const tooltipStyle: CSSProperties = {
 };
 
 function byTypeBreakdown(stats: Stats) {
-  const totalNormalAttackDamage = Math.round(
-    Object.keys(stats['normalAttackDamage'])
-      .map((element) => {
-        return stats['normalAttackDamage'][element];
-      })
-      .reduce((prev, cur) => prev + cur, 0),
-  );
-
-  const totalChargedAttackDamage = Math.round(
-    Object.keys(stats['chargedAttackDamage'])
-      .map((element) => {
-        return stats['chargedAttackDamage'][element];
-      })
-      .reduce((prev, cur) => prev + cur, 0),
-  );
-
-  const totalSkillDamage = Math.round(
-    Object.keys(stats['skillDamage'])
-      .map((element) => {
-        return stats['skillDamage'][element];
-      })
-      .reduce((prev, cur) => prev + cur, 0),
-  );
-
-  const totalOtherDamage = Math.round(
-    Object.keys(stats['otherDamage'])
-      .map((element) => {
-        return stats['otherDamage'][element];
-      })
-      .reduce((prev, cur) => prev + cur, 0),
-  );
-
-  const totalDamage =
-    totalNormalAttackDamage +
-      totalChargedAttackDamage +
-      totalSkillDamage +
-      totalOtherDamage +
-      stats['dotDamage'] || 1;
+  const totals = StatsUpdateHelper.getTotalDamage(stats);
 
   const normalAttackHits = Math.round(stats['normalAttackHits']);
   const skillHits = Math.round(stats['skillHits']);
@@ -83,37 +46,37 @@ function byTypeBreakdown(stats: Stats) {
       fill: string;
     }[] = [];
 
-    if (totalNormalAttackDamage > 0) {
+    if (totals.totalNormalAttackDamage > 0) {
       data.push({
         name: 'NA',
-        value: totalNormalAttackDamage,
+        value: totals.totalNormalAttackDamage,
         hitCount: normalAttackHits,
         fill: DamageTypeColors.NORMAL_ATTACK,
       });
       damageTypeSectorColors.push(DamageTypeColors.NORMAL_ATTACK);
     }
-    if (totalChargedAttackDamage > 0) {
+    if (totals.totalChargedAttackDamage > 0) {
       data.push({
         name: 'CA',
-        value: totalChargedAttackDamage,
+        value: totals.totalChargedAttackDamage,
         hitCount: chargedAttackHits,
         fill: DamageTypeColors.CHARGED_ATTACK,
       });
       damageTypeSectorColors.push(DamageTypeColors.CHARGED_ATTACK);
     }
-    if (totalSkillDamage > 0) {
+    if (totals.totalSkillDamage > 0) {
       data.push({
         name: 'Skill',
-        value: totalSkillDamage,
+        value: totals.totalSkillDamage,
         hitCount: skillHits,
         fill: DamageTypeColors.SKILL,
       });
       damageTypeSectorColors.push(DamageTypeColors.SKILL);
     }
-    if (totalOtherDamage > 0) {
+    if (totals.totalOtherDamage > 0) {
       data.push({
         name: 'Other',
-        value: totalOtherDamage,
+        value: totals.totalOtherDamage,
         hitCount: otherHits,
         fill: DamageTypeColors.OTHER,
       });
@@ -162,7 +125,9 @@ function byTypeBreakdown(stats: Stats) {
 
     const hitsText = hitCount ? ` (${hitCount} hits)` : '';
 
-    const percent = ((props.value / totalDamage) * 100).toFixed(0);
+    const percent = ((props.value / (totals.totalDamage || 1)) * 100).toFixed(
+      0,
+    );
     return `${props.value.toLocaleString()} (${percent}%)${hitsText}`;
   };
 
@@ -192,8 +157,11 @@ function byTypeBreakdown(stats: Stats) {
                 style={{ color: dataPoint['fill'] }}
               >
                 {entry.name}: {entry.value?.toLocaleString()} (
-                {((Number(entry.value) / totalDamage) * 100).toFixed(0)}%) (
-                {dataPoint['hitCount']} hits)
+                {(
+                  (Number(entry.value) / (totals.totalDamage || 1)) *
+                  100
+                ).toFixed(0)}
+                %) ({dataPoint['hitCount']} hits)
               </p>
             ) : (
               <span key={`item-${index}`}></span>
@@ -234,7 +202,7 @@ function byTypeBreakdown(stats: Stats) {
           <Tooltip
             contentStyle={tooltipStyle}
             formatter={(a) =>
-              `${a?.toLocaleString()} (${((Number(a) / totalDamage) * 100).toFixed(0)}%)`
+              `${a?.toLocaleString()} (${((Number(a) / (totals.totalDamage || 1)) * 100).toFixed(0)}%)`
             }
             content={CustomTooltip}
           />

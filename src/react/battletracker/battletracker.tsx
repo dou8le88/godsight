@@ -10,6 +10,7 @@ import {
 import { SettingsManager } from '../../godsight/settings/settingsmanager';
 import { HpBar } from './hpbar';
 import { Actor } from '../../gbf/battletypes/scenariodata/mechanics/actor';
+import { StatsUpdateHelper } from '../../godsight/battletypes/stats';
 
 export default function BattleTracker({
   battleData,
@@ -53,6 +54,20 @@ export default function BattleTracker({
     battleData !== undefined && battleData['totalWaves'] > 1
       ? ` (${battleData['currentWave']}/${battleData['totalWaves']})`
       : '';
+
+  const totalDamage =
+    battleData !== undefined
+      ? StatsUpdateHelper.getTotalDamage(
+          battleData['battleStats']['generalStats'],
+        ).totalDamage
+      : 0;
+
+  const initialDpmDivisor =
+    battleData !== undefined
+      ? (battleData['lastUpdated'] - battleData['firstRecorded']) / 1000 / 60
+      : 1;
+  const dpmDivisor = initialDpmDivisor > 1 ? initialDpmDivisor : 1;
+
   const crossTabHeader = (
     <div className="battle-metadata">
       <div className="boss-name">
@@ -78,6 +93,16 @@ export default function BattleTracker({
             actor={Actor.BOSS}
           />
         ))
+      ) : (
+        <></>
+      )}
+      {totalDamage > 0 ? (
+        <div
+          className="dpm-calculation"
+          title="Calculated from the time the battle was first loaded to the time of the last action."
+        >
+          {Math.round(totalDamage / dpmDivisor).toLocaleString()} DPM
+        </div>
       ) : (
         <></>
       )}

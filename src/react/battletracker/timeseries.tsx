@@ -19,7 +19,7 @@ import {
   GameElementHelper,
 } from '../../gbf/battletypes/scenariodata/mechanics/element';
 import { CharacterColors } from './charactercolors';
-import { Stats } from '../../godsight/battletypes/stats';
+import { Stats, StatsUpdateHelper } from '../../godsight/battletypes/stats';
 
 interface ByTypeChartData {
   turn: string;
@@ -98,37 +98,7 @@ const ByCharacter = createHorizontalChart<
 
 function getDamageByTypeData(turnStats: TurnStats[]): ByTypeChartData[] {
   return turnStats.map((statsByTurn) => {
-    const totalNormalAttackDamage = Math.round(
-      Object.keys(statsByTurn.stats['normalAttackDamage'])
-        .map((element) => {
-          return statsByTurn.stats['normalAttackDamage'][element];
-        })
-        .reduce((prev, cur) => prev + cur, 0),
-    );
-
-    const totalChargedAttackDamage = Math.round(
-      Object.keys(statsByTurn.stats['chargedAttackDamage'])
-        .map((element) => {
-          return statsByTurn.stats['chargedAttackDamage'][element];
-        })
-        .reduce((prev, cur) => prev + cur, 0),
-    );
-
-    const totalSkillDamage = Math.round(
-      Object.keys(statsByTurn.stats['skillDamage'])
-        .map((element) => {
-          return statsByTurn.stats['skillDamage'][element];
-        })
-        .reduce((prev, cur) => prev + cur, 0),
-    );
-
-    const totalOtherDamage = Math.round(
-      Object.keys(statsByTurn.stats['otherDamage'])
-        .map((element) => {
-          return statsByTurn.stats['otherDamage'][element];
-        })
-        .reduce((prev, cur) => prev + cur, 0),
-    );
+    const totals = StatsUpdateHelper.getTotalDamage(statsByTurn.stats);
 
     const hitCount = statsByTurn.stats['hitCount'];
     const normalAttackHits = statsByTurn.stats['normalAttackHits'];
@@ -139,20 +109,15 @@ function getDamageByTypeData(turnStats: TurnStats[]): ByTypeChartData[] {
     return {
       turn: `${statsByTurn.turn}`,
       hitCount: hitCount,
-      normalAttackDamage: totalNormalAttackDamage,
+      normalAttackDamage: totals.totalNormalAttackDamage,
       normalAttackHits: normalAttackHits,
-      skillDamage: totalSkillDamage,
+      skillDamage: totals.totalSkillDamage,
       skillHits: skillHits,
-      chargedAttackDamage: totalChargedAttackDamage,
+      chargedAttackDamage: totals.totalChargedAttackDamage,
       chargedAttackHits: chargedAttackHits,
-      otherDamage: totalOtherDamage,
+      otherDamage: totals.totalOtherDamage,
       otherHits: otherHits,
-      totalDamage:
-        totalNormalAttackDamage +
-        totalSkillDamage +
-        totalChargedAttackDamage +
-        totalOtherDamage +
-        statsByTurn['stats']['dotDamage'],
+      totalDamage: totals.totalDamage,
     };
   });
 }
@@ -195,47 +160,15 @@ function getDamageByCharacterData(
   return turnStats.map((statsByTurn) => {
     const characterData = allCharacters
       .map((charIdx) => {
-        const totalNormalAttackDamage = Math.round(
-          Object.keys(statsByTurn.stats[charIdx]['normalAttackDamage'])
-            .map((element) => {
-              return statsByTurn.stats[charIdx]['normalAttackDamage'][element];
-            })
-            .reduce((prev, cur) => prev + cur, 0),
-        );
-
-        const totalChargedAttackDamage = Math.round(
-          Object.keys(statsByTurn.stats[charIdx]['chargedAttackDamage'])
-            .map((element) => {
-              return statsByTurn.stats[charIdx]['chargedAttackDamage'][element];
-            })
-            .reduce((prev, cur) => prev + cur, 0),
-        );
-
-        const totalSkillDamage = Math.round(
-          Object.keys(statsByTurn.stats[charIdx]['skillDamage'])
-            .map((element) => {
-              return statsByTurn.stats[charIdx]['skillDamage'][element];
-            })
-            .reduce((prev, cur) => prev + cur, 0),
-        );
-
-        const totalOtherDamage = Math.round(
-          Object.keys(statsByTurn.stats[charIdx]['otherDamage'])
-            .map((element) => {
-              return statsByTurn.stats[charIdx]['otherDamage'][element];
-            })
-            .reduce((prev, cur) => prev + cur, 0),
+        const totals = StatsUpdateHelper.getTotalDamage(
+          statsByTurn.stats[charIdx],
         );
 
         const hitCount = Math.round(statsByTurn.stats[charIdx]['hitCount']);
 
         return {
           [charIdx]: {
-            damage:
-              totalNormalAttackDamage +
-              totalChargedAttackDamage +
-              totalSkillDamage +
-              totalOtherDamage,
+            damage: totals.totalDamage,
             hitCount: hitCount,
           },
         };

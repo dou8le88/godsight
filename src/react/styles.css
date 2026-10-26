@@ -823,6 +823,13 @@ body,
       margin-left: 5px;
       cursor: default;
     }
+
+    .dpm-calculation {
+      border-bottom: 1px dotted #c2c2c2;
+      cursor: help;
+      font-size: 16px;
+      margin-left: 10px;
+    }
   }
 
   .breakdown-name {

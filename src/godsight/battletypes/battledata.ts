@@ -28,6 +28,7 @@ export interface GodsightBattleData {
   'babylParties'?: Record<string | number, GodsightPartyMemberData[]>;
   'babylFormations'?: Record<string | number, number[]>;
   'expirationTime': number;
+  'firstRecorded': number;
   'lastUpdated': number;
   'party': GodsightPartyFormationData;
   'lyriaIndex': number;
