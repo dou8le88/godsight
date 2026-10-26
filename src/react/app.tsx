@@ -413,7 +413,13 @@ export default function GodsightPanel() {
               case 'group_gauge_action_result.json':
                 try {
                   const body = JSON.parse(content) as GranblueBattleData;
-                  battleDataHandler(body, endpoint);
+                  if (body['scenario']) {
+                    battleDataHandler(body, endpoint);
+                  } else {
+                    console.error(
+                      `Missing expected scenario data for ${endpoint}, body was ${content}`,
+                    );
+                  }
                 } catch (e: unknown) {
                   console.error(e);
                 }
