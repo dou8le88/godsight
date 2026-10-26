@@ -96,7 +96,7 @@ export default function BattleTracker({
       ) : (
         <></>
       )}
-      {settings['displayDPM'] && totalDamage > 0 ? (
+      {settings['displayDPM'] ? (
         <div className="dpm-calculation">
           {Math.round(totalDamage / dpmDivisor).toLocaleString()} DPM
         </div>

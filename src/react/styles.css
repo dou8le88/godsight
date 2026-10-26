@@ -169,12 +169,12 @@ body,
 }
 
 /* Ensure the HP bar animation doesn't play on top of the config window. */
-::view-transition-group(config-overlay) {
+::view-transition-group(overlay) {
   z-index: 2000;
 }
 
 .config-window {
-  view-transition-name: config-overlay;
+  view-transition-name: overlay;
   position: absolute;
   width: 95%;
   height: 95%;
@@ -527,6 +527,8 @@ body,
   height: 30px;
   display: flex;
   justify-content: center;
+  margin-bottom: 10px;
+  view-transition-name: overlay;
 
   .tab {
     width: calc(50% - 6px);
@@ -573,7 +575,6 @@ body,
   justify-content: flex-start;
   align-items: center;
   flex: 1;
-  margin-top: 10px;
 }
 
 .battle-stats-deepdive {
