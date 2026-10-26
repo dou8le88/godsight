@@ -104,6 +104,7 @@ import { range } from './util/range';
 import { PartyChangeAction } from './godsight/battletypes/partychangeaction';
 import { GodsightSummonData } from './godsight/battletypes/summondata';
 import { DBStarCharacterRescueAction } from './godsight/battletypes/dbstarcharacterrescueaction';
+import { BacklineStatusScenarioData } from './gbf/battletypes/scenariodata/backlinestatusscenariodata';
 
 export class BattleScenarioParser {
   constructor() {
@@ -1468,9 +1469,81 @@ export class BattleScenarioParser {
           break;
         }
 
-        case ScenarioCommand.BACKLINE_STATUS:
-          // TODO: this
+        case ScenarioCommand.BACKLINE_STATUS: {
+          const backlineStatusScenario = scenario as BacklineStatusScenarioData;
+          if (backlineStatusScenario['to'] == Actor.PLAYER) {
+            if (
+              backlineStatusScenario['param']['hp'] !== undefined &&
+              backlineStatusScenario['param']['hpmax'] !== undefined
+            ) {
+              const characterIdx = backlineStatusScenario['num'];
+              const character =
+                godsightBattleData['party']['members'][characterIdx];
+
+              const currentHp = character['hp'];
+              const newHp = backlineStatusScenario['param']['hp'];
+
+              character['hp'] = newHp;
+              character['hpMax'] = backlineStatusScenario['param']['hpmax'];
+
+              if (newHp < currentHp) {
+                actions.push(
+                  new DamageAction(
+                    backlineStatusScenario['to'],
+                    godsightBattleData['party']['partyMemberCount'],
+                    false,
+                    !isBossAttackPhase,
+                    [
+                      {
+                        'element': GameElement.NULL_PLAIN,
+                        'receiverName':
+                          PartyFormationHelper.getNameOfCharacterAtPartyIndex(
+                            godsightBattleData['party'],
+                            characterIdx,
+                          ),
+                        'receiverIndex': characterIdx,
+                        'value': currentHp - newHp,
+                        'receiverHpAfterDamage': newHp,
+                        'critical': false,
+                        'miss': AttackAccuracyResult.HIT,
+                        'guarded': false,
+                      },
+                    ],
+                  ),
+                );
+              } else if (newHp > currentHp) {
+                actions.push(
+                  new HealingAction(
+                    backlineStatusScenario['to'],
+                    godsightBattleData['party']['partyMemberCount'],
+                    !isBossAttackPhase,
+                    [
+                      {
+                        'receiverName':
+                          PartyFormationHelper.getNameOfCharacterAtPartyIndex(
+                            godsightBattleData['party'],
+                            characterIdx,
+                          ),
+                        'receiverIndex': characterIdx,
+                        'value': newHp - currentHp,
+                        'hpAfterHealing': newHp,
+                      },
+                    ],
+                  ),
+                );
+              }
+            } else {
+              console.warn(
+                `Unknown backline status change: ${JSON.stringify(backlineStatusScenario)}`,
+              );
+            }
+          } else {
+            console.warn(
+              `Unexpected actor ${backlineStatusScenario['to']} for backline status change command!`,
+            );
+          }
           break;
+        }
 
         case ScenarioCommand.IMAGE_CHANGE: {
           const imageChangeScenario = scenario as ImageChangeScenarioData;
