@@ -98,7 +98,7 @@ function byCharacterBreakdown(
             entry.value !== 0 && entry.value != null ? (
               <p
                 key={`item-${index}`}
-                style={{ color: CharacterColors[index] }}
+                style={{ color: CharacterColors[numericIndex] }}
               >
                 {entry.name}: {entry.value?.toLocaleString()} (
                 {((Number(entry.value) / totalDamage) * 100).toFixed(0)}%) (

@@ -3,7 +3,7 @@
  */
 export const CharacterColors = [
   '#1f78b4',
-  '#a6cee3',
+  '#67caff',
   '#33a02c',
   '#b2df8a',
   '#f93b3d',
