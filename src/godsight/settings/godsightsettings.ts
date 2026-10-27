@@ -51,7 +51,7 @@ export const DefaultSettings: GodsightSettings = {
   'mainCharacterNameOverride': 'MC',
   'defaultBattleView': DefaultBattleView.LAST_SELECTION,
   'maxRememberedBattles': 10,
-  'damageDisplay': DamageDisplay.ONE_PER_ELEMENT,
+  'damageDisplay': DamageDisplay.ALL_HITS,
   'onRaidLoadBehavior': OnRaidLoadBehavior.SWITCH,
   'displayDPM': false,
   'enableImageLoading': false,
