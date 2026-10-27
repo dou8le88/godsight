@@ -461,7 +461,8 @@ export function Config({ onExit }: { onExit: () => void }) {
                 </td>
                 <td className="config-explanation">
                   Displays DPM calculated from first load to the time of the
-                  last action taken.
+                  last time battle data was updated (last action or last
+                  load-in).
                 </td>
               </tr>
               <tr className="config-option">
