@@ -8,13 +8,19 @@ This extension does not modify any code in the game itself. It does not inject a
 
 ## Warnings
 
-To be able to read response bodies from the server, an extension must either patch the main window's XHR functions or use devtools APIs. As the former would definitely break Granblue Fantasy's TOS, this extension opts for the latter.
+### Security
 
-Devtools APIs are very powerful and thus very dangerous for users installing such extensions. _You should be exceedingly cautious when thinking of using them, as a malicious extension could steal your cookies or act on your behalf._
+To be able to read response bodies from the server, an extension must either patch the main window's XHR functions or use devtools APIs. As the former would definitely break Granblue Fantasy's TOS, this extension opts for the latter. There are some other advantages, too, such as there being no risk of buggy code in the extension breaking the game's webpage.
 
-Review the code of such extensions carefully, or ask a trusted individual familiar with such things to do so on your behalf.
+Devtools APIs are very powerful and thus very dangerous for users installing such extensions. _You should be exceedingly cautious when thinking of using them, as a malicious extension could steal your cookies or act on your behalf._ For proper safety, it is recommended to only run this extension in a browser dedicated to Granblue Fantasy.
+
+Review the code of this extension carefully, or ask a trusted individual familiar with such things to do so on your behalf.
 
 The only code that interfaces with the devtools APIs is in [/src/devtools.ts](/src/devtools.ts) and [/src/react/app.tsx](/src/react/app.tsx), which should reduce the footprint of reviewing this repository for security concerns to a minimum.
+
+### Detectability
+
+Under the extension's default configuration, the game should not be able to detect it. If you choose to enable loading of character portraits and status effect icons, these resources are generally cached and put no extra load on the game servers, but the access patterns of these resources might change in a way that makes it possible to detect this extension if Cygames tries hard enough. It's not necessarily certain, just my personal speculation. However, you may choose to keep the image setting off, or use only the "Click status text to load icon" setting if status effect icons are needed (since they can sometimes contain information that is lost through the purely-textual description of status effects, such as duration or stack count).
 
 ## Installation
 

@@ -460,9 +460,8 @@ export function Config({ onExit }: { onExit: () => void }) {
                   />
                 </td>
                 <td className="config-explanation">
-                  Displays DPM calculated from first load to the time of the
-                  last time battle data was updated (last action or last
-                  load-in).
+                  Displays DPM calculated from first load to the last time
+                  battle data was updated (last action or last load-in).
                 </td>
               </tr>
               <tr className="config-option">
@@ -488,7 +487,19 @@ export function Config({ onExit }: { onExit: () => void }) {
                   <br />
                   As your browser must load this data anyway to display the
                   images ingame, these requests are cached and should have
-                  minimal impact on the game servers.
+                  minimal impact on the game servers in most circumstances, but
+                  may change access patterns in ways that make this extension
+                  detectable. <br />
+                  See the{' '}
+                  <a
+                    className="config-link"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href="https://github.com/dou8le88/godsight"
+                  >
+                    extension readme
+                  </a>{' '}
+                  for more info.
                 </td>
               </tr>
               <tr

@@ -299,6 +299,11 @@ body,
       .config-explanation {
         padding: 10px;
       }
+
+      .config-link,
+      .config-link:visited {
+        color: #b4d3e0;
+      }
     }
   }
 }
