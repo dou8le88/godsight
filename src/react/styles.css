@@ -53,6 +53,7 @@ body,
 }
 
 .version-header {
+  view-transition-name: version-header-overlay;
   width: 100%;
   height: 20px;
   padding-right: 5px;
@@ -74,6 +75,8 @@ body,
 }
 
 .toolbar {
+  view-transition-name: toolbar-overlay;
+  background-color: #282828;
   width: 100%;
   display: flex;
   flex-direction: row;
@@ -165,11 +168,16 @@ body,
   z-index: 1000;
   background-color: #333333aa;
 
+  view-transition-name: overlay-mask;
   animation: config-fadeIn 0.2s forwards;
 }
 
 /* Ensure the HP bar animation doesn't play on top of the config window. */
-::view-transition-group(overlay) {
+::view-transition-group(overlay),
+::view-transition-group(overlay-mask),
+::view-transition-group(tab-overlay),
+::view-transition-group(version-header-overlay),
+::view-transition-group(toolbar-overlay) {
   z-index: 2000;
 }
 
@@ -533,7 +541,8 @@ body,
   display: flex;
   justify-content: center;
   margin-bottom: 10px;
-  view-transition-name: overlay;
+  view-transition-name: tab-overlay;
+  background-color: #282828;
 
   .tab {
     width: calc(50% - 6px);
