@@ -1016,6 +1016,19 @@ body,
   vertical-align: middle;
 }
 
+.avatar-hp-bar-wrapper {
+  background-color: #00000088;
+  position: relative;
+  top: -30px;
+  left: 1px;
+  height: 16px;
+  width: 47px;
+  z-index: 30;
+  cursor: help;
+  isolation: isolate;
+  contain: paint layout size;
+}
+
 .hp-bar {
   display: inline-block;
   width: 203px;
@@ -1035,13 +1048,46 @@ body,
     }
   }
 
+  &.player.critical {
+    .dynamic-hp-bar-wrapper {
+      .current-hp {
+        background: linear-gradient(to bottom, #d65c3f, #9c280f, #8b1f06);
+      }
+    }
+
+    .hp-percent {
+      color: #d65c3f;
+    }
+  }
+
   &.player {
-    .current-hp {
-      background: linear-gradient(to bottom, #76c786, #2ba23d, #690f0e);
+    width: 46px;
+    height: 6px;
+    position: absolute;
+    top: 6px;
+    pointer-events: none;
+
+    .dynamic-hp-bar-wrapper {
+      width: 43px;
+
+      .current-hp {
+        height: 4px;
+        top: -4px;
+        background: linear-gradient(to bottom, #76c786, #2ba23d, #690f0e);
+      }
+
+      .damage-diff {
+        height: 4px;
+      }
     }
 
     .hp-percent {
       color: #76c786;
+      top: -21px;
+    }
+
+    .exact-hp {
+      visibility: hidden;
     }
   }
 

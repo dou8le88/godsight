@@ -1,6 +1,8 @@
+import { Actor } from '../../gbf/battletypes/scenariodata/mechanics/actor';
 import { GameElementHelper } from '../../gbf/battletypes/scenariodata/mechanics/element';
 import { GodsightPartyMemberData } from '../../godsight/battletypes/partyformationdata';
 import { useGodsightSettings } from '../../godsight/settings/usegodsightsettings';
+import { HpBar } from './hpbar';
 
 export default function Avatar({
   characterData,
@@ -75,6 +77,11 @@ export default function Avatar({
           )}
         </>
       )}
+      <HpBar
+        actor={Actor.PLAYER}
+        currentHp={characterData['hp']}
+        maxHp={characterData['hpMax']}
+      />
     </div>
   );
 }
