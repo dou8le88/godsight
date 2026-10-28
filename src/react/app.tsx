@@ -415,6 +415,10 @@ export default function GodsightPanel() {
                   const body = JSON.parse(content) as GranblueBattleData;
                   if (body['scenario']) {
                     battleDataHandler(body, endpoint);
+                  } else if (
+                    (body as unknown as { 'popup': unknown })['popup']
+                  ) {
+                    // "Your HP is too low" or "you don't have the stacks" type popups
                   } else {
                     console.error(
                       `Missing expected scenario data for ${endpoint}, body was ${content}`,
