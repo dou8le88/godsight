@@ -20,7 +20,9 @@ The only code that interfaces with the devtools APIs is in [/src/devtools.ts](/s
 
 ### Detectability
 
-Under the extension's default configuration, the game should not be able to detect it. If you choose to enable loading of character portraits and status effect icons, these resources are generally cached and put no extra load on the game servers, but the access patterns of these resources might change in a way that makes it possible to detect this extension if Cygames tries hard enough. It's not necessarily certain, just my personal speculation. However, you may choose to keep the image setting off, or use only the "Click status text to load icon" setting if status effect icons are needed (since they can sometimes contain information that is lost through the purely-textual description of status effects, such as duration or stack count).
+Under the extension's default configuration, the game should not be able to detect it. If you choose to enable loading of character portraits and status effect icons, these resources are generally cached and put no extra load on the game servers, but the access patterns of these resources might change in a way that makes it possible to detect this extension if Cygames tries hard enough. It's not necessarily certain, just my personal speculation. There is also the possibility that you open up old recorded battle data in the extension and all the assets are uncached for whatever reason, causing the extension to fetch all of them at once.
+
+It is recommended to keep the image setting off, and use the "Click status text to load icon" setting if you need more information about status effects (since they can sometimes contain information that is lost through the purely-textual description of status effects, such as duration or stack count).
 
 ## Installation
 
@@ -33,7 +35,7 @@ Under the extension's default configuration, the game should not be able to dete
 - **NOTE 1:** Refreshing too fast will cause the extension to miss data. The safe timing for refreshing is approximately how long it takes for your ingame honors score to update under normal conditions (actually a little sooner but it's an easy cue). If your honors update gets delayed due to server load, but your button press is being executed in the client, you are still safe to refresh.
   - A warning icon will be displayed if missing data is detected, but the extension can't detect all cases.
 - **NOTE 2:** The extension **does** support multi-window gameplay, but it can only detect battle data from an inspected window. If you want to play the game in multiple windows (e.g., for speedmaxxers using Fated Chains in a second window), make sure to open the extension panel in those other windows as well. Updates will be reflected across all open extension panels.
-- **NOTE 3:** Loading images from the GBF CDN is disabled by default. These images are cached by the browser (because the game has to load them in the first place), so the impact on GBF servers should be minimal and it should be fine to enable it. It is worth noting that status effect icons can actually be important as they contain information like stack counts or a local debuff's remaining duration. The extension attempts to recover and display some of this information if images are disabled, but it is imperfect.
+- **NOTE 3:** Loading images from the GBF CDN is disabled by default (see the "Detectability" section). It is worth noting that status effect icons can actually be important as they contain information like stack counts or a local debuff's remaining duration. The extension attempts to recover and display some of this information if images are disabled, but it is imperfect due to inconsistent naming schemes between status effects. There is a setting to display specific status effect icons without loading all images.
 
 <br/>
 

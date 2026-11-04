@@ -132,6 +132,7 @@ export default function GodsightPanel() {
           existingRaid['turnsWithSkippedOrRecordedAttackActions'];
 
         godsightBattleData['firstRecorded'] = existingRaid['firstRecorded'];
+        godsightBattleData['lastUpdated'] = existingRaid['lastUpdated'];
       }
 
       if ('updateTurnTo' in godsightBattleData) {

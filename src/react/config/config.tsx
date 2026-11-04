@@ -460,8 +460,8 @@ export function Config({ onExit }: { onExit: () => void }) {
                   />
                 </td>
                 <td className="config-explanation">
-                  Displays DPM calculated from first load to the last time
-                  battle data was updated (last action or last load-in).
+                  Displays DPM calculated from first load to the last time an
+                  action was taken.
                 </td>
               </tr>
               <tr className="config-option">
@@ -489,7 +489,9 @@ export function Config({ onExit }: { onExit: () => void }) {
                   images ingame, these requests are cached and should have
                   minimal impact on the game servers in most circumstances, but
                   may change access patterns in ways that make this extension
-                  detectable. <br />
+                  detectable.
+                  <br /> <b>It is recommended to keep this setting off.</b>
+                  <br />
                   See the{' '}
                   <a
                     className="config-link"
