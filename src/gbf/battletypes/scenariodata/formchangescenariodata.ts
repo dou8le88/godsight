@@ -9,6 +9,7 @@ export interface FormChangeScenarioData extends GenericScenarioData {
     'attr': GameElementValue;
     'name': {
       'en': string;
+      'ja': string;
     };
   };
   'pos': number;

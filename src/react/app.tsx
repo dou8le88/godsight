@@ -17,9 +17,15 @@ import {
   Notification,
   NotificationType,
 } from './notifications/notification';
-import { OnRaidLoadBehavior } from '../godsight/settings/godsightsettings';
+import {
+  GameLanguage,
+  OnRaidLoadBehavior,
+} from '../godsight/settings/godsightsettings';
 import SearchHandler from './search/searchhandler';
 import { range } from '../util/range';
+import { Toolbar } from './config/toolbar';
+import { SettingsManager } from '../godsight/settings/settingsmanager';
+import { JPLanguageTest } from '../util/jplanguagetest';
 
 const NoKnownActiveBattleNotificationKey = 'NoKnownActiveBattle';
 const LoadedIntoRaidNotificationKey = 'LoadedIntoRaid';
@@ -68,6 +74,7 @@ export default function GodsightPanel() {
   const storageManager = GodsightStorageManager.getInstance();
   const godsightStorage = useGodsightStorage();
 
+  const settingsManager = SettingsManager.getInstance();
   const settings = useGodsightSettings();
 
   const [notifications, setNotifications] = useState<GodsightNotification[]>(
@@ -101,10 +108,39 @@ export default function GodsightPanel() {
   // Only listen for network requests when we're inspecting GBF.
   useEffect(() => {
     if (!onGbfPage) return;
-    const battleScenarioParser = new BattleScenarioParser();
+    const battleScenarioParser = new BattleScenarioParser(settings);
 
     function startDataHandler(data: StartData, endpoint: string) {
       console.info(`Got start data for ${endpoint}`);
+
+      const mainCharacter = data['player']['param'][0];
+      if (mainCharacter) {
+        if (
+          (JPLanguageTest.containsJapaneseRegex.test(
+            mainCharacter['special_skill'],
+          ) ||
+            JPLanguageTest.containsJapaneseRegex.test(
+              mainCharacter['special_comment'],
+            )) &&
+          settings['gameLanguage'] != GameLanguage.JA
+        ) {
+          settingsManager.updateSingleSetting('gameLanguage', GameLanguage.JA);
+          // Also update the language for the current parse.
+          settings['gameLanguage'] = GameLanguage.JA;
+        } else if (
+          !JPLanguageTest.containsJapaneseRegex.test(
+            mainCharacter['special_skill'],
+          ) &&
+          !JPLanguageTest.containsJapaneseRegex.test(
+            mainCharacter['special_comment'],
+          ) &&
+          settings['gameLanguage'] != GameLanguage.EN
+        ) {
+          settingsManager.updateSingleSetting('gameLanguage', GameLanguage.EN);
+          // Also update the language for the current parse.
+          settings['gameLanguage'] = GameLanguage.EN;
+        }
+      }
 
       const godsightBattleData = battleScenarioParser.parseStartData(
         data,
@@ -531,6 +567,7 @@ export default function GodsightPanel() {
     settings,
     notifications,
     storageManager,
+    settingsManager,
   ]);
 
   const allBattles = godsightStorage['battles'];
@@ -562,14 +599,7 @@ export default function GodsightPanel() {
           Godsight version {manifest['version']}
         </a>
       </div>
-      <div className="toolbar">
-        <div
-          className="icon config-icon"
-          onClick={() => setShowConfig(true)}
-        >
-          ⚙
-        </div>
-      </div>
+      <Toolbar onConfigClicked={() => setShowConfig(true)} />
       <div className="notification-bar">
         {notifications.map((notification) => (
           <Notification

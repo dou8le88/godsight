@@ -3,5 +3,5 @@ import { ScenarioCommand } from './scenariocommand';
 
 export interface BattleLogScenarioData extends GenericScenarioData {
   'cmd': ScenarioCommand._BATTLE_LOG;
-  'body': string | { 'en': string };
+  'body': string | { 'en': string; 'ja': string };
 }

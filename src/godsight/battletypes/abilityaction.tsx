@@ -45,7 +45,6 @@ export class AbilityAction extends BattleAction {
           key={key}
           className="action-description"
         >
-          {' '}
           {this.sourceName} activated {this.name}!
           {this.subactions.map((subaction, idx) =>
             subaction.getDescription(idx, settings),

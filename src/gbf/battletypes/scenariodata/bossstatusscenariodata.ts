@@ -6,6 +6,7 @@ export interface BossStatusScenarioData extends GenericScenarioData {
   'cmd': ScenarioCommand.BOSS_STATUS;
   'name': {
     'en': string;
+    'ja': string;
   };
   'pos': number;
   'attr': GameElementValue;

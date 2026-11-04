@@ -49,7 +49,7 @@ It is recommended to keep the image setting off, and use the "Click status text 
 
 ## Limitations
 
-- **This extension does not currently support the ingame Japanese language option. For now, please only use the extension with the ingame language set to English.**
+- **The extension will function when the ingame language is set to Japanese, but the extension itself currently does not have a Japanese translation.**
 - This extension cannot intercept battle updates from other players. Thus, you will not see HP update inside the extension until you perform an action (similar to the ingame "Live Battle Feed" setting being off).
 
 ## Bug Reports and Contributions

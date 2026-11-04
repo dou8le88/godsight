@@ -174,6 +174,9 @@ export interface PartyMemberData {
    * Numerical boolean (0/1) reeee
    */
   'is_vanished': number;
+
+  'special_skill': string;
+  'special_comment': string;
 }
 
 export interface BossFormationData {
@@ -222,6 +225,7 @@ export interface BossData {
   'is_key_enemy': number;
   'name': {
     'en': string;
+    'ja': string;
   };
   'Lv': string;
   'attribute': PrettyElementName;

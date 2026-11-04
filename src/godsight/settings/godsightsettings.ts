@@ -1,4 +1,9 @@
 export interface GodsightSettings {
+  /**
+   * A non-configurable setting, automatically determined by examining battle data.
+   * The detected language of the game client, used to adjust how certain battle data is parsed.
+   */
+  'gameLanguage': GameLanguage;
   'mainCharacterNameOverride': string;
   'defaultBattleView': DefaultBattleView;
   'lastSelectedBattleView'?: BattleViewTab;
@@ -47,7 +52,13 @@ export enum OnRaidLoadBehavior {
   NO_ACTION = 'No Action',
 }
 
+export enum GameLanguage {
+  EN = 'en',
+  JA = 'ja',
+}
+
 export const DefaultSettings: GodsightSettings = {
+  'gameLanguage': GameLanguage.EN,
   'mainCharacterNameOverride': 'MC',
   'defaultBattleView': DefaultBattleView.LAST_SELECTION,
   'maxRememberedBattles': 10,

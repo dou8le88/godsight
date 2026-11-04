@@ -1,6 +1,7 @@
 import { Actor } from '../../gbf/battletypes/scenariodata/mechanics/actor';
 import { GameElementHelper } from '../../gbf/battletypes/scenariodata/mechanics/element';
 import { GodsightPartyMemberData } from '../../godsight/battletypes/partyformationdata';
+import { GameLanguage } from '../../godsight/settings/godsightsettings';
 import { useGodsightSettings } from '../../godsight/settings/usegodsightsettings';
 import { HpBar } from './hpbar';
 
@@ -58,7 +59,15 @@ export default function Avatar({
         <>
           <div className="portrait-noimage">
             {showName ? (
-              <div className="character-name">{characterData['name']}</div>
+              <div
+                className={
+                  settings['gameLanguage'] == GameLanguage.JA
+                    ? 'character-name jp'
+                    : 'character-name'
+                }
+              >
+                {characterData['name']}
+              </div>
             ) : (
               <></>
             )}

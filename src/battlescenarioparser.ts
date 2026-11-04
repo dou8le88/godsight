@@ -105,11 +105,14 @@ import { PartyChangeAction } from './godsight/battletypes/partychangeaction';
 import { GodsightSummonData } from './godsight/battletypes/summondata';
 import { DBStarCharacterRescueAction } from './godsight/battletypes/dbstarcharacterrescueaction';
 import { BacklineStatusScenarioData } from './gbf/battletypes/scenariodata/backlinestatusscenariodata';
+import {
+  GodsightSettings,
+  GameLanguage,
+} from './godsight/settings/godsightsettings';
+import { JPLanguageTest } from './util/jplanguagetest';
 
 export class BattleScenarioParser {
-  constructor() {
-    // No params needed.
-  }
+  constructor(private settings: GodsightSettings) {}
 
   /**
    * Parses game battle scenario data.
@@ -133,12 +136,29 @@ export class BattleScenarioParser {
     ).actions;
   }
 
-  private containsJapaneseRegex =
-    /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u;
-  private summonHitCountRegex = /(\d+)-hit/;
-  private summonTargetRegex = /DMG[^/]*?to all foes/;
+  private summonHitCountRegex = {
+    [GameLanguage.EN]: /(\d+)-hit/,
+    [GameLanguage.JA]: /(\d+)回/,
+  };
+  private summonTargetRegex = {
+    [GameLanguage.EN]: /DMG[^/]*?to all foes/,
+    [GameLanguage.JA]: /敵全体[^/]*?ダメージ/,
+  };
 
-  private filteredAbilityNames = ['Paralyze effect to a foe'];
+  private filteredAbilityNames = {
+    [GameLanguage.EN]: ['Paralyze effect to a foe'],
+    [GameLanguage.JA]: ['麻痺'],
+  };
+
+  private UnnamedAbility = {
+    [GameLanguage.EN]: 'Unnamed Ability',
+    [GameLanguage.JA]: '名称不明の能力',
+  };
+
+  private UnknownSummonName = {
+    [GameLanguage.EN]: 'Unknown Summon',
+    [GameLanguage.JA]: '名称不明の召喚石',
+  };
 
   /**
    * Parses game battle scenario data.
@@ -420,13 +440,17 @@ export class BattleScenarioParser {
           // to use surrounding commands as context to display something useful.
           if (
             !abilityAction.name ||
-            this.containsJapaneseRegex.test(abilityAction.name)
+            this.settings['gameLanguage'] == GameLanguage.EN
+              ? JPLanguageTest.containsJapaneseRegex.test(abilityAction.name)
+              : false
           ) {
             const windowSubactions = abilityAction.subactions.filter(
               (a) => a instanceof WindowEffectAction,
             ) as WindowEffectAction[];
-            const firstNamedWindowSubaction = windowSubactions.find(
-              (a) => a.name && !this.containsJapaneseRegex.test(a.name),
+            const firstNamedWindowSubaction = windowSubactions.find((a) =>
+              a.name && this.settings['gameLanguage'] == GameLanguage.EN
+                ? !JPLanguageTest.containsJapaneseRegex.test(a.name)
+                : true,
             );
             if (firstNamedWindowSubaction) {
               abilityAction.name = firstNamedWindowSubaction.name;
@@ -437,8 +461,12 @@ export class BattleScenarioParser {
           );
 
           if (
-            !this.containsJapaneseRegex.test(abilityAction.name) &&
-            !this.filteredAbilityNames.includes(abilityAction.name)
+            (this.settings['gameLanguage'] == GameLanguage.EN
+              ? !JPLanguageTest.containsJapaneseRegex.test(abilityAction.name)
+              : true) &&
+            !this.filteredAbilityNames[this.settings['gameLanguage']].includes(
+              abilityAction.name,
+            )
           ) {
             if (abilityAction.name != '') {
               actions.push(abilityAction);
@@ -454,7 +482,7 @@ export class BattleScenarioParser {
                   abilityAction.overrideMessage = battleLogScenario['body'];
                 } else {
                   abilityAction.overrideMessage =
-                    battleLogScenario['body']['en'];
+                    battleLogScenario['body'][this.settings['gameLanguage']];
                 }
                 actions.push(abilityAction);
               } else {
@@ -472,7 +500,8 @@ export class BattleScenarioParser {
                   // with no name for something that *should* be displaying a name.
                   // E.g., Echidna will sometimes not have a name for the skill
                   // damage from her "Primal Beast of Motherhood" passive.
-                  abilityAction.name = 'Unnamed Ability';
+                  abilityAction.name =
+                    this.UnnamedAbility[this.settings['gameLanguage']];
                   actions.push(abilityAction);
                 } else {
                   // No known way (yet) to make sense of this Ability command, so just
@@ -1001,7 +1030,8 @@ export class BattleScenarioParser {
           ]
             ? subactions.actions.findIndex(
                 (a) =>
-                  a instanceof AbilityAction && a.name == 'Unnamed Ability',
+                  a instanceof AbilityAction &&
+                  a.name == this.UnnamedAbility[this.settings['gameLanguage']],
               )
             : -1;
           if (maybeMeaninglessAbilityActionIdx != -1) {
@@ -1116,12 +1146,16 @@ export class BattleScenarioParser {
             let trueSummonHitCount: number | undefined;
             if (calledSummon) {
               const matchResult = calledSummon['description'].match(
-                this.summonHitCountRegex,
+                this.summonHitCountRegex[this.settings['gameLanguage']],
               );
               if (matchResult) {
                 trueSummonHitCount = Number(matchResult.at(-1)!);
 
-                if (this.summonTargetRegex.test(calledSummon['description'])) {
+                if (
+                  this.summonTargetRegex[this.settings['gameLanguage']].test(
+                    calledSummon['description'],
+                  )
+                ) {
                   const uniqueTargets = new Set(
                     damageInstances.map((d) => d['receiverIndex']),
                   );
@@ -1136,7 +1170,9 @@ export class BattleScenarioParser {
 
             actions.push(
               new SummonAction(
-                calledSummon ? calledSummon['name'] : 'Unknown Summon',
+                calledSummon
+                  ? calledSummon['name']
+                  : this.UnknownSummonName[this.settings['gameLanguage']],
                 summonScenario['name'],
                 godsightBattleData['lyriaIndex'],
                 BattleActionHelper.getMainCharacterName(
@@ -1356,7 +1392,7 @@ export class BattleScenarioParser {
             if (typeof prev['body'] == 'string') {
               battleMessage = prev['body'];
             } else {
-              battleMessage = prev['body']['en'];
+              battleMessage = prev['body'][this.settings['gameLanguage']];
             }
           }
           const standbyAction = new StandbyAction(
@@ -2224,7 +2260,7 @@ export class BattleScenarioParser {
     const currentHp = Number(b['hp']);
 
     const godsightBossData: GodsightBossData = {
-      'name': b['name']['en'],
+      'name': b['name'][this.settings['gameLanguage']],
       'element': b['attr'],
       'hpCurrent': currentHp,
       'hpMax': Number(b['hpmax']),
@@ -2244,7 +2280,7 @@ export class BattleScenarioParser {
     const currentDiamonds = Number(b['recast']);
 
     const godsightBossData: GodsightBossData = {
-      'name': b['name']['en'],
+      'name': b['name'][this.settings['gameLanguage']],
       'element': b['attr'],
       'hpCurrent': b['hp'],
       'hpMax': existingData['hpMax'],
@@ -2261,7 +2297,7 @@ export class BattleScenarioParser {
     existingData: GodsightBossData,
   ): GodsightBossData {
     const godsightBossData: GodsightBossData = {
-      'name': b['param']['name']['en'],
+      'name': b['param']['name'][this.settings['gameLanguage']],
       'element': b['param']['attr'],
       'hpCurrent': existingData['hpCurrent'],
       'hpMax': existingData['hpMax'],
