@@ -968,6 +968,7 @@ export class BattleScenarioParser {
           godsightBattleData['party']['backline'] = backline;
           godsightBattleData['party']['members'].forEach((char) => {
             char['alive'] = true;
+            char['hp'] = char['hpMax'];
           });
 
           break baseLoop;
