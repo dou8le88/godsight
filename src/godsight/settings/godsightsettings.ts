@@ -64,7 +64,7 @@ export const DefaultSettings: GodsightSettings = {
   'maxRememberedBattles': 10,
   'damageDisplay': DamageDisplay.ALL_HITS,
   'onRaidLoadBehavior': OnRaidLoadBehavior.SWITCH,
-  'displayDPM': false,
+  'displayDPM': true,
   'enableImageLoading': false,
   'clickStatusToLoadImage': false,
   'visibleStats': {
