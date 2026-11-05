@@ -867,7 +867,7 @@ body,
       display: inline-block;
       color: #f5bd32;
       margin-left: 5px;
-      cursor: default;
+      cursor: help;
     }
 
     .dpm-calculation {
