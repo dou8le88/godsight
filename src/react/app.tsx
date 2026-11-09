@@ -446,6 +446,7 @@ export default function GodsightPanel() {
               case 'temporary_item_result.json':
               case 'user_recovery.json':
               case 'retire.json':
+              case 'abort_raid.json':
               case 'tower_party_change.json':
               case 'group_gauge_action_result.json':
                 try {
