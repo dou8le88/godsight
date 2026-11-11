@@ -17,8 +17,7 @@ export class ReplaceCharacterAction extends BattleAction {
     super();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getDescription(key: number, settings: GodsightSettings): JSX.Element {
+  getDescription(key: number, _settings: GodsightSettings): JSX.Element {
     return (
       <div
         key={key}

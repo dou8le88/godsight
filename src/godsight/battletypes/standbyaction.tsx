@@ -25,8 +25,7 @@ export class StandbyAction extends BattleAction {
     return StatsUpdateHelper.getEmptyStatsUpdate();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getDescription(key: number, settings: GodsightSettings): JSX.Element {
+  getDescription(key: number, _settings: GodsightSettings): JSX.Element {
     let message = `${this.actorName} can't attack!`;
     if (this.battleMessage) {
       message = `${this.battleMessage} They can't attack!`;

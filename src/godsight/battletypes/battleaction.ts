@@ -12,8 +12,7 @@ export abstract class BattleAction {
 
   abstract getDescription(key: number, settings: GodsightSettings): JSX.Element;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  static fromJSON(json: Record<string, unknown>): BattleAction | undefined {
+  static fromJSON(_json: Record<string, unknown>): BattleAction | undefined {
     throw new Error(
       'BattleAction subclasses must implement a `static fromJSON` method!',
     );

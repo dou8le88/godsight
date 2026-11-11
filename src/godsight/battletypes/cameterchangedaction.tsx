@@ -20,8 +20,7 @@ export class CAMeterChangedAction extends BattleAction {
     super();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getDescription(key: number, settings: GodsightSettings): JSX.Element {
+  getDescription(key: number, _settings: GodsightSettings): JSX.Element {
     let changeWord = '';
     if (this.change > 0) {
       changeWord = 'gained';
