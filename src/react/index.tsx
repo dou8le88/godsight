@@ -1,3 +1,5 @@
+// Globally compile all zod schemas
+import 'zod/compile';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';

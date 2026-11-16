@@ -1,7 +1,8 @@
-import { GenericScenarioData } from './genericscenariodata';
+import { ScenarioData } from './scenariodata';
 import { ScenarioCommand } from './scenariocommand';
+import { z } from 'zod';
 
-export interface WindowEffectScenarioData extends GenericScenarioData {
-  'cmd': ScenarioCommand.WINDOW_EFFECT;
-  'name': string;
-}
+export const WindowEffectScenarioData = ScenarioData.extend({
+  'cmd': z.literal(ScenarioCommand.WINDOW_EFFECT),
+  'name': z.string(),
+}).strip();

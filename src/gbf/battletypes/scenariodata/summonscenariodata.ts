@@ -1,23 +1,28 @@
-import { GameElementValue } from './mechanics/element';
+import { GameElementSchema } from './mechanics/element';
 import { ScenarioCommand } from './scenariocommand';
-import { GenericScenarioData } from './genericscenariodata';
+import { ScenarioData } from './scenariodata';
+import { z } from 'zod';
 
-export interface SummonDamageInstance {
-  'pos': number;
-  'value': number;
-  'hp': number;
-  'critical': boolean;
-  'guard': boolean;
-  'color': GameElementValue;
-}
+export const SummonDamageInstance = z.object({
+  'pos': z.coerce.number(),
+  'value': z.coerce.number(),
+  'hp': z.coerce.number(),
+  'critical': z.coerce.boolean(),
+  'guard': z.coerce.boolean(),
+  'color': GameElementSchema,
+});
 
-export interface SummonDamageDescription {
-  'damage':
-    SummonDamageInstance[] | Record<string | number, SummonDamageInstance>;
-}
+export type SummonDamageInstance = z.infer<typeof SummonDamageInstance>;
 
-export interface SummonScenarioData extends GenericScenarioData {
-  'cmd': ScenarioCommand.SUMMON;
-  'name': string;
-  'list': SummonDamageDescription[];
-}
+export const SummonDamageDescription = z.object({
+  'damage': z.union([
+    z.array(SummonDamageInstance),
+    z.record(z.coerce.number(), SummonDamageInstance),
+  ]),
+});
+
+export const SummonScenarioData = ScenarioData.extend({
+  'cmd': z.literal(ScenarioCommand.SUMMON),
+  'name': z.string(),
+  'list': z.array(SummonDamageDescription),
+}).strip();

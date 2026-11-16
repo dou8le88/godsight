@@ -1,54 +1,41 @@
-import { CharacterType } from './scenariodata/mechanics/charactertype';
-import { GuardStatus } from './scenariodata/mechanics/guardstatus';
-import { GenericScenarioData } from './scenariodata/genericscenariodata';
+import { z } from 'zod';
+import { ScenarioList } from './scenariolist';
 
-export interface CharacterAbilityStatus {
-  'mode': CharacterType;
-  'pos': number;
-  'alive': number;
-  'src': string;
-}
+export const GroupGaugeStatus = z.object({
+  'value': z.coerce.number(),
+  'ability_available': z.coerce.boolean(),
+});
 
-/**
- * Seems to be only the frontline? Mostly focused on ability availability,
- * probably used for displaying ability and CD information.
- */
-export type PartyAbilityStatus = Record<string, CharacterAbilityStatus>;
+export const SummonData = z.object({
+  'skill': z.string(),
+  'comment': z.string(),
+  /**
+   * Summon cooldown.
+   */
+  'recast': z.coerce.number(),
+});
 
-export interface GroupGaugeStatus {
-  'value': number;
-  'ability_available': boolean;
-}
-
-export interface BattleStatus {
-  'raid_id': number;
-  'turn': number;
-  'timer': number;
+export const BattleStatus = z.object({
+  'turn': z.coerce.number(),
+  'timer': z.coerce.number(),
   /**
    * Number of skill button presses in battle.
    * Increments every time a character skill is used via pressing its button.
+   * Not present in solo battles.
    */
-  'ability_turn': number;
-  'is_guard_status': GuardStatus[];
-  'ability': PartyAbilityStatus;
-  // "lyria_pos": number,
-  'group_gauge': GroupGaugeStatus;
-  'summon': SummonData[];
-  'supporter'?: {
-    'recast': string;
-  };
-}
+  'ability_turn': z.optional(z.coerce.number()),
+  'group_gauge': z.optional(GroupGaugeStatus),
+  'summon': z.array(SummonData),
+  'supporter': z.optional(
+    z.object({
+      'recast': z.coerce.number(),
+    }),
+  ),
+});
 
-export interface SummonData {
-  'skill': string;
-  'comment': string;
-  /**
-   * Numeric string of summon cooldown.
-   */
-  'recast': string;
-}
+export const GranblueBattleData = z.object({
+  'scenario': ScenarioList,
+  'status': z.optional(BattleStatus),
+});
 
-export interface GranblueBattleData {
-  'scenario': GenericScenarioData[];
-  'status'?: BattleStatus;
-}
+export type GranblueBattleData = z.infer<typeof GranblueBattleData>;

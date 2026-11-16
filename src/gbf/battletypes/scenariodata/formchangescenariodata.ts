@@ -1,17 +1,18 @@
-import { GenericScenarioData } from './genericscenariodata';
-import { GameElementValue } from './mechanics/element';
+import { ScenarioData } from './scenariodata';
+import { GameElementSchema } from './mechanics/element';
 import { Actor } from './mechanics/actor';
 import { ScenarioCommand } from './scenariocommand';
+import { z } from 'zod';
+import { MultiLanguageStringSchema } from './multilanguagestring';
 
-export interface FormChangeScenarioData extends GenericScenarioData {
-  'cmd': ScenarioCommand.FORM_CHANGE;
-  'param': {
-    'attr': GameElementValue;
-    'name': {
-      'en': string;
-      'ja': string;
-    };
-  };
-  'pos': number;
-  'to': Actor;
-}
+export const FormChangeScenarioData = ScenarioData.extend({
+  'cmd': z.literal(ScenarioCommand.FORM_CHANGE),
+  'param': z.object({
+    'attr': GameElementSchema,
+    'name': z.union([z.string(), MultiLanguageStringSchema]),
+  }),
+  'pos': z.coerce.number(),
+  'to': z.enum(Actor),
+}).strip();
+
+export type FormChangeScenarioData = z.infer<typeof FormChangeScenarioData>;

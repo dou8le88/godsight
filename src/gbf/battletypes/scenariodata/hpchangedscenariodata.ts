@@ -1,17 +1,18 @@
-import { GenericScenarioData } from './genericscenariodata';
+import { ScenarioData } from './scenariodata';
 import { Actor } from './mechanics/actor';
 import { ScenarioCommand } from './scenariocommand';
+import { z } from 'zod';
 
-export interface HPChangedScenarioData extends GenericScenarioData {
-  'cmd': ScenarioCommand.HP_CHANGED;
-  'to': Actor;
-  'pos': number;
+export const HPChangedScenarioData = ScenarioData.extend({
+  'cmd': z.literal(ScenarioCommand.HP_CHANGED),
+  'to': z.enum(Actor),
+  'pos': z.coerce.number(),
   /**
    * Current HP.
    */
-  'value': number;
+  'value': z.coerce.number(),
   /**
    * Max HP.
    */
-  'max': number;
-}
+  'max': z.coerce.number(),
+}).strip();

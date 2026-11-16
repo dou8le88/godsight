@@ -1,7 +1,8 @@
-import { GenericScenarioData } from './genericscenariodata';
+import { ScenarioData } from './scenariodata';
 import { ScenarioCommand } from './scenariocommand';
+import { z } from 'zod';
 
-export interface TurnChangeScenarioData extends GenericScenarioData {
-  'cmd': ScenarioCommand.TURN_CHANGE;
-  'turn': number | string;
-}
+export const TurnChangeScenarioData = ScenarioData.extend({
+  'cmd': z.literal(ScenarioCommand.TURN_CHANGE),
+  'turn': z.coerce.number(),
+}).strip();

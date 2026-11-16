@@ -17,8 +17,8 @@ export enum ActionType {
   CA_METER_CHANGED = 'ca_meter_changed',
   CALLED_SUMMON = 'summon',
   BOSS_SPECIAL_ATTACK = 'boss_special',
+  NORMAL_ATTACK_GROUP = 'normal_attack_group',
   NORMAL_ATTACK = 'normal_attack',
-  SINGULAR_NORMAL_ATTACK = 'singular_normal_attack',
   CHARGED_ATTACK = 'charged_attack',
   CHAIN_BURST = 'chain_burst',
   /**

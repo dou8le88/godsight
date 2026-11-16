@@ -1,6 +1,7 @@
-import { GenericScenarioData } from './genericscenariodata';
+import { ScenarioData } from './scenariodata';
 import { ScenarioCommand } from './scenariocommand';
+import { z } from 'zod';
 
-export interface FullElixirScenarioData extends GenericScenarioData {
-  'cmd': ScenarioCommand.FULL_ELIXIR;
-}
+export const FullElixirScenarioData = ScenarioData.extend({
+  'cmd': z.literal(ScenarioCommand.FULL_ELIXIR),
+}).strip();

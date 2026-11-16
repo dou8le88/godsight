@@ -1,8 +1,9 @@
-import { GenericScenarioData } from './genericscenariodata';
+import { ScenarioData } from './scenariodata';
 import { ScenarioCommand } from './scenariocommand';
+import { z } from 'zod';
 
-export interface PotionsChangedScenarioData extends GenericScenarioData {
-  'cmd': ScenarioCommand._POTIONS_CHANGED;
-  'small': string | number;
-  'large': string | number;
-}
+export const PotionsChangedScenarioData = ScenarioData.extend({
+  'cmd': z.literal(ScenarioCommand._POTIONS_CHANGED),
+  'small': z.coerce.number(),
+  'large': z.coerce.number(),
+}).strip();

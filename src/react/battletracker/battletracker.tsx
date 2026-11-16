@@ -47,6 +47,10 @@ export default function BattleTracker({
       ? battleData['turnsWithSkippedOrRecordedAttackActions'].length <
         battleData['currentTurn'] - 1
       : false;
+  const failedToParseActions =
+    battleData !== undefined
+      ? battleData['skippedActionsDueToParseErrors']
+      : false;
 
   const bossName =
     battleData !== undefined ? battleData['boss'][0]['name'] : 'Unknown';
@@ -68,15 +72,32 @@ export default function BattleTracker({
       : 1;
   const dpmDivisor = initialDpmDivisor > 1 ? initialDpmDivisor : 1;
 
+  let missingInfoWarningText =
+    'Missing battle data detected. The stats and actions shown may not match the ingame battle log due to the following errors:';
+
+  if (isMissingAbilities) {
+    missingInfoWarningText +=
+      ' One or more missing ability uses were detected.';
+  }
+  if (isMissingFinishedTurns) {
+    missingInfoWarningText += ' Some turns are missing an "Attack" action.';
+  }
+  if (failedToParseActions) {
+    missingInfoWarningText +=
+      ' Some battle actions failed schema validation (this is a bug with the extension, please report it).';
+  }
+
   const crossTabHeader = (
     <div className="battle-metadata">
       <div className="boss-name">
         Vs. {bossName}
         {waveCount}{' '}
-        {isMissingAbilities || isMissingFinishedTurns ? (
+        {isMissingAbilities ||
+        isMissingFinishedTurns ||
+        failedToParseActions ? (
           <span
             className="missing-info-warning"
-            title="Missing battle data detected. The stats and actions shown may not match the ingame battle log."
+            title={missingInfoWarningText}
           >
             ⚠
           </span>

@@ -1,7 +1,8 @@
 import { ScenarioCommand } from './scenariocommand';
-import { GenericScenarioData } from './genericscenariodata';
+import { ScenarioData } from './scenariodata';
+import { z } from 'zod';
 
-export interface HonorsGainedScenarioData extends GenericScenarioData {
-  'cmd': ScenarioCommand.HONORS_GAINED;
-  'amount': number;
-}
+export const HonorsGainedScenarioData = ScenarioData.extend({
+  'cmd': z.literal(ScenarioCommand.HONORS_GAINED),
+  'amount': z.coerce.number(),
+}).strip();

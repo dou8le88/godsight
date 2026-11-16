@@ -1,121 +1,99 @@
-import { JSX } from 'react/jsx-runtime';
+import { Actor } from '../../gbf/battletypes/scenariodata/mechanics/actor';
 import { ActionType } from './actiontype';
 import { BattleAction } from './battleaction';
-import { BattleActionParser } from './battleactionparser';
+import { DamageInstance } from './damageinstance';
 import { StatsUpdate, StatsUpdateHelper } from './stats';
-import { SingularNormalAttackAction } from './singularnormalattackaction';
+import { JSX } from 'react/jsx-runtime';
+import { BattleActionHelper } from './battleactionhelper';
 import { assertNotNullOrUndefined } from '../../util/assert';
 import { GodsightSettings } from '../settings/godsightsettings';
-import { Actor } from '../../gbf/battletypes/scenariodata/mechanics/actor';
-import { ConditionChangeAction } from './conditionchangeaction';
 
 export class NormalAttackAction extends BattleAction {
   public actionType: ActionType = ActionType.NORMAL_ATTACK;
+  public subactions: BattleAction[] = [];
 
   constructor(
-    public attackerName: string,
+    public source: Actor,
+    public attackerIndex: number,
     public isCounter: boolean,
     public partySize: number,
     public beforeBossTurn: boolean,
-    public subactions: BattleAction[],
+    public damageInstances: DamageInstance[],
   ) {
     super();
   }
 
-  // #futureproof
-  private attackCountWording: Record<number, string> = {
-    0: "couldn't attack",
-    1: 'made a single attack',
-    2: 'made a double attack',
-    3: 'made a triple attack',
-    4: 'made a quadruple attack',
-    5: 'made a quintuple attack',
-    6: 'made a sextuple attack',
-    7: 'made a septuple attack',
-    8: 'made an octuple attack',
-    9: 'made a nonuple attack',
-    10: 'made a decuple attack',
-  };
-
   getDescription(key: number, settings: GodsightSettings): JSX.Element {
-    const attacks = this.subactions.filter(
-      (a) => a instanceof SingularNormalAttackAction,
+    const damageInstanceJsx = BattleActionHelper.getDamageInstanceJsx(
+      this.damageInstances,
+      settings['damageDisplay'],
     );
-    const attackCount = attacks.length;
-    const attackWording = this.isCounter
-      ? 'executed a counter'
-      : this.attackCountWording[attackCount] || 'made unknown attacks';
 
-    return (
-      <div
-        key={key}
-        className="action-description"
-      >
-        {this.attackerName} {attackWording}!
-        {this.subactions.map((subaction, idx) =>
-          subaction.getDescription(idx, settings),
-        )}
-      </div>
-    );
+    return <span key={key}>{damageInstanceJsx}</span>;
   }
 
   getStats(): StatsUpdate {
     const update = StatsUpdateHelper.getEmptyStatsUpdate(this.partySize);
 
-    const attacks = this.subactions.filter(
-      (a) => a instanceof SingularNormalAttackAction,
-    );
-    const attackCount = attacks.length;
-
-    const nonStatusEffectSubactionUpdates = this.subactions
-      .filter((a) => !(a instanceof ConditionChangeAction))
-      .map((action) => action.getStats());
-
-    const statusEffectSubactionUpdates = this.subactions
-      .filter((a) => a instanceof ConditionChangeAction)
-      .map((action) => action.getStats());
-
-    const statusEffectUpdate = statusEffectSubactionUpdates.reduce(
-      (prev, cur) => StatsUpdateHelper.concatUpdates(prev, cur),
-      StatsUpdateHelper.getEmptyStatsUpdate(),
-    );
-
-    if (
-      attackCount > 0 &&
-      !this.isCounter &&
-      attacks[0]['source'] == Actor.PLAYER
-    ) {
-      const attacker = attacks[0]['attackerIndex'];
-      update['generalStats']['normalAttacks'] += 1;
-      update['characterStats'][attacker]['normalAttacks'] += 1;
-      update['characterStats'][attacker]['debuffsInflictedCount'] +=
-        statusEffectUpdate['generalStats']['debuffsInflictedCount'];
-      if (attackCount == 3) {
-        update['generalStats']['tripleAttacks'] += 1;
-        update['characterStats'][attacker]['tripleAttacks'] += 1;
-      }
-      if (this.beforeBossTurn) {
-        update['beforeBossTurnStats']['normalAttacks'] += 1;
-        update['characterBeforeBossTurnStats'][attacker]['normalAttacks'] += 1;
-        update['characterBeforeBossTurnStats'][attacker][
-          'debuffsInflictedCount'
-        ] += statusEffectUpdate['generalStats']['debuffsInflictedCount'];
-
-        if (attackCount == 3) {
-          update['beforeBossTurnStats']['tripleAttacks'] += 1;
-          update['characterBeforeBossTurnStats'][attacker]['tripleAttacks'] +=
-            1;
-        }
-      }
+    switch (this.source) {
+      case Actor.PLAYER:
+        this.damageInstances.forEach((instance) => {
+          const attackerIndex = this.attackerIndex;
+          update['generalStats']['normalAttackDamage'][instance['element']] +=
+            instance['value'];
+          update['characterStats'][attackerIndex]['normalAttackDamage'][
+            instance['element']
+          ] += instance['value'];
+          if (this.beforeBossTurn) {
+            update['beforeBossTurnStats']['normalAttackDamage'][
+              instance['element']
+            ] += instance['value'];
+            update['characterBeforeBossTurnStats'][attackerIndex][
+              'normalAttackDamage'
+            ][instance['element']] += instance['value'];
+          }
+          if (instance['value'] > 0) {
+            update['generalStats']['hitCount'] += 1;
+            update['generalStats']['normalAttackHits'] += 1;
+            update['characterStats'][attackerIndex]['hitCount'] += 1;
+            update['characterStats'][attackerIndex]['normalAttackHits'] += 1;
+            if (this.beforeBossTurn) {
+              update['beforeBossTurnStats']['hitCount'] += 1;
+              update['beforeBossTurnStats']['normalAttackHits'] += 1;
+              update['characterBeforeBossTurnStats'][attackerIndex][
+                'hitCount'
+              ] += 1;
+              update['characterBeforeBossTurnStats'][attackerIndex][
+                'normalAttackHits'
+              ] += 1;
+            }
+          }
+        });
+        break;
+      case Actor.BOSS:
+        this.damageInstances.forEach((instance) => {
+          update['generalStats']['damageTaken'][instance['element']] +=
+            instance['value'];
+          update['characterStats'][instance['receiverIndex']]['damageTaken'][
+            instance['element']
+          ] += instance['value'];
+          if (this.beforeBossTurn) {
+            update['beforeBossTurnStats']['damageTaken'][instance['element']] +=
+              instance['value'];
+            update['characterBeforeBossTurnStats'][instance['receiverIndex']][
+              'damageTaken'
+            ][instance['element']] += instance['value'];
+          }
+        });
+        break;
+      default:
+        console.error(
+          `Unknown actor ${this.source} in SingularNormalAttackAction`,
+        );
+        break;
     }
 
-    return StatsUpdateHelper.concatUpdates(
-      nonStatusEffectSubactionUpdates.reduce(
-        (prev, cur) => StatsUpdateHelper.concatUpdates(prev, cur),
-        update,
-      ),
-      statusEffectUpdate,
-    );
+    return update;
   }
 
   static override fromJSON(
@@ -124,16 +102,15 @@ export class NormalAttackAction extends BattleAction {
     const actionType = json['actionType'];
     if (actionType == ActionType.NORMAL_ATTACK) {
       return new NormalAttackAction(
-        assertNotNullOrUndefined(json['attackerName'] as string),
+        assertNotNullOrUndefined(json['source'] as Actor),
+        assertNotNullOrUndefined(json['attackerIndex'] as number),
         assertNotNullOrUndefined(json['isCounter'] as boolean),
         assertNotNullOrUndefined(json['partySize'] as number),
         assertNotNullOrUndefined(json['beforeBossTurn'] as boolean),
-        (json['subactions'] as Record<string, unknown>[]).map((action) => {
-          return BattleActionParser.fromJSON(action);
-        }) as BattleAction[],
+        assertNotNullOrUndefined(json['damageInstances'] as DamageInstance[]),
       );
     } else {
-      console.error(`NormalAttackAction.fromJSON called on ${json}`);
+      console.error(`SingularNormalAttackAction.fromJSON called on ${json}`);
       return undefined;
     }
   }

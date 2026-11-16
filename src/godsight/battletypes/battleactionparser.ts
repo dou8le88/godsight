@@ -13,13 +13,13 @@ import { FormChangeAction } from './formchangeaction';
 import { FullElixirAction } from './fullelixiraction';
 import { HealingAction } from './healingaction';
 import { MultihitDamageAction } from './multihitdamageaction';
-import { NormalAttackAction } from './normalattackaction';
+import { NormalAttackGroupAction } from './normalattackgroupaction';
 import { OmenCancelAction } from './omencancelaction';
 import { PartyChangeAction } from './partychangeaction';
 import { ReplaceCharacterAction } from './replacecharacteraction';
 import { ResurrectedAction } from './resurrectedaction';
 import { RetreatAction } from './retreataction';
-import { SingularNormalAttackAction } from './singularnormalattackaction';
+import { NormalAttackAction } from './normalattackaction';
 import { StandbyAction } from './standbyaction';
 import { SummonAction } from './summonaction';
 import { TurnChangeAction } from './turnchangeaction';
@@ -63,14 +63,14 @@ export class BattleActionParser {
         case ActionType.HEAL:
           return HealingAction.fromJSON(json);
 
-        case ActionType.NORMAL_ATTACK:
-          return NormalAttackAction.fromJSON(json);
+        case ActionType.NORMAL_ATTACK_GROUP:
+          return NormalAttackGroupAction.fromJSON(json);
 
         case ActionType.REPLACED_CHARACTER:
           return ReplaceCharacterAction.fromJSON(json);
 
-        case ActionType.SINGULAR_NORMAL_ATTACK:
-          return SingularNormalAttackAction.fromJSON(json);
+        case ActionType.NORMAL_ATTACK:
+          return NormalAttackAction.fromJSON(json);
 
         case ActionType.USED_FULL_ELIXIR:
           return FullElixirAction.fromJSON(json);

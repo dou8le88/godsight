@@ -1,7 +1,8 @@
-import { GenericScenarioData } from './genericscenariodata';
+import { ScenarioData } from './scenariodata';
 import { ScenarioCommand } from './scenariocommand';
+import { z } from 'zod';
 
-export interface FatedChainGaugeScenarioData extends GenericScenarioData {
-  'cmd': ScenarioCommand.FATED_CHAIN_GAUGE_CHANGE;
-  'value': number;
-}
+export const FatedChainGaugeScenarioData = ScenarioData.extend({
+  'cmd': z.literal(ScenarioCommand.FATED_CHAIN_GAUGE_CHANGE),
+  'value': z.coerce.number(),
+}).strip();

@@ -249,4 +249,8 @@ export enum ScenarioCommand {
    * Ignored command, do not use, exists for completeness in the parser.
    */
   _ONESHOT_KILL = 'oneshot_onekill',
+  /**
+   * Sometimes we can get empty scenario commands, this serves as a parser placeholder for them.
+   */
+  __EMPTY_SCENARIO_PLACEHOLDER = '__empty_scenario_placeholder',
 }

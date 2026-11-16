@@ -11,15 +11,14 @@ import { GodsightSummonData } from './summondata';
 export interface GodsightBattleData {
   'raidId': number;
   'updateRaidIdTo'?: number;
-  'questId': string;
-  'IsCoopRaid': boolean;
-  'isHost': boolean;
+  'questId': number;
   'currentTurn': number;
   'updateTurnTo'?: number;
   'currentWave': number;
   'totalWaves': number;
   'abilityTurns': number[];
   'turnsWithSkippedOrRecordedAttackActions': number[];
+  'skippedActionsDueToParseErrors': boolean;
   'honors': number;
   'fatedChainGauge': number;
   'battleProgressStatus': BattleProgressStatus;

@@ -1,10 +1,13 @@
-import { GenericScenarioData } from './genericscenariodata';
+import { ScenarioData } from './scenariodata';
 import { Actor } from './mechanics/actor';
 import { ScenarioCommand } from './scenariocommand';
+import { z } from 'zod';
 
-export interface ScreenEffectScenarioData extends GenericScenarioData {
-  'cmd': ScenarioCommand._SCREEN_EFFECT;
-  'name': string;
-  'to'?: Actor;
-  'is_fatal_chain'?: boolean;
-}
+export const ScreenEffectScenarioData = ScenarioData.extend({
+  'cmd': z.literal(ScenarioCommand._SCREEN_EFFECT),
+  'name': z.string(),
+  'to': z.optional(z.enum(Actor)),
+  'is_fatal_chain': z.optional(z.coerce.boolean()),
+}).strip();
+
+export type ScreenEffectScenarioData = z.infer<typeof ScreenEffectScenarioData>;

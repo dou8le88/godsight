@@ -1,7 +1,9 @@
-import { GenericScenarioData } from './genericscenariodata';
+import { ScenarioData } from './scenariodata';
+import { MultiLanguageStringSchema } from './multilanguagestring';
 import { ScenarioCommand } from './scenariocommand';
+import { z } from 'zod';
 
-export interface BattleLogScenarioData extends GenericScenarioData {
-  'cmd': ScenarioCommand._BATTLE_LOG;
-  'body': string | { 'en': string; 'ja': string };
-}
+export const BattleLogScenarioData = ScenarioData.extend({
+  'cmd': z.literal(ScenarioCommand._BATTLE_LOG),
+  'body': z.union([z.string(), MultiLanguageStringSchema]),
+}).strip();

@@ -1,8 +1,9 @@
-import { GenericScenarioData } from './genericscenariodata';
+import { ScenarioData } from './scenariodata';
 import { ScenarioCommand } from './scenariocommand';
+import { z } from 'zod';
 
-export interface ImageChangeScenarioData extends GenericScenarioData {
-  'cmd': ScenarioCommand.IMAGE_CHANGE;
-  'pos': number;
-  'image_id': string;
-}
+export const ImageChangeScenarioData = ScenarioData.extend({
+  'cmd': z.literal(ScenarioCommand.IMAGE_CHANGE),
+  'pos': z.coerce.number(),
+  'image_id': z.string(),
+}).strip();

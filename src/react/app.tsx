@@ -26,6 +26,7 @@ import { range } from '../util/range';
 import { Toolbar } from './config/toolbar';
 import { SettingsManager } from '../godsight/settings/settingsmanager';
 import { JPLanguageTest } from '../util/jplanguagetest';
+import { z } from 'zod';
 
 const NoKnownActiveBattleNotificationKey = 'NoKnownActiveBattle';
 const LoadedIntoRaidNotificationKey = 'LoadedIntoRaid';
@@ -166,6 +167,8 @@ export default function GodsightPanel() {
         godsightBattleData['abilityTurns'] = abilityTurns;
         godsightBattleData['turnsWithSkippedOrRecordedAttackActions'] =
           existingRaid['turnsWithSkippedOrRecordedAttackActions'];
+        godsightBattleData['skippedActionsDueToParseErrors'] =
+          existingRaid['skippedActionsDueToParseErrors'];
 
         godsightBattleData['firstRecorded'] = existingRaid['firstRecorded'];
         godsightBattleData['lastUpdated'] = existingRaid['lastUpdated'];
@@ -385,9 +388,14 @@ export default function GodsightPanel() {
             delete draft['updateTurnTo'];
           }
 
-          // multiwave battles don't have a turn_change action
+          // multiwave battles don't always have a turn_change action
           // so we account for that here.
-          if (endpoint == 'normal_attack_result.json') {
+          if (
+            endpoint == 'normal_attack_result.json' &&
+            draft['totalWaves'] > 1 &&
+            draft['currentWave'] < draft['totalWaves'] &&
+            draft['boss'].every((b) => b['hpCurrent'] == 0)
+          ) {
             if (
               !draft['turnsWithSkippedOrRecordedAttackActions'].includes(
                 draft['currentTurn'],
@@ -450,9 +458,14 @@ export default function GodsightPanel() {
               case 'tower_party_change.json':
               case 'group_gauge_action_result.json':
                 try {
-                  const body = JSON.parse(content) as GranblueBattleData;
+                  const body = JSON.parse(content);
                   if (body['scenario']) {
-                    battleDataHandler(body, endpoint);
+                    const bodyParseResult = GranblueBattleData.safeParse(body);
+                    if (!bodyParseResult.success) {
+                      console.error(z.prettifyError(bodyParseResult.error));
+                    } else {
+                      battleDataHandler(bodyParseResult.data, endpoint);
+                    }
                   } else if (
                     (body as unknown as { 'popup': unknown })['popup']
                   ) {
@@ -470,8 +483,16 @@ export default function GodsightPanel() {
               case 'start.json':
                 // On battle start or on refreshing a page.
                 try {
-                  const body = JSON.parse(content) as StartData;
-                  startDataHandler(body, endpoint);
+                  const body = JSON.parse(content);
+                  const bodyParseResult = StartData.safeParse(body);
+                  if (!bodyParseResult.success) {
+                    console.error(
+                      'Error parsing StartData',
+                      z.prettifyError(bodyParseResult.error),
+                    );
+                  } else {
+                    startDataHandler(bodyParseResult.data, endpoint);
+                  }
                 } catch (e: unknown) {
                   console.error(e);
                 }
@@ -524,10 +545,19 @@ export default function GodsightPanel() {
                     try {
                       const json = JSON.parse(content);
                       if (json['scenario']) {
-                        console.warn(
-                          `Got scenario data from fallback-processed endpoint ${endpoint}`,
-                        );
-                        battleDataHandler(json as GranblueBattleData, endpoint);
+                        const bodyParseResult =
+                          GranblueBattleData.safeParse(json);
+                        if (!bodyParseResult.success) {
+                          console.error(
+                            `Error parsing battle data from fallback-processed endpoint ${endpoint}`,
+                            z.prettifyError(bodyParseResult.error),
+                          );
+                        } else {
+                          console.warn(
+                            `Got scenario data from fallback-processed endpoint ${endpoint}`,
+                          );
+                          battleDataHandler(bodyParseResult.data, endpoint);
+                        }
                       } else {
                         console.warn(
                           `Got unknown JSON from fallback-processed endpoint ${endpoint}`,

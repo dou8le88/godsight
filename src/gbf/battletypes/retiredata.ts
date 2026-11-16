@@ -1,5 +1,6 @@
 import { RetreatScenarioData } from './scenariodata/retreatscenariodata';
+import { z } from 'zod';
 
-export interface RetreatData {
-  'scenario': RetreatScenarioData[];
-}
+export const RetreatData = z.object({
+  'scenario': z.array(RetreatScenarioData),
+});

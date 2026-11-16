@@ -9,5 +9,8 @@ export interface DamageInstance {
   'receiverHpAfterDamage'?: number;
   'critical': boolean;
   'miss': AttackAccuracyResult | boolean;
-  'guarded': boolean;
+  /**
+   *
+   */
+  'guarded'?: boolean;
 }

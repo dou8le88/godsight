@@ -24,13 +24,8 @@ export interface GodsightPartyMemberData {
   'meter': number;
   'meterMax': number;
   'element': GameElementValue;
-  'weaponProficiency': Proficiency[];
   'alive': boolean;
-  'buffCount': number;
-  'debuffCount': number;
   'canBeResurrected': boolean;
-  'isGuarding': boolean;
-  'canGuard': boolean;
   'isVanished': boolean;
 }
 

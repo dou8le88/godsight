@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 export enum PrettyElementName {
   NULL_PLAIN = 'Plain',
   FIRE = 'Fire',
@@ -8,11 +10,6 @@ export enum PrettyElementName {
   DARK = 'Dark',
   DESTRUCTION = 'Destruction',
 }
-
-/**
- * WTF Cygames why can they be either strings or numbers???
- */
-export type GameElementValue = NumericGameElement | StringGameElement;
 
 export const GameElement = {
   NULL_PLAIN: 0,
@@ -28,6 +25,30 @@ export const GameElement = {
 export type NumericGameElement = (typeof GameElement)[keyof typeof GameElement];
 
 export type StringGameElement = `${NumericGameElement}` | '';
+
+/**
+ * WTF Cygames why can they be either strings or numbers???
+ */
+const allPossibleElementValues = [
+  ...Object.values(GameElement),
+  ...Object.values(GameElement).map(
+    (x) => x.toString() as `${NumericGameElement}`,
+  ),
+  '' as const,
+];
+
+const literals = allPossibleElementValues.map((val) => z.literal(val));
+
+const RawGameElementSchema = z.union(literals);
+
+export const GameElementSchema = z.nullable(
+  RawGameElementSchema.transform((val) => {
+    if (val === '') return null;
+    return Number(val) as NumericGameElement;
+  }),
+);
+
+export type GameElementValue = z.infer<typeof GameElementSchema>;
 
 const elementValues = Object.values(GameElement);
 const elementNames = Object.values(PrettyElementName);
@@ -56,7 +77,7 @@ export class GameElementHelper {
     return Object.values(GameElement);
   }
 
-  static getNumericGameElement(elt: GameElementValue): NumericGameElement {
+  static getNumericGameElement(elt: string): NumericGameElement {
     if (elt === '' || elt === undefined || elt === null) {
       return GameElement.NULL_PLAIN;
     } else {
@@ -65,7 +86,7 @@ export class GameElementHelper {
   }
 
   static getPrettyElementName(elt: GameElementValue): string {
-    const numericElt = GameElementHelper.getNumericGameElement(elt);
+    const numericElt = elt ?? GameElement.NULL_PLAIN;
 
     return numericElementToName[numericElt];
   }

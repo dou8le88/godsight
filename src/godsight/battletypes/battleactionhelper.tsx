@@ -8,7 +8,6 @@ import {
 import {
   GameElement,
   GameElementHelper,
-  GameElementValue,
   NumericGameElement,
 } from '../../gbf/battletypes/scenariodata/mechanics/element';
 import { HealingInstance } from './healinginstance';
@@ -129,9 +128,7 @@ export class BattleActionHelper {
         if (damageByElementByRecipient[recipient][element] > 0) {
           elementDamage.push({
             damage: damageByElementByRecipient[recipient][element],
-            element: GameElementHelper.getNumericGameElement(
-              element as GameElementValue,
-            ),
+            element: GameElementHelper.getNumericGameElement(element),
           });
         }
       });
@@ -233,7 +230,7 @@ export class BattleActionHelper {
                       {totalDamageByElementPerRecipient[recipient][element] >
                       0 ? (
                         <span
-                          className={`element ${GameElementHelper.getPrettyElementName(element as GameElementValue)}`}
+                          className={`element ${GameElementHelper.getPrettyElementName(GameElementHelper.getNumericGameElement(element))}`}
                         >
                           {totalDamageByElementPerRecipient[recipient][
                             element

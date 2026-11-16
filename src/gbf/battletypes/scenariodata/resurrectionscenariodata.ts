@@ -1,12 +1,13 @@
-import { GenericScenarioData } from './genericscenariodata';
+import { ScenarioData } from './scenariodata';
 import { ScenarioCommand } from './scenariocommand';
+import { z } from 'zod';
 
-export interface ResurrectionScenarioData extends GenericScenarioData {
-  'cmd': ScenarioCommand.RESURRECTION;
-  'pos': number;
-  'index': number;
-  'performer': number;
-  'name': string;
-  'hp': number;
-  'hpmax': number;
-}
+export const ResurrectionScenarioData = ScenarioData.extend({
+  'cmd': z.literal(ScenarioCommand.RESURRECTION),
+  'pos': z.coerce.number(),
+  'index': z.coerce.number(),
+  'performer': z.coerce.number(),
+  'name': z.string(),
+  'hp': z.coerce.number(),
+  'hpmax': z.coerce.number(),
+}).strip();

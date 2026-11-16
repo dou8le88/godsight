@@ -1,22 +1,23 @@
-import { GameElementValue } from './mechanics/element';
+import { GameElementSchema } from './mechanics/element';
 import { AttackAccuracyResult } from './mechanics/attackaccuracyresult';
+import { z } from 'zod';
 
-export interface SkillOrDebuffDamageInstance {
+export const SkillOrDebuffDamageInstance = z.object({
   /**
    * Damage value for this hit
    */
-  'value': number;
-  /**
-   * 0-indexed hit #
-   */
-  'attack_num': number;
+  'value': z.coerce.number(),
   /**
    * Target's HP after this instance of damage
    */
-  'hp': number;
-  'color': GameElementValue;
-  'critical': boolean;
-  'miss': AttackAccuracyResult | boolean;
-  'guard': boolean;
-  'pos': number;
-}
+  'hp': z.coerce.number(),
+  'color': z.optional(GameElementSchema),
+  'critical': z.optional(z.union([z.boolean(), z.stringbool()])),
+  'miss': z.optional(z.union([z.enum(AttackAccuracyResult), z.boolean()])),
+  'guard': z.optional(z.union([z.boolean(), z.stringbool()])),
+  'pos': z.coerce.number(),
+});
+
+export type SkillOrDebuffDamageInstance = z.infer<
+  typeof SkillOrDebuffDamageInstance
+>;

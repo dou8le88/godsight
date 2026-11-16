@@ -1,11 +1,16 @@
-import { GenericScenarioData } from './genericscenariodata';
+import { ScenarioData } from './scenariodata';
 import { Actor } from './mechanics/actor';
 import { ScenarioCommand } from './scenariocommand';
+import { z } from 'zod';
 
-export interface DeathScenarioData extends GenericScenarioData {
-  'cmd': ScenarioCommand.DEATH;
-  'to': Actor;
-  'pos': number;
-  'index': number | null | undefined;
-  // "chain": 0,
-}
+export const DeathScenarioData = ScenarioData.extend({
+  'cmd': z.union([
+    z.literal(ScenarioCommand.DEATH),
+    z.literal(ScenarioCommand.STOP),
+  ]),
+  'to': z.enum(Actor),
+  'pos': z.coerce.number(),
+  'index': z.number().nullish(),
+}).strip();
+
+export type DeathScenario = z.infer<typeof DeathScenarioData>;

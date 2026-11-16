@@ -1,13 +1,14 @@
-import { GameElementValue } from './mechanics/element';
+import { GameElementSchema } from './mechanics/element';
 import { Actor } from './mechanics/actor';
 import { ScenarioCommand } from './scenariocommand';
-import { GenericScenarioData } from './genericscenariodata';
+import { ScenarioData } from './scenariodata';
 import { SkillOrDebuffDamageInstance } from './individualdamageinstance';
+import { z } from 'zod';
 
-export interface DamageScenarioData extends GenericScenarioData {
-  'cmd': ScenarioCommand.DAMAGE_DEALT;
-  'color': GameElementValue;
-  'to': Actor;
-  'list': SkillOrDebuffDamageInstance[];
-  'turn_end'?: boolean;
-}
+export const DamageScenarioData = ScenarioData.extend({
+  'cmd': z.literal(ScenarioCommand.DAMAGE_DEALT),
+  'color': GameElementSchema,
+  'to': z.enum(Actor),
+  'list': z.array(SkillOrDebuffDamageInstance),
+  'turn_end': z.optional(z.union([z.boolean(), z.stringbool()])),
+}).strip();

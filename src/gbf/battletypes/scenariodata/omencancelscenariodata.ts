@@ -1,7 +1,8 @@
-import { GenericScenarioData } from './genericscenariodata';
+import { ScenarioData } from './scenariodata';
 import { ScenarioCommand } from './scenariocommand';
+import { z } from 'zod';
 
-export interface OmenCancelScenarioData extends GenericScenarioData {
-  'cmd': ScenarioCommand.OMEN_CANCEL;
-  'pos': number;
-}
+export const OmenCancelScenarioData = ScenarioData.extend({
+  'cmd': z.literal(ScenarioCommand.OMEN_CANCEL),
+  'pos': z.coerce.number(),
+}).strip();
