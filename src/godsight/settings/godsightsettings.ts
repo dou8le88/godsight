@@ -27,6 +27,15 @@ export interface GodsightSettings {
     'debuffs': boolean;
     'tripleAttacks': boolean;
   };
+  /**
+   * Display developer options in config.
+   */
+  'devMode': boolean;
+  /**
+   * Saves GBF network requests for recorded battles to a folder in the Downloads directory.
+   * Used to get real data for constructing tests.
+   */
+  'downloadBattleData': boolean;
 }
 
 export enum DefaultBattleView {
@@ -74,11 +83,13 @@ export const DefaultSettings: GodsightSettings = {
     'chargedAttackDamage': true,
     'otherDamage': true,
     'hitCount': true,
-    'normalAttackHits': false,
-    'skillHits': false,
+    'normalAttackHits': true,
+    'skillHits': true,
     'chargedAttackHits': false,
     'otherHits': false,
     'debuffs': true,
     'tripleAttacks': true,
   },
+  'devMode': false,
+  'downloadBattleData': false,
 };

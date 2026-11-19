@@ -127,7 +127,6 @@ export enum ScenarioCommand {
    * Boss probably uses something else cuz there's no target field.
    */
   STANDBY = 'standby',
-  RESURRECTION_AVAILABLE = 'resurrection_available',
   RESURRECTION = 'resurrection',
   /**
    * A character's HP/max HP changed.
@@ -249,6 +248,7 @@ export enum ScenarioCommand {
    * Ignored command, do not use, exists for completeness in the parser.
    */
   _ONESHOT_KILL = 'oneshot_onekill',
+  _RESURRECTION_AVAILABLE = 'resurrection_available',
   /**
    * Sometimes we can get empty scenario commands, this serves as a parser placeholder for them.
    */

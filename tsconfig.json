@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "jsx": "react-jsx",
-    "module": "commonjs",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "noImplicitAny": true,
     "removeComments": true,
     "preserveConstEnums": true,
@@ -17,6 +18,6 @@
     "src/**/*"
   ],
   "exclude": [
-    "**/*.spec.ts"
+    "**/*.test.tsx"
   ]
 }

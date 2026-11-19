@@ -12,9 +12,9 @@ import {
   ChargeAttackMeterChangedScenarioData,
 } from './gbf/battletypes/scenariodata/chargeattackmeterchangedscenariodata';
 import {
-  ChargedAttackDamageInstanceHelper,
-  ChargedAttackScenarioData,
-} from './gbf/battletypes/scenariodata/chargedattackscenariodata';
+  ChargeAttackDamageInstanceHelper,
+  ChargeAttackScenarioData,
+} from './gbf/battletypes/scenariodata/chargeattackscenariodata';
 import { DamageScenarioData } from './gbf/battletypes/scenariodata/damagescenariodata';
 import {
   DeathScenario,
@@ -563,14 +563,14 @@ export class BattleScenarioParser {
                     godsightBattleData['skippedActionsDueToParseErrors'] = true;
                   } else {
                     const battleLogScenario = battleLogScenarioParseResult.data;
-                    if (typeof battleLogScenario['body'] == 'string') {
-                      abilityAction.overrideMessage = battleLogScenario['body'];
-                    } else {
-                      abilityAction.overrideMessage =
-                        battleLogScenario['body'][
-                          this.settings['gameLanguage']
-                        ];
-                    }
+                    const rawBody =
+                      typeof battleLogScenario['body'] == 'string'
+                        ? battleLogScenario['body']
+                        : battleLogScenario['body'][
+                            this.settings['gameLanguage']
+                          ];
+                    const parsedBody = this.unescapeHTML(rawBody);
+                    abilityAction.overrideMessage = parsedBody;
                   }
                   actions.push(abilityAction);
                 } else {
@@ -1010,7 +1010,7 @@ export class BattleScenarioParser {
             break baseLoop;
           }
           const chargedAttackScenarioParseResult =
-            ChargedAttackScenarioData.safeParse(scenario);
+            ChargeAttackScenarioData.safeParse(scenario);
           if (!chargedAttackScenarioParseResult.success) {
             console.error(
               'Error parsing ChargeAttackScenario\n',
@@ -1061,7 +1061,7 @@ export class BattleScenarioParser {
               !isBossAttackPhase,
               (chargedAttackScenario['total'] || []).map((damage) => {
                 const damageTotal =
-                  ChargedAttackDamageInstanceHelper.getTotal(damage);
+                  ChargeAttackDamageInstanceHelper.getTotal(damage);
                 const receiverIndex = damage['pos'];
                 const receiverName = BattleActionHelper.getActorName(
                   godsightBattleData['boss'],
@@ -1693,11 +1693,11 @@ export class BattleScenarioParser {
                 godsightBattleData['skippedActionsDueToParseErrors'] = true;
               } else {
                 const prev = battleLogScenarioDataParseResult.data;
-                if (typeof prev['body'] == 'string') {
-                  battleMessage = prev['body'];
-                } else {
-                  battleMessage = prev['body'][this.settings['gameLanguage']];
-                }
+                const rawBody =
+                  typeof prev['body'] == 'string'
+                    ? prev['body']
+                    : prev['body'][this.settings['gameLanguage']];
+                battleMessage = this.unescapeHTML(rawBody);
               }
             }
             const standbyAction = new StandbyAction(
@@ -1769,9 +1769,6 @@ export class BattleScenarioParser {
           }
           break;
 
-        case ScenarioCommand.RESURRECTION_AVAILABLE:
-          break;
-
         case ScenarioCommand._BATTLE_LOG: {
           // This can be used for charm/can't act type effects, but is also used for other stuff,
           // so we try to narrow it down based on patterns.
@@ -1800,15 +1797,18 @@ export class BattleScenarioParser {
               godsightBattleData['skippedActionsDueToParseErrors'] = true;
             } else {
               const battleLogScenario = battleLogScenarioParseResult.data;
-              if (typeof battleLogScenario['body'] == 'string') {
-                const standbyAction = new StandbyAction(
-                  'Placeholder',
-                  true,
-                  !isBossAttackPhase,
-                  battleLogScenario['body'],
-                );
-                actions.push(standbyAction);
-              }
+              const rawBody =
+                typeof battleLogScenario['body'] == 'string'
+                  ? battleLogScenario['body']
+                  : battleLogScenario['body'][this.settings['gameLanguage']];
+
+              const standbyAction = new StandbyAction(
+                'Placeholder',
+                true,
+                !isBossAttackPhase,
+                this.unescapeHTML(rawBody),
+              );
+              actions.push(standbyAction);
             }
           }
           break;
@@ -2028,6 +2028,7 @@ export class BattleScenarioParser {
         case ScenarioCommand._MOTION_LINK:
         case ScenarioCommand._ONESHOT_KILL:
         case ScenarioCommand._POTIONS_CHANGED:
+        case ScenarioCommand._RESURRECTION_AVAILABLE:
         case ScenarioCommand._SCREEN_EFFECT:
         case ScenarioCommand._SPECIAL_CHANGE:
         case ScenarioCommand._SUMMON_CUTIN:
@@ -2668,5 +2669,10 @@ export class BattleScenarioParser {
     };
 
     return godsightBossData;
+  }
+
+  private unescapeHTML(text: string): string {
+    const doc = new DOMParser().parseFromString(text, 'text/html');
+    return doc.documentElement.textContent;
   }
 }

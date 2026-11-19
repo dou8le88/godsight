@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { ScenarioList } from './scenariolist';
+import { DownloadScenarioData } from './downloadscenariodata';
 
 export const GroupGaugeStatus = z.object({
   'value': z.coerce.number(),
@@ -39,3 +40,7 @@ export const GranblueBattleData = z.object({
 });
 
 export type GranblueBattleData = z.infer<typeof GranblueBattleData>;
+
+export const DownloadGranblueBattleData = GranblueBattleData.extend({
+  'scenario': z.array(DownloadScenarioData),
+});

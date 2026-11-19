@@ -5,7 +5,7 @@ import { Actor } from './mechanics/actor';
 import { ScenarioCommand } from './scenariocommand';
 import { z } from 'zod';
 
-const BossSpecialAttackDamageInstance = z.object({
+export const BossSpecialAttackDamageInstance = z.object({
   'attr': GameElementSchema,
   'pos': z.coerce.number(),
   /**

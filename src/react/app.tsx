@@ -1,8 +1,11 @@
 import { startTransition, useEffect, useState } from 'react';
 import { produce } from 'immer';
 import WrongWebsiteBanner from './wrongwebsitebanner';
-import { GranblueBattleData } from '../gbf/battletypes/battledata';
-import { StartData } from '../gbf/battletypes/startdata';
+import {
+  GranblueBattleData,
+  DownloadGranblueBattleData,
+} from '../gbf/battletypes/battledata';
+import { StartData, DownloadStartData } from '../gbf/battletypes/startdata';
 import BattleTracker from './battletracker/battletracker';
 import { BattleScenarioParser } from '../battlescenarioparser';
 import { useGodsightStorage } from '../godsight/godsightstorage/usegodsightstorage';
@@ -27,10 +30,12 @@ import { Toolbar } from './config/toolbar';
 import { SettingsManager } from '../godsight/settings/settingsmanager';
 import { JPLanguageTest } from '../util/jplanguagetest';
 import { z } from 'zod';
+import { TestBuilder } from './testbuilder';
 
 const NoKnownActiveBattleNotificationKey = 'NoKnownActiveBattle';
 const LoadedIntoRaidNotificationKey = 'LoadedIntoRaid';
 const DeleteAllStoredDataNotificationKey = 'DeleteAllStoredData';
+const DevModeToggledNotificationKey = 'DevModeToggled';
 
 const validHosts = ['game.granbluefantasy.jp', 'steam.granbluefantasy.com'];
 
@@ -41,6 +46,20 @@ const battleApiRegex = /^\/rest\/(?:multi)?raid/;
 // raid/123456
 // raid_multi/123456
 const battleIdRegex = /^raid(?:_multi)?\/(\d+)/;
+
+// Abridged.
+const KonamiCode = [
+  'ArrowUp',
+  'ArrowUp',
+  'ArrowDown',
+  'ArrowDown',
+  'ArrowLeft',
+  'ArrowRight',
+  'ArrowLeft',
+  'ArrowRight',
+];
+
+let downloadFileCounter = 0;
 
 export default function GodsightPanel() {
   // Find out if we're inspecting a GBF page.
@@ -172,6 +191,25 @@ export default function GodsightPanel() {
 
         godsightBattleData['firstRecorded'] = existingRaid['firstRecorded'];
         godsightBattleData['lastUpdated'] = existingRaid['lastUpdated'];
+      } else {
+        downloadFileCounter = 0;
+      }
+
+      if (settings['downloadBattleData']) {
+        const testDataParseResult = DownloadStartData.safeParse(data);
+        if (!testDataParseResult.success) {
+          console.error(
+            'Unable to parse StartData for download',
+            z.prettifyError(testDataParseResult.error),
+          );
+        } else {
+          TestBuilder.saveBattleDataForTest(
+            endpoint,
+            downloadFileCounter++,
+            raidId,
+            testDataParseResult.data,
+          );
+        }
       }
 
       if ('updateTurnTo' in godsightBattleData) {
@@ -280,13 +318,28 @@ export default function GodsightPanel() {
       );
     }
 
-    function battleDataHandler(
-      data: GranblueBattleData,
-      endpoint: string | undefined,
-    ) {
+    function battleDataHandler(data: GranblueBattleData, endpoint: string) {
       console.info(`Got battle data for ${endpoint}`);
 
       withActiveBattle((battleId, raid) => {
+        if (settings['downloadBattleData']) {
+          const testBattleDataParseResult =
+            DownloadGranblueBattleData.safeParse(data);
+          if (!testBattleDataParseResult.success) {
+            console.error(
+              'Unable to parse battle data for download',
+              z.prettifyError(testBattleDataParseResult.error),
+            );
+          } else {
+            TestBuilder.saveBattleDataForTest(
+              endpoint,
+              downloadFileCounter++,
+              battleId,
+              testBattleDataParseResult.data,
+            );
+          }
+        }
+
         const updatedRaid = produce(raid, (draft) => {
           const currentTurnNumber = draft['currentTurn'];
           let currentTurn = draft['turnData'][currentTurnNumber];
@@ -556,7 +609,10 @@ export default function GodsightPanel() {
                           console.warn(
                             `Got scenario data from fallback-processed endpoint ${endpoint}`,
                           );
-                          battleDataHandler(bodyParseResult.data, endpoint);
+                          battleDataHandler(
+                            bodyParseResult.data,
+                            endpoint ?? 'unknownEndpoint',
+                          );
                         }
                       } else {
                         console.warn(
@@ -601,6 +657,58 @@ export default function GodsightPanel() {
     settingsManager,
   ]);
 
+  const [keysPressed, setKeysPressed] = useState<string[]>([]);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const newKeysPressed = [...keysPressed, e.key];
+      while (newKeysPressed.length > KonamiCode.length) {
+        newKeysPressed.shift();
+      }
+      setKeysPressed(newKeysPressed);
+
+      if (
+        newKeysPressed.length == KonamiCode.length &&
+        newKeysPressed.every((value, idx) => value == KonamiCode[idx])
+      ) {
+        if (settings['devMode']) {
+          settingsManager.updateSingleSetting('devMode', false);
+          settingsManager.updateSingleSetting('downloadBattleData', false);
+          setNotifications([
+            ...notifications.filter(
+              (n) => n.key != DevModeToggledNotificationKey,
+            ),
+            {
+              key: DevModeToggledNotificationKey,
+              type: NotificationType.INFO,
+              message:
+                'Developer mode disabled. All settings hidden behind developer mode disabled as well.',
+              expiration: Date.now() + 5 * 1000,
+            },
+          ]);
+        } else {
+          settingsManager.updateSingleSetting('devMode', true);
+          setNotifications([
+            ...notifications,
+            {
+              key: DevModeToggledNotificationKey,
+              type: NotificationType.INFO,
+              message:
+                'Developer mode enabled. Check Settings for further options.',
+              expiration: Date.now() + 5 * 1000,
+            },
+          ]);
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown, true);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, true);
+    };
+  }, [keysPressed, notifications, settings, settingsManager]);
+
   const allBattles = godsightStorage['battles'];
 
   const [showConfig, setShowConfig] = useState(false);
@@ -630,7 +738,28 @@ export default function GodsightPanel() {
           Godsight version {manifest['version']}
         </a>
       </div>
-      <Toolbar onConfigClicked={() => setShowConfig(true)} />
+      <Toolbar
+        onConfigClicked={() => setShowConfig(true)}
+        makeTestFileEnabled={downloadFileCounter > 0}
+        onMakeTestFileClicked={() => {
+          const testFile = TestBuilder.buildTestFileFromDownloadedData(
+            downloadFileCounter,
+            godsightStorage['battles'].find(
+              (b) => b['raidId'] == lastUpdatedBattle,
+            )!,
+          );
+
+          const blob = new Blob([testFile], {
+            'type': 'application/octet-stream',
+          });
+          const blobUrl = URL.createObjectURL(blob);
+
+          chrome.downloads.download({
+            'url': blobUrl,
+            'filename': `${lastUpdatedBattle}/test-${lastUpdatedBattle}.test.tsx`,
+          });
+        }}
+      />
       <div className="notification-bar">
         {notifications.map((notification) => (
           <Notification

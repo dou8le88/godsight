@@ -9,7 +9,7 @@ import { BossSpecialAttackScenarioData } from './scenariodata/bossspecialattacks
 import { BossStatusScenarioData } from './scenariodata/bossstatusscenariodata';
 import { ChainBurstScenarioData } from './scenariodata/chainburstscenariodata';
 import { ChargeAttackMeterChangedScenarioData } from './scenariodata/chargeattackmeterchangedscenariodata';
-import { ChargedAttackScenarioData } from './scenariodata/chargedattackscenariodata';
+import { ChargeAttackScenarioData } from './scenariodata/chargeattackscenariodata';
 import { DamageScenarioData } from './scenariodata/damagescenariodata';
 import { DeathScenarioData } from './scenariodata/deathscenariodata';
 import { FatedChainGaugeScenarioData } from './scenariodata/fatedchaingaugescenariodata';
@@ -35,7 +35,7 @@ import { TurnChangeScenarioData } from './scenariodata/turnchangescenariodata';
 import { WindowEffectScenarioData } from './scenariodata/windoweffectscenariodata';
 import { WonBattleScenarioData } from './scenariodata/wonbattlescenariodata';
 
-const TypedScenarioData = z.discriminatedUnion('cmd', [
+export const TypedScenarioData = z.discriminatedUnion('cmd', [
   AbilityScenarioData,
   AttackPhaseTurnScenarioData,
   BacklineStatusScenarioData,
@@ -44,7 +44,7 @@ const TypedScenarioData = z.discriminatedUnion('cmd', [
   BossStatusScenarioData,
   ChainBurstScenarioData,
   ChargeAttackMeterChangedScenarioData,
-  ChargedAttackScenarioData,
+  ChargeAttackScenarioData,
   DamageScenarioData,
   DeathScenarioData,
   FatedChainGaugeScenarioData,

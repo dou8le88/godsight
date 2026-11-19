@@ -4,7 +4,7 @@ import { Actor } from './mechanics/actor';
 import { ScenarioCommand } from './scenariocommand';
 import { z } from 'zod';
 
-const ChargedAttackDamageInstance = z.object({
+export const ChargeAttackDamageInstance = z.object({
   'pos': z.coerce.number(),
   'split': z.array(
     z.union([
@@ -24,19 +24,19 @@ const ChargedAttackDamageInstance = z.object({
   'count': z.coerce.number(),
 });
 
-type ChargedAttackDamageInstance = z.infer<typeof ChargedAttackDamageInstance>;
+type ChargeAttackDamageInstance = z.infer<typeof ChargeAttackDamageInstance>;
 
-const ChargedAttackPartitionedDamageInstance = z.object({
+const ChargeAttackPartitionedDamageInstance = z.object({
   'attr': GameElementSchema,
   'critical': z.union([z.boolean(), z.stringbool()]),
   'hp': z.coerce.number(),
 });
 
-const ChargedAttackPartitionedDamage = z.object({
-  'damage': z.array(ChargedAttackPartitionedDamageInstance),
+const ChargeAttackPartitionedDamage = z.object({
+  'damage': z.array(ChargeAttackPartitionedDamageInstance),
 });
 
-export const ChargedAttackScenarioData = ScenarioData.extend({
+export const ChargeAttackScenarioData = ScenarioData.extend({
   'cmd': z.union([
     z.literal(ScenarioCommand.CHARACTER_CHARGED_ATTACK),
     z.literal(ScenarioCommand.MC_CHARGED_ATTACK),
@@ -48,12 +48,12 @@ export const ChargedAttackScenarioData = ScenarioData.extend({
   'to': z.coerce.number(),
   'count': z.coerce.number(),
   'attr': GameElementSchema,
-  'total': z.optional(z.array(ChargedAttackDamageInstance)),
-  'list': z.optional(z.array(ChargedAttackPartitionedDamage)),
+  'total': z.optional(z.array(ChargeAttackDamageInstance)),
+  'list': z.optional(z.array(ChargeAttackPartitionedDamage)),
 }).strip();
 
-export class ChargedAttackDamageInstanceHelper {
-  static getTotal(i: ChargedAttackDamageInstance): number {
-    return Number(i.split.join(''));
+export class ChargeAttackDamageInstanceHelper {
+  static getTotal(i: ChargeAttackDamageInstance): number {
+    return Number(i['split'].join(''));
   }
 }

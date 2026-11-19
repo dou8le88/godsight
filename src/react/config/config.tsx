@@ -562,6 +562,31 @@ export function Config({ onExit }: { onExit: () => void }) {
                   !
                 </td>
               </tr>
+              {settings['devMode'] ? (
+                <tr className="config-option">
+                  <td className="config-description">Download battle data:</td>
+                  <td className="config-input-container">
+                    <input
+                      type="checkbox"
+                      className="config-checkbox"
+                      checked={settings['downloadBattleData']}
+                      onChange={(e) => {
+                        settingsManager.updateSingleSetting(
+                          'downloadBattleData',
+                          e.target.checked,
+                        );
+                      }}
+                    />
+                  </td>
+                  <td className="config-explanation">
+                    Downloads recorded battle data to the user&apos;s Downloads
+                    folder, stripping out any directly-sensitive info. Used for
+                    constructing tests.
+                  </td>
+                </tr>
+              ) : (
+                <></>
+              )}
             </tbody>
           </table>
         </div>

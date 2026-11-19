@@ -3,6 +3,8 @@ import { GameElementSchema } from './scenariodata/mechanics/element';
 import { z } from 'zod';
 import { MultiLanguageStringSchema } from './scenariodata/multilanguagestring';
 import { ScenarioList } from './scenariolist';
+import { DownloadScenarioData } from './downloadscenariodata';
+import { ScenarioCommand } from './scenariodata/scenariocommand';
 
 export const StartSummonData = z.object({
   'id': z.coerce.string(),
@@ -156,7 +158,6 @@ export const StartData = GranblueBattleData.extend({
    */
   'player': PartyFormationData,
   'boss': BossFormationData,
-  'nickname': z.string(),
   /**
    * Only populated if the boss has an opening action, and only on the initial start.json.
    * Battle refreshes will show an empty scenario.
@@ -191,3 +192,51 @@ export const StartData = GranblueBattleData.extend({
 });
 
 export type StartData = z.infer<typeof StartData>;
+
+export const DownloadPartyMemberData = PartyMemberData.transform((data) => {
+  if (data['leader']) {
+    data['name'] = 'MC';
+  }
+  return data;
+});
+
+export const DownloadPartyFormationData = PartyFormationData.extend({
+  'param': z.array(DownloadPartyMemberData),
+});
+
+export const DownloadStartData = StartData.extend({
+  'player': DownloadPartyFormationData,
+  'tower_party': z.optional(
+    z.object({
+      'param': z.record(
+        z.coerce.number(),
+        z.record(z.coerce.number(), DownloadPartyMemberData).and(
+          z.object({
+            'can_party_change': z.coerce.boolean(),
+          }),
+        ),
+      ),
+    }),
+  ),
+  'scenario': z.array(
+    z.union([
+      DownloadScenarioData,
+      z
+        .array(
+          // Sometimes we can get empty arrays instead of scenario commands.
+          // This will error if the array actually has something in it,
+          // but otherwise transform empty arrays into placeholder scenario commands.
+          z.object({
+            '____impossible_field': z.string(),
+          }),
+        )
+        .transform((_nothing) => {
+          return {
+            'cmd': ScenarioCommand.__EMPTY_SCENARIO_PLACEHOLDER,
+          };
+        }),
+    ]),
+  ),
+});
+
+export type DownloadStartData = z.infer<typeof DownloadStartData>;
