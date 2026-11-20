@@ -1,7 +1,7 @@
 {
   "name": "Godsight",
   "description": "A Granblue Fantasy battle analysis extension.",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "manifest_version": 3,
   "icons": {
     "48": "icons/godsight-48x48.png",
