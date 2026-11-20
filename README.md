@@ -6,6 +6,10 @@
 
 Godsight is a free browser extension intended to be used with the browser game [Granblue Fantasy](https://game.granbluefantasy.jp/). It reads game actions sent to the client from the server and processes them into useful information, breakdowns, charts, etc.
 
+Think of it as an expanded and very detailed version of the ingame Battle Log.
+
+If you want to discuss the extension in more depth, consider joining [the discord server](https://discord.com/invite/bY4hkMQFMb).
+
 ## Granblue Fantasy ToS Compatibility
 
 This extension does not modify any code in the game itself. It does not inject any scripts, and it uses a separate UI in your developer tools (F12/CTRL+SHIFT+I) to display all of its information. An explicit aim for this extension was to be ToS-compatible by any _reasonable_ definition. That said, the ToS is pretty broad about external tools, and while that's likely intended for things that give you an actual gameplay advantage, like a bot or UI modifications, it's probably best to avoid associating your account with this tool in videos or screenshots. Some game developers are _very_ strict with these things. :/
