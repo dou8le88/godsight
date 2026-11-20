@@ -1,5 +1,9 @@
 # Godsight - A GBF Battle Analysis Extension
 
+<p align="center">
+  <img src="./public/icons/godsight-128x128.png" alt="The eye of the omnipotent sees all" />
+</p>
+
 Godsight is a free browser extension intended to be used with the browser game [Granblue Fantasy](https://game.granbluefantasy.jp/). It reads game actions sent to the client from the server and processes them into useful information, breakdowns, charts, etc.
 
 ## Granblue Fantasy ToS Compatibility
@@ -69,13 +73,3 @@ It is recommended to keep the image setting off, and use the "Click status text 
 ## Development Status
 
 This project is currently under active development.
-
-- [x] - Verify correctness in as many raids as possible
-  - [x] Dark Rapture (Hard)
-  - [x] Hexachromatic Hierarch
-  - [x] Dark Rapture Zero
-  - [x] Versusia
-  - [x] FA basically everything
-  - [x] Sandbox
-  - [x] Solomonis
-  - [x] Babyl
