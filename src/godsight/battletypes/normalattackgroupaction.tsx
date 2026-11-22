@@ -9,6 +9,21 @@ import { GodsightSettings } from '../settings/godsightsettings';
 import { Actor } from '../../gbf/battletypes/scenariodata/mechanics/actor';
 import { ConditionChangeAction } from './conditionchangeaction';
 
+// #futureproof
+const attackCountWording: Record<number, string> = {
+  0: "couldn't attack",
+  1: 'made a single attack',
+  2: 'made a double attack',
+  3: 'made a triple attack',
+  4: 'made a quadruple attack',
+  5: 'made a quintuple attack',
+  6: 'made a sextuple attack',
+  7: 'made a septuple attack',
+  8: 'made an octuple attack',
+  9: 'made a nonuple attack',
+  10: 'made a decuple attack',
+} as const;
+
 export class NormalAttackGroupAction extends BattleAction {
   public actionType: ActionType = ActionType.NORMAL_ATTACK_GROUP;
 
@@ -22,21 +37,6 @@ export class NormalAttackGroupAction extends BattleAction {
     super();
   }
 
-  // #futureproof
-  private attackCountWording: Record<number, string> = {
-    0: "couldn't attack",
-    1: 'made a single attack',
-    2: 'made a double attack',
-    3: 'made a triple attack',
-    4: 'made a quadruple attack',
-    5: 'made a quintuple attack',
-    6: 'made a sextuple attack',
-    7: 'made a septuple attack',
-    8: 'made an octuple attack',
-    9: 'made a nonuple attack',
-    10: 'made a decuple attack',
-  };
-
   getDescription(key: number, settings: GodsightSettings): JSX.Element {
     const attacks = this.subactions.filter(
       (a) => a instanceof NormalAttackAction,
@@ -44,7 +44,7 @@ export class NormalAttackGroupAction extends BattleAction {
     const attackCount = attacks.length;
     const attackWording = this.isCounter
       ? 'executed a counter'
-      : this.attackCountWording[attackCount] || 'made unknown attacks';
+      : attackCountWording[attackCount] || 'made unknown attacks';
 
     return (
       <div
