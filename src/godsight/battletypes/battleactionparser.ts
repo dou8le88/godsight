@@ -24,6 +24,7 @@ import { StandbyAction } from './standbyaction';
 import { SummonAction } from './summonaction';
 import { TurnChangeAction } from './turnchangeaction';
 import { WindowEffectAction } from './windoweffectaction';
+import { BattleStateAction } from './battlestateaction';
 
 export class BattleActionParser {
   static fromJSON(json: Record<string, unknown>): BattleAction | undefined {
@@ -32,6 +33,9 @@ export class BattleActionParser {
       switch (actionType as ActionType) {
         case ActionType.ACTIVATED_ABILITY:
           return AbilityAction.fromJSON(json);
+
+        case ActionType.BATTLE_STATE:
+          return BattleStateAction.fromJSON(json);
 
         case ActionType.BOSS_SPECIAL_ATTACK:
           return BossSpecialAttackAction.fromJSON(json);

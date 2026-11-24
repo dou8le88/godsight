@@ -1,5 +1,6 @@
 import { Actor } from '../../gbf/battletypes/scenariodata/mechanics/actor';
 import { GameElementHelper } from '../../gbf/battletypes/scenariodata/mechanics/element';
+import { CharacterSnapshot } from '../../godsight/battletypes/battlestateaction';
 import { GodsightPartyMemberData } from '../../godsight/battletypes/partyformationdata';
 import { GameLanguage } from '../../godsight/settings/godsightsettings';
 import { useGodsightSettings } from '../../godsight/settings/usegodsightsettings';
@@ -10,7 +11,7 @@ export default function Avatar({
   backline,
   showName,
 }: {
-  characterData: GodsightPartyMemberData;
+  characterData: GodsightPartyMemberData | CharacterSnapshot;
   backline?: boolean;
   showName?: boolean;
 }) {
@@ -31,9 +32,8 @@ export default function Avatar({
   return (
     <div
       className={
-        backline || !characterData['alive']
-          ? 'avatar-container backline-or-dead'
-          : 'avatar-container'
+        'avatar-container' +
+        (backline || !characterData['alive'] ? ' backline-or-dead' : '')
       }
     >
       {settings['enableImageLoading'] ? (

@@ -1051,6 +1051,27 @@ body,
               color: #a0bbc7;
               margin-left: 10px;
             }
+
+            .state-snapshot {
+              margin-top: 5px;
+
+              .player-snapshot {
+                display: flex;
+                flex-direction: row;
+                column-gap: 5px;
+                row-gap: 5px;
+                flex-wrap: wrap;
+              }
+
+              .boss-snapshot {
+                display: flex;
+                flex-direction: row;
+                column-gap: 5px;
+                flex-wrap: wrap;
+                margin-bottom: 20px;
+                row-gap: 20px;
+              }
+            }
           }
         }
       }

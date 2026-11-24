@@ -31,6 +31,7 @@ import { SettingsManager } from '../godsight/settings/settingsmanager';
 import { JPLanguageTest } from '../util/jplanguagetest';
 import { z } from 'zod';
 import { TestBuilder } from './testbuilder';
+import { BattleStateAction } from '../godsight/battletypes/battlestateaction';
 
 const NoKnownActiveBattleNotificationKey = 'NoKnownActiveBattle';
 const LoadedIntoRaidNotificationKey = 'LoadedIntoRaid';
@@ -425,6 +426,55 @@ export default function GodsightPanel() {
           draft['turnData'][currentTurnNumber] = newTurnData;
 
           draft['lastUpdated'] = Date.now();
+
+          // Record a snapshot of battle state at the end of a turn.
+          if (endpoint == 'normal_attack_result.json') {
+            draft['turnData'][draft['currentTurn']]['turnActions'].push(
+              new BattleStateAction(
+                draft['currentWave'],
+                draft['boss'].map((boss) => {
+                  return {
+                    'name': boss['name'],
+                    'hp': boss['hpCurrent'],
+                    'hpMax': boss['hpMax'],
+                    'element': boss['element'],
+                  };
+                }),
+                [
+                  ...draft['party']['frontline'].map((characterIdx) => {
+                    const characterData =
+                      draft['party']['members'][characterIdx];
+
+                    return {
+                      'name': characterData['name'],
+                      'hp': characterData['hp'],
+                      'hpMax': characterData['hpMax'],
+                      'element': characterData['element'],
+                      'alive': characterData['alive'],
+                      'portraitImageId': characterData['portraitImageId'],
+                      'isMC': characterData['isMC'],
+                      'backline': false,
+                    };
+                  }),
+                  ...draft['party']['backline'].map((characterIdx) => {
+                    const characterData =
+                      draft['party']['members'][characterIdx];
+
+                    return {
+                      'name': characterData['name'],
+                      'hp': characterData['hp'],
+                      'hpMax': characterData['hpMax'],
+                      'element': characterData['element'],
+                      'alive': characterData['alive'],
+                      'portraitImageId': characterData['portraitImageId'],
+                      'isMC': characterData['isMC'],
+                      'backline': true,
+                    };
+                  }),
+                ],
+              ),
+            );
+          }
 
           if ('updateTurnTo' in draft) {
             const updatedTurn = draft['updateTurnTo']!;

@@ -1,5 +1,4 @@
 import { GameElementValue } from '../../gbf/battletypes/scenariodata/mechanics/element';
-import { Proficiency } from '../../gbf/battletypes/scenariodata/mechanics/proficiency';
 
 export interface GodsightPartyFormationData {
   'partyMemberCount': number;

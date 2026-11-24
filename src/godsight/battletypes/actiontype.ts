@@ -11,6 +11,10 @@ export enum ActionType {
    */
   ACTIVATED_ABILITY = 'activated_ability',
   /**
+   * Snapshot of battle state.
+   */
+  BATTLE_STATE = 'battle_state',
+  /**
    * Buff and debuff list changed.
    */
   CONDITION_CHANGED = 'status_changed',
