@@ -28,7 +28,7 @@ export class StandbyAction extends BattleAction {
   getDescription(key: number, _settings: GodsightSettings): JSX.Element {
     let message = `${this.actorName} can't attack!`;
     if (this.battleMessage) {
-      message = `${this.battleMessage} They can't attack!`;
+      message = this.battleMessage;
     }
 
     return (
