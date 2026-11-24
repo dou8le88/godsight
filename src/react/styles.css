@@ -653,6 +653,7 @@ body,
   display: flex;
   flex-direction: row;
   width: 200px;
+  min-width: 200px;
   border: 1px solid #c2c2c2;
   border-radius: 5px;
   padding: 5px;
@@ -985,14 +986,14 @@ body,
     .turn {
       display: flex;
       flex-direction: row;
-      justify-content: center;
-      width: calc(100% - 1020px);
 
       animation: fadeIn 0.3s ease-out forwards;
 
       &::details-content {
         display: flex;
         align-items: flex-start;
+        flex: 1;
+        min-width: 0;
       }
 
       &[open] {
@@ -1003,7 +1004,7 @@ body,
         position: sticky;
         top: 5px;
         height: 30px;
-        width: 80px;
+        min-width: 80px;
         border: 1px solid #c2c2c2;
         border-radius: 5px;
         padding: 5px;
@@ -1014,15 +1015,17 @@ body,
       }
 
       .turn-action-container {
-        width: 80%;
+        flex: 1;
+        min-width: 250px;
         display: flex;
         flex-direction: column-reverse;
+        margin-right: 10px;
 
         .action-container {
           margin: 5px;
           border: 1px solid #c2c2c2;
           border-radius: 5px;
-          width: 800px;
+          width: 100%;
           word-wrap: break-word;
           padding: 5px;
           scroll-margin-top: 10px;
