@@ -6,6 +6,7 @@ import Avatar from './avatar';
 export function StatsShower({
   stats,
   header,
+  forTurn,
   character,
   backline,
   searchable,
@@ -13,6 +14,7 @@ export function StatsShower({
 }: {
   stats: Stats;
   header?: string;
+  forTurn?: boolean;
   character?: GodsightPartyMemberData;
   backline?: boolean;
   searchable?: boolean;
@@ -77,6 +79,9 @@ export function StatsShower({
     dotDamage;
 
   let className = 'stats-list';
+  if (forTurn) {
+    className += ' for-turn';
+  }
   if (character) {
     className += ' for-character';
   }

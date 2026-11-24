@@ -25,7 +25,10 @@ export default function Turn({
           />
         ))}
       </div>
-      <StatsShower stats={turnData['turnStats']} />
+      <StatsShower
+        stats={turnData['turnStats']}
+        forTurn
+      />
     </details>
   );
 }
