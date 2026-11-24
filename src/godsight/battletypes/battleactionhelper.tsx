@@ -21,6 +21,16 @@ import { GodsightCondition } from './condition';
 import { GodsightBattleData } from './battledata';
 
 export class BattleActionHelper {
+  /**
+   * A lot of turn-based debuffs have icon strings formatted like `123_14`,
+   * where that last `4` is the duration. Most status effects with an underscore
+   * do not have multiple digits after the underscore unless they're following this pattern.
+   *
+   * These checks are still imperfect, as the devs have like 10 different naming schemes
+   * depending on the status effect.
+   */
+  static maybeAwkwardTurnDurationStatusIconRegex = /\d(\d+)$/;
+
   static IconlessStatusEffects = ['1047'];
 
   static getRehydratedActions(battleActions: BattleAction[]): BattleAction[] {
@@ -467,20 +477,70 @@ export class BattleActionHelper {
     return healingInstancesByRecipient;
   }
 
+  static CrestIcons = [
+    /^6527(\d{1,2})$/, // Fire
+    /^6528(\d{1,2})$/, // Water
+    /^6529(\d{1,2})$/, // Earth
+    /^6530(\d{1,2})$/, // Wind
+    /^6531(\d{1,2})$/, // Light
+    /^6532(\d{1,2})$/, // Dark
+  ];
+
+  static ElementalCritIcons = [
+    /^1279_1$/, // Fire
+    /^1279_2$/, // Water
+    /^1279_3$/, // Earth
+    /^1279_4$/, // Wind
+    /^1279_5$/, // Light
+    /^1279_6$/, // Dark
+  ];
+
+  static LocalBonusDamageIconRegex = /^1383_2[1-6]([0-9])$/;
+
   static getStatusTextJsx(
     status: GodsightCondition,
     settings: GodsightSettings,
     key: number,
     statusUrlOverride?: string,
   ): JSX.Element {
+    let stacksOrDuration = '';
+    const crestMatcher = this.CrestIcons.find((matcher) =>
+      matcher.test(status.icon || ''),
+    );
+    const isElementalCrit = this.ElementalCritIcons.some((critMatcher) =>
+      critMatcher.test(status.icon || ''),
+    );
+    const isLocalBonusDamage = this.LocalBonusDamageIconRegex.test(
+      status.icon || '',
+    );
+    if (crestMatcher) {
+      const match = status.icon?.match(crestMatcher) || ['?'];
+      stacksOrDuration = match.at(-1) || '?';
+    } else if (isElementalCrit) {
+      // Stack look-alike, but not actually stacks.
+    } else if (isLocalBonusDamage) {
+      stacksOrDuration = status.icon?.at(-1) || '?';
+    } else if (status.icon && status.icon.includes('_')) {
+      const lastPart = status.icon.split('_').at(-1) || '';
+      if (this.maybeAwkwardTurnDurationStatusIconRegex.test(lastPart)) {
+        if (lastPart.length == 2 && lastPart.at(-1) == '0') {
+          stacksOrDuration = lastPart;
+        } else {
+          stacksOrDuration = lastPart.slice(1);
+        }
+      } else {
+        stacksOrDuration = lastPart;
+      }
+    }
+
     return (
       <span
+        key={key}
         className={
           !settings['enableImageLoading'] && settings['clickStatusToLoadImage']
             ? 'status-wrapper clickable'
             : 'status-wrapper'
         }
-        key={key}
         {...(!settings['enableImageLoading'] &&
           settings['clickStatusToLoadImage'] &&
           status.icon &&
@@ -513,10 +573,10 @@ export class BattleActionHelper {
           />
         ) : (
           <>
-            {status.icon && status.icon.includes('_') ? (
+            {stacksOrDuration ? (
               <>
                 <span className="status-text removable">
-                  ({status.icon.split('_').at(-1)}){' '}
+                  ({stacksOrDuration}){' '}
                 </span>
               </>
             ) : (
