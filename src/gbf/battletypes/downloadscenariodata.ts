@@ -13,7 +13,7 @@ import { DamageScenarioData } from './scenariodata/damagescenariodata';
 import { DeathScenarioData } from './scenariodata/deathscenariodata';
 import { FatedChainGaugeScenarioData } from './scenariodata/fatedchaingaugescenariodata';
 import { FormChangeScenarioData } from './scenariodata/formchangescenariodata';
-import { FullElixirScenarioData } from './scenariodata/fullelixirscenariodata';
+import { ReviveItemScenarioData } from './scenariodata/reviveitemscenariodata';
 import { HealingScenarioData } from './scenariodata/healingscenariodata';
 import { HonorsGainedScenarioData } from './scenariodata/honorsgainedscenariodata';
 import { HPChangedScenarioData } from './scenariodata/hpchangedscenariodata';
@@ -48,6 +48,10 @@ const _ConditionScenarioData = z.object({
 
 const _DropScenarioData = z.object({
   'cmd': z.literal(ScenarioCommand._DROP),
+});
+
+const _TemporaryItemScenarioData = z.object({
+  'cmd': z.literal(ScenarioCommand._EVENT_POTIONS_CHANGED),
 });
 
 const _GroupGaugeScenarioData = z.object({
@@ -128,7 +132,7 @@ export const DownloadScenarioData = z.discriminatedUnion('cmd', [
   DeathScenarioData,
   FatedChainGaugeScenarioData,
   FormChangeScenarioData,
-  FullElixirScenarioData,
+  ReviveItemScenarioData,
   HonorsGainedScenarioData,
   ImageChangeScenarioData,
   MessageScenarioData,
@@ -160,6 +164,7 @@ export const DownloadScenarioData = z.discriminatedUnion('cmd', [
   _BgmScenarioData,
   _ConditionScenarioData,
   _DropScenarioData,
+  _TemporaryItemScenarioData,
   _GroupGaugeScenarioData,
   _InformationScenarioData,
   _LineMessageScenarioData,

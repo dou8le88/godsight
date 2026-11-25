@@ -555,6 +555,7 @@ export default function GodsightPanel() {
               case 'normal_attack_result.json':
               case 'summon_result.json':
               case 'temporary_item_result.json':
+              case 'event_temporary_item_result.json':
               case 'user_recovery.json':
               case 'retire.json':
               case 'abort_raid.json':

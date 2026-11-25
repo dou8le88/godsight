@@ -96,11 +96,12 @@ export enum ScenarioCommand {
    */
   FINISHED = 'finished',
   /**
-   * Used a Full Elixir.
+   * Used a Full Elixir or Revival Potion.
    */
-  FULL_ELIXIR = 'rematch',
+  REVIVE_ITEM = 'rematch',
   RETREAT = 'retire',
   _POTIONS_CHANGED = 'temporary',
+  _EVENT_POTIONS_CHANGED = 'event_temporary',
   FORM_CHANGE = 'formchange',
   CHAIN_BURST = 'chain_cutin',
   /**

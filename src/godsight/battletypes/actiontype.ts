@@ -40,7 +40,10 @@ export enum ActionType {
   STAR_CHARACTER_RESCUE = 'star_character_rescue',
   SWITCHED_PARTIES = 'switched_parties',
   TURN_CHANGE = 'turn_change',
-  USED_FULL_ELIXIR = 'used_full_elixir',
+  /**
+   * Full Elixir, Revival Potion
+   */
+  USED_REVIVAL_ITEM = 'used_revival_item',
   WINDOW_EFFECT = 'window_effect',
   OMEN_CANCELLED = 'omen_cancelled',
 }

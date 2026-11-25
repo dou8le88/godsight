@@ -59,7 +59,7 @@ import { ConditionChangeAction } from './godsight/battletypes/conditionchangeact
 import { DamageAction } from './godsight/battletypes/damageaction';
 import { DamageInstance } from './godsight/battletypes/damageinstance';
 import { DeathAction } from './godsight/battletypes/deathaction';
-import { FullElixirAction } from './godsight/battletypes/fullelixiraction';
+import { RevivalItemAction } from './godsight/battletypes/revivalitemaction';
 import { MultihitDamageAction } from './godsight/battletypes/multihitdamageaction';
 import { NormalAttackGroupAction } from './godsight/battletypes/normalattackgroupaction';
 import { ReplaceCharacterAction } from './godsight/battletypes/replacecharacteraction';
@@ -111,6 +111,7 @@ import { PartyChangeAction } from './godsight/battletypes/partychangeaction';
 import { GodsightSummonData } from './godsight/battletypes/summondata';
 import { DBStarCharacterRescueAction } from './godsight/battletypes/dbstarcharacterrescueaction';
 import { BacklineStatusScenarioData } from './gbf/battletypes/scenariodata/backlinestatusscenariodata';
+import { ReviveItemScenarioData } from './gbf/battletypes/scenariodata/reviveitemscenariodata';
 import {
   GodsightSettings,
   GameLanguage,
@@ -192,7 +193,12 @@ export class BattleScenarioParser {
     let i = 0;
     baseLoop: for (; i < scenarioData.length; i++) {
       const scenario = scenarioData[i];
-      if (stopOnTheseActions && stopOnTheseActions.includes(scenario['cmd'])) {
+      if (
+        stopOnTheseActions &&
+        stopOnTheseActions.includes(
+          scenario['cmd'] as unknown as ScenarioCommand,
+        )
+      ) {
         break baseLoop;
       }
       switch (scenario['cmd']) {
@@ -1122,38 +1128,54 @@ export class BattleScenarioParser {
           break;
         }
 
-        case ScenarioCommand.FULL_ELIXIR: {
-          // You can't use a full elixir in the middle of a turn, it's always its own button press,
-          // so all subsequent commands like increasing character meter and reviving are subactions.
-          const subactions = this._parseScenarioData(
-            scenarioData.slice(i + 1),
-            gbfBattleData,
-            godsightBattleData,
-            isBossAttackPhase,
-            /* isRecursive */ true,
-            /* stopOnMainAction */ false,
-          );
-          isBossAttackPhase = subactions.isBossAttackPhase;
-          const fullElixirAction = new FullElixirAction(
-            !isBossAttackPhase,
-            subactions.actions,
-          );
-          actions.push(fullElixirAction);
-          // Full elixirs inherently reset the party order to what it was at battle start
-          // and do not produce individual REPLACE_CHARACTER commands.
-          const initialFormation = godsightBattleData['party']['members'].map(
-            (_, idx) => idx,
-          );
-          const frontline = initialFormation.slice(0, 4);
-          const backline = initialFormation.slice(4);
-          godsightBattleData['party']['frontline'] = frontline;
-          godsightBattleData['party']['backline'] = backline;
-          godsightBattleData['party']['members'].forEach((char) => {
-            char['alive'] = true;
-            char['hp'] = char['hpMax'];
-          });
+        case ScenarioCommand.REVIVE_ITEM: {
+          const reviveItemScenarioParseResult =
+            ReviveItemScenarioData.safeParse(scenario);
+          if (!reviveItemScenarioParseResult.success) {
+            console.error(
+              'Error parsing ReviveItemScenarioData',
+              z.prettifyError(reviveItemScenarioParseResult.error),
+            );
+          } else {
+            const reviveItemScenario = reviveItemScenarioParseResult.data;
+            // You can't use a revival item in the middle of a turn, it's always its own button press,
+            // so all subsequent commands are subactions.
+            const subactions = this._parseScenarioData(
+              scenarioData.slice(i + 1),
+              gbfBattleData,
+              godsightBattleData,
+              isBossAttackPhase,
+              /* isRecursive */ true,
+              /* stopOnMainAction */ false,
+            );
+            isBossAttackPhase = subactions.isBossAttackPhase;
+            const revivalItemAction = new RevivalItemAction(
+              !isBossAttackPhase,
+              /* isFullElixir */ !reviveItemScenario.is_revival,
+              subactions.actions,
+            );
+            actions.push(revivalItemAction);
+            // Revive items inherently reset the party order to what it was at battle start
+            // and do not produce individual REPLACE_CHARACTER commands.
+            const initialFormation = godsightBattleData['party']['members'].map(
+              (_, idx) => idx,
+            );
+            const frontline = initialFormation.slice(0, 4);
+            const backline = initialFormation.slice(4);
+            godsightBattleData['party']['frontline'] = frontline;
+            godsightBattleData['party']['backline'] = backline;
+            godsightBattleData['party']['members'].forEach((char, charIdx) => {
+              char['alive'] = true;
+              char['hp'] =
+                reviveItemScenario['hp'] !== undefined &&
+                reviveItemScenario['hp'][charIdx] !== undefined
+                  ? reviveItemScenario['hp'][charIdx]
+                  : char['hpMax'];
+            });
 
-          break baseLoop;
+            break baseLoop;
+          }
+          break;
         }
 
         case ScenarioCommand.HEALING: {
@@ -1601,13 +1623,17 @@ export class BattleScenarioParser {
             godsightBattleData['skippedActionsDueToParseErrors'] = true;
           } else {
             const turnChangeScenario = turnChangeScenarioParseResult.data;
-            const turnChangeAction = new TurnChangeAction(
-              godsightBattleData['currentTurn'],
-              turnChangeScenario['turn'],
-              !isBossAttackPhase,
-            );
-            godsightBattleData['updateTurnTo'] = turnChangeAction.newTurn;
-            actions.push(turnChangeAction);
+            if (
+              turnChangeScenario['turn'] != godsightBattleData['currentTurn']
+            ) {
+              const turnChangeAction = new TurnChangeAction(
+                godsightBattleData['currentTurn'],
+                turnChangeScenario['turn'],
+                !isBossAttackPhase,
+              );
+              godsightBattleData['updateTurnTo'] = turnChangeAction.newTurn;
+              actions.push(turnChangeAction);
+            }
           }
           break;
         }
@@ -2014,6 +2040,17 @@ export class BattleScenarioParser {
           break;
         }
 
+        case ScenarioCommand._LOSE: {
+          if (isBossAttackPhase) {
+            // Dying during the attack phase doesn't give us a TURN_CHANGE cmd.
+            // +1 turn is probably not always true (say, if you die during a fastforwarded turn)
+            // but this will cover common cases at least.
+            godsightBattleData['updateTurnTo'] =
+              godsightBattleData['currentTurn'] + 1;
+          }
+          break;
+        }
+
         // All of these commands are recognized but ignored.
         case ScenarioCommand._BACKGROUND_CHANGE:
         case ScenarioCommand._BGM:
@@ -2022,12 +2059,12 @@ export class BattleScenarioParser {
         case ScenarioCommand._GROUP_GAUGE:
         case ScenarioCommand._INFORMATION:
         case ScenarioCommand._LINE_MESSAGE:
-        case ScenarioCommand._LOSE:
         case ScenarioCommand._MODE_CHANGE:
         case ScenarioCommand._MOTION:
         case ScenarioCommand._MOTION_LINK:
         case ScenarioCommand._ONESHOT_KILL:
         case ScenarioCommand._POTIONS_CHANGED:
+        case ScenarioCommand._EVENT_POTIONS_CHANGED:
         case ScenarioCommand._RESURRECTION_AVAILABLE:
         case ScenarioCommand._SCREEN_EFFECT:
         case ScenarioCommand._SPECIAL_CHANGE:

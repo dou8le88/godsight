@@ -6,23 +6,28 @@ import { StatsUpdate, StatsUpdateHelper } from './stats';
 import { GodsightSettings } from '../settings/godsightsettings';
 import { assertNotNullOrUndefined } from '../../util/assert';
 
-export class FullElixirAction extends BattleAction {
-  public actionType: ActionType = ActionType.USED_FULL_ELIXIR;
+export class RevivalItemAction extends BattleAction {
+  public actionType: ActionType = ActionType.USED_REVIVAL_ITEM;
 
   constructor(
     public beforeBossTurn: boolean,
+    public isFullElixir: boolean,
     public subactions: BattleAction[],
   ) {
     super();
   }
 
   getDescription(key: number, settings: GodsightSettings): JSX.Element {
+    let itemName = 'revival item';
+    if (this.isFullElixir) {
+      itemName = 'Full Elixir';
+    }
     return (
       <div
         key={key}
         className="action-description"
       >
-        The party used a Full Elixir!
+        The party used a {itemName}!
         {this.subactions.map((subaction, idx) =>
           subaction.getDescription(idx, settings),
         )}
@@ -42,11 +47,12 @@ export class FullElixirAction extends BattleAction {
 
   static override fromJSON(
     json: Record<string, unknown>,
-  ): FullElixirAction | undefined {
+  ): RevivalItemAction | undefined {
     const actionType = json['actionType'];
-    if (actionType == ActionType.USED_FULL_ELIXIR) {
-      return new FullElixirAction(
+    if (actionType == ActionType.USED_REVIVAL_ITEM) {
+      return new RevivalItemAction(
         assertNotNullOrUndefined(json['beforeBossTurn'] as boolean),
+        assertNotNullOrUndefined(json['isFullElixir'] as boolean),
         (json['subactions'] as Record<string, unknown>[]).map((action) => {
           return BattleActionParser.fromJSON(action);
         }) as BattleAction[],

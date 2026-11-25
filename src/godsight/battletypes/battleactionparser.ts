@@ -10,7 +10,7 @@ import { DamageAction } from './damageaction';
 import { DBStarCharacterRescueAction } from './dbstarcharacterrescueaction';
 import { DeathAction } from './deathaction';
 import { FormChangeAction } from './formchangeaction';
-import { FullElixirAction } from './fullelixiraction';
+import { RevivalItemAction } from './revivalitemaction';
 import { HealingAction } from './healingaction';
 import { MultihitDamageAction } from './multihitdamageaction';
 import { NormalAttackGroupAction } from './normalattackgroupaction';
@@ -76,8 +76,8 @@ export class BattleActionParser {
         case ActionType.NORMAL_ATTACK:
           return NormalAttackAction.fromJSON(json);
 
-        case ActionType.USED_FULL_ELIXIR:
-          return FullElixirAction.fromJSON(json);
+        case ActionType.USED_REVIVAL_ITEM:
+          return RevivalItemAction.fromJSON(json);
 
         case ActionType.WINDOW_EFFECT:
           return WindowEffectAction.fromJSON(json);
