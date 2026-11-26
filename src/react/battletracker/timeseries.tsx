@@ -301,6 +301,7 @@ function damageByTypeTimeSeries(data: ByTypeChartData[]) {
         dataKey="normalAttackDamage"
         stackId="turn"
         fill={DamageTypeColors.NORMAL_ATTACK}
+        isAnimationActive={false}
       />
       <ByType.Bar
         name="CA"
@@ -308,6 +309,7 @@ function damageByTypeTimeSeries(data: ByTypeChartData[]) {
         dataKey="chargedAttackDamage"
         stackId="turn"
         fill={DamageTypeColors.CHARGED_ATTACK}
+        isAnimationActive={false}
       />
       <ByType.Bar
         name="Skill"
@@ -315,6 +317,7 @@ function damageByTypeTimeSeries(data: ByTypeChartData[]) {
         dataKey="skillDamage"
         stackId="turn"
         fill={DamageTypeColors.SKILL}
+        isAnimationActive={false}
       />
       <ByType.Bar
         name="Other"
@@ -322,6 +325,7 @@ function damageByTypeTimeSeries(data: ByTypeChartData[]) {
         dataKey="otherDamage"
         stackId="turn"
         fill={DamageTypeColors.OTHER}
+        isAnimationActive={false}
       />
     </ByType.BarChart>
   );
@@ -424,6 +428,7 @@ function damageByElementTimeSeries(data: ByElementChartData[]) {
         dataKey={GameElement.NULL_PLAIN}
         stackId="turn"
         fill={GameElementHelper.getElementColor(GameElement.NULL_PLAIN)}
+        isAnimationActive={false}
       />
       <ByElement.Bar
         name={GameElementHelper.getPrettyElementName(GameElement.FIRE)}
@@ -431,6 +436,7 @@ function damageByElementTimeSeries(data: ByElementChartData[]) {
         dataKey={GameElement.FIRE}
         stackId="turn"
         fill={GameElementHelper.getElementColor(GameElement.FIRE)}
+        isAnimationActive={false}
       />
       <ByElement.Bar
         name={GameElementHelper.getPrettyElementName(GameElement.WATER)}
@@ -438,6 +444,7 @@ function damageByElementTimeSeries(data: ByElementChartData[]) {
         dataKey={GameElement.WATER}
         stackId="turn"
         fill={GameElementHelper.getElementColor(GameElement.WATER)}
+        isAnimationActive={false}
       />
       <ByElement.Bar
         name={GameElementHelper.getPrettyElementName(GameElement.EARTH)}
@@ -445,6 +452,7 @@ function damageByElementTimeSeries(data: ByElementChartData[]) {
         dataKey={GameElement.EARTH}
         stackId="turn"
         fill={GameElementHelper.getElementColor(GameElement.EARTH)}
+        isAnimationActive={false}
       />
       <ByElement.Bar
         name={GameElementHelper.getPrettyElementName(GameElement.WIND)}
@@ -452,6 +460,7 @@ function damageByElementTimeSeries(data: ByElementChartData[]) {
         dataKey={GameElement.WIND}
         stackId="turn"
         fill={GameElementHelper.getElementColor(GameElement.WIND)}
+        isAnimationActive={false}
       />
       <ByElement.Bar
         name={GameElementHelper.getPrettyElementName(GameElement.LIGHT)}
@@ -459,6 +468,7 @@ function damageByElementTimeSeries(data: ByElementChartData[]) {
         dataKey={GameElement.LIGHT}
         stackId="turn"
         fill={GameElementHelper.getElementColor(GameElement.LIGHT)}
+        isAnimationActive={false}
       />
       <ByElement.Bar
         name={GameElementHelper.getPrettyElementName(GameElement.DARK)}
@@ -466,6 +476,7 @@ function damageByElementTimeSeries(data: ByElementChartData[]) {
         dataKey={GameElement.DARK}
         stackId="turn"
         fill={GameElementHelper.getElementColor(GameElement.DARK)}
+        isAnimationActive={false}
       />
       <ByElement.Bar
         name={GameElementHelper.getPrettyElementName(GameElement.DESTRUCTION)}
@@ -473,6 +484,7 @@ function damageByElementTimeSeries(data: ByElementChartData[]) {
         dataKey={GameElement.DESTRUCTION}
         stackId="turn"
         fill={GameElementHelper.getElementColor(GameElement.DESTRUCTION)}
+        isAnimationActive={false}
       />
     </ByElement.BarChart>
   );
@@ -569,6 +581,7 @@ function damageByCharacterTimeSeries(
           dataKey={(data) => data[charIdx]['damage']}
           stackId="turn"
           fill={CharacterColors[charIdx]}
+          isAnimationActive={false}
         />
       ))}
     </ByCharacter.BarChart>

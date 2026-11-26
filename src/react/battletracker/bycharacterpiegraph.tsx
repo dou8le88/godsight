@@ -151,6 +151,7 @@ function byCharacterBreakdown(
           label={customLabel}
           labelLine={false}
           minAngle={2}
+          isAnimationActive={false}
         ></Pie>
         <Tooltip
           contentStyle={tooltipStyle}
