@@ -49,12 +49,7 @@ export class StatusIconParser {
     // End Crests
 
     // Elemental Crit
-    { regex: /^1279_1$/, parser: StatusIconParser.emptyParser }, // Fire
-    { regex: /^1279_2$/, parser: StatusIconParser.emptyParser }, // Water
-    { regex: /^1279_3$/, parser: StatusIconParser.emptyParser }, // Earth
-    { regex: /^1279_4$/, parser: StatusIconParser.emptyParser }, // Wind
-    { regex: /^1279_5$/, parser: StatusIconParser.emptyParser }, // Light
-    { regex: /^1279_6$/, parser: StatusIconParser.emptyParser }, // Dark
+    { regex: /^1279_[1-6]$/, parser: StatusIconParser.emptyParser },
 
     // Last-index-based stacks/duration
     { regex: /^1383_2[1-6](\d)$/, parser: StatusIconParser.lastIndexParser }, // Local Bonus Damage
