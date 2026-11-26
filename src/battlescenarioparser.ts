@@ -1151,7 +1151,7 @@ export class BattleScenarioParser {
             isBossAttackPhase = subactions.isBossAttackPhase;
             const revivalItemAction = new RevivalItemAction(
               !isBossAttackPhase,
-              /* isFullElixir */ !reviveItemScenario.is_revival,
+              /* isFullElixir */ !reviveItemScenario['is_revival'],
               subactions.actions,
             );
             actions.push(revivalItemAction);
